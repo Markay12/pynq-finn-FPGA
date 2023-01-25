@@ -62,6 +62,10 @@ Follow for more information [Pynq Docs](http://www.pynq.io/)
 
 The short term goal of this project is to run a simple CNN using Brevitas, Finn and finally deployment to the Pynq board. 
 
+### Long Term Goal
+
+The long term goal of this project is to program this FPGA device while studying the algorithms used and its hardware resilience. This will eventually be used to further empower autonomous navigation with radar sensing and machine learning.
+
 ## Directory Overview
 
 1. /docs/
