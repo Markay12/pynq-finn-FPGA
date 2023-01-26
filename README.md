@@ -2,6 +2,9 @@
 
 FINN and Brevitas Neural Network integration onto Pynq FPGA Board.
 
+[![GitHub Discussions](https://img.shields.io/badge/discussions-join-green)](https://github.com/Xilinx/finn/discussions)
+[![ReadTheDocs](https://readthedocs.org/projects/finn/badge/?version=latest&style=plastic)](http://finn.readthedocs.io/)
+
 # Table of Contents
 
 1. About
