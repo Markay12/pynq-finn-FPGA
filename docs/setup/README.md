@@ -1,4 +1,4 @@
-# Ubnutu Setup
+# Full Setup Information
 
 There are many requirements that are needed to setup your local machine to use Brevitas, FINN and the Pynq board together. These requirements are:
 
@@ -16,7 +16,7 @@ There are many requirements that are needed to setup your local machine to use B
 
 1. [Installing Docker Engine](https://github.com/Markay12/pynq-finn-FPGA/blob/main/docs/setup/ubuntu_setup.md#installing-docker-engine)
 	1. [Set Up Docker Engine Without Root](https://github.com/Markay12/pynq-finn-FPGA/blob/main/docs/setup/ubuntu_setup.md#setting-up-docker-engine-to-run-without-root)
-
+2. [Install Vitis and Vivado]()
 
 
 ## Installing Docker Engine 
@@ -118,4 +118,33 @@ Docker is now set up to run without root access or the sudo command. For more in
 
 ---
 
+## Install Vitis and Vivado Softare
 
+This installation is done assuming that you have access to a Xilinx license for the software.
+
+1. Download the Vivado software from Xilinx. Found [here](https://www.xilinx.com/member/forms/download/xef.html?filename=Xilinx_Unified_2022.2_1014_8888_Lin64.bin).
+
+2. This will download a `.bin` file. To intall using this extension do:
+
+```Shell
+$ chmod a+x <Directory/File-Name>
+$ ./<Directory/File-Name>
+```
+
+This will then open the visual installer for Xilinx Vivado. Follow the steps by providing your login information and next steps. 
+
+3. Select `Download and Install Now` not the image. 
+
+4. Select the **Vitis** install.
+
+5. Once this has been chosen, make sure that the Vivado install has also been selected.
+
+![Vivado Selection](/assets/VivadoSelection.png)
+
+6. Accept all terms.
+
+7. Choose your installation directory.
+
+8. Install Vitis and Vivado.
+
+This may take a while as these two programs take up a lot of space. Have patience as well as a large storage space for these programs. 
