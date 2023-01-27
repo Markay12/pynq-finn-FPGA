@@ -15,6 +15,7 @@ There are many requirements that are needed to setup your local machine to use B
 # Table of Contents
 
 1. [Installing Docker Engine](https://github.com/Markay12/pynq-finn-FPGA/blob/main/docs/setup/ubuntu_setup.md#installing-docker-engine)
+	1. [Set Up Docker Engine Without Root]()
 
 
 
@@ -82,4 +83,38 @@ Explanation: This command downloads a test image and runs a container. When this
 You are now done and should have fully installed Docker Engine on your Ubuntu Bionic 18.04.\* Machine. For more information or troubleshooting with Docker follow this [link](https://docs.docker.com/engine/install/ubuntu/)
 
 ---
+
+## Setting Up Docker Engine to Run Without Root
+
+Explanation for this Step: The docker daemon binds to a Unix socker, not a TCP port. By default it's the root user that owns the Unix socket, and other users can only access it using `sudo`. Therefore the docker daemon always runs as the root user.
+
+Setting up docker this way allows us to run docker without the command sudo. Docker becomes its own group and users are added to that configuration. When the docker daemon starts, it creates a Unix socket accessible by members of the docker group. 
+
+### Create the docker group and add your user profile
+
+1. Create the `docker` group.
+
+```Shell
+$ sudo groupadd docker
+```
+
+2. Add your profile to the `docker` group.
+```Shell
+$ sudo usermod -aG docker $USER
+```
+
+Use $USER if you are on your own profile and the one that you want to add.
+
+3. Logout and log back in so that your group membership is re-evaluated.
+
+4. Verify your installation
+
+```Shell
+$ docker run hello-world
+```
+
+This command will download the test image as before but now doing it without the sudo command.
+
+Docker is now set up to run without root access or the sudo command. For more information reference this [link](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user).
+
 
