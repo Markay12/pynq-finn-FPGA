@@ -14,7 +14,7 @@ There are many requirements that are needed to setup your local machine to use B
 
 # Table of Contents
 
-1. [Installing Docker Engine]()
+1. [Installing Docker Engine](https://github.com/Markay12/pynq-finn-FPGA/blob/main/docs/setup/ubuntu_setup.md#installing-docker-engine)
 
 
 
@@ -26,7 +26,7 @@ Docker Engine is compatible with _x86 or amd64. armhf, arm64, s390x_ architectur
 
 Older versions of Docker should be uninstalled.
 
-```Bash
+```Shell
 $ sudo apt-get remove docker docker-engine docker.io containerd runc
 ```
 
