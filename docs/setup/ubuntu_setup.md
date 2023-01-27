@@ -14,8 +14,20 @@ There are many requirements that are needed to setup your local machine to use B
 
 # Table of Contents
 
-1. [Setting up Docker]()
+1. [Installing Docker Engine]()
 
 
 
-## Setting up Docker 
+## Installing Docker Engine 
+
+Note: All of these steps are performed on an Ubuntu system running Ubuntu Bionic 18.04.\* LTS. This is the version that should be used when recreating these steps as of January 2023.
+
+Docker Engine is compatible with _x86 or amd64. armhf, arm64, s390x_ architectures.
+
+Older versions of Docker should be uninstalled.
+
+```Bash
+$ sudo apt-get remove docker docker-engine docker.io containerd runc
+```
+
+
