@@ -139,7 +139,7 @@ This will then open the visual installer for Xilinx Vivado. Follow the steps by 
 
 5. Once this has been chosen, make sure that the Vivado install has also been selected.
 
-![Vivado Selection](/assets/VivadoSelection.png)
+![Vivado Selection](docs/setup/assets/VivadoSelection.png)
 
 6. Accept all terms.
 
