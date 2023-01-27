@@ -26,7 +26,7 @@ Docker Engine is compatible with _x86 or amd64. armhf, arm64, s390x_ architectur
 
 Older versions of Docker should be uninstalled.
 
-```Shell
+```console
 $ sudo apt-get remove docker docker-engine docker.io containerd runc
 ```
 
