@@ -139,7 +139,7 @@ This will then open the visual installer for Xilinx Vivado. Follow the steps by 
 
 5. Once this has been chosen, make sure that the Vivado install has also been selected.
 
-![Vivado Selection](docs/setup/assets/VivadoSelection.png)
+![Vivado Selection](https://github.com/Markay12/pynq-finn-FPGA/blob/main/docs/setup/assets/VivadoSelection.png?raw=true)
 
 6. Accept all terms.
 
