@@ -7,8 +7,8 @@ FINN and Brevitas Neural Network integration onto Pynq FPGA Board.
 
 # Table of Contents
 
-1. About
-2. Directory Overview
+1. [About](https://github.com/Markay12/pynq-finn-FPGA#about)
+2. [Directory Overview](https://github.com/Markay12/pynq-finn-FPGA#directory-overview)
 
 
 # Contents
@@ -71,7 +71,7 @@ The long term goal of this project is to program this FPGA device while studying
 
 ## Directory Overview
 
-1. /docs/
+1. [/docs/setup](https://github.com/Markay12/pynq-finn-FPGA/tree/main/docs/setup)
 
 Docs is the location where all setup information will be stored. This includes but is not limited to Pynq information, Ubuntu setup information, FINN and Brevitas information. Each separate setup will have their own subpath and will be updated as time progresses. The setup should be done in chronological order beginning with the Pynq setup information.
 
