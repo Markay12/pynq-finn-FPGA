@@ -15,7 +15,7 @@ There are many requirements that are needed to setup your local machine to use B
 # Table of Contents
 
 1. [Installing Docker Engine](https://github.com/Markay12/pynq-finn-FPGA/blob/main/docs/setup/ubuntu_setup.md#installing-docker-engine)
-	1. [Set Up Docker Engine Without Root]()
+	1. [Set Up Docker Engine Without Root](https://github.com/Markay12/pynq-finn-FPGA/blob/main/docs/setup/ubuntu_setup.md#setting-up-docker-engine-to-run-without-root)
 
 
 
@@ -80,7 +80,7 @@ $ sudo docker run hello-world
 
 Explanation: This command downloads a test image and runs a container. When this finishes running a confirmation is made then docker is exited.
 
-You are now done and should have fully installed Docker Engine on your Ubuntu Bionic 18.04.\* Machine. For more information or troubleshooting with Docker follow this [link](https://docs.docker.com/engine/install/ubuntu/)
+You are now done and should have fully installed Docker Engine on your Ubuntu Bionic 18.04.\* Machine. For more information or troubleshooting with Docker follow this [link](https://docs.docker.com/engine/install/ubuntu/).
 
 ---
 
