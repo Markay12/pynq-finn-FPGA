@@ -19,7 +19,7 @@ There are many requirements that are needed to setup your local machine to use B
 2. [Install Vitis and Vivado]()
 3. [Run Vitis and Vivado]()
 4. [Set-up Environment Variables]() 
-
+5. [Clone FINN from Repository]()
 
 ## Installing Docker Engine 
 
@@ -187,3 +187,24 @@ user:$ export FINN_XILINX_VERSION=2022.2
 ```
 
 The environment variables have now been set to work with FINN.
+
+
+## Clone FINN Compiler from Repository
+
+Cloning FINN from the repository allows for the most updated version. Find which location you would like to install and use finn from. This is the pwd you want to be in for this clone command.
+
+Once there, use this command to clone the FINN repo from Xilinx.
+
+```Shell
+git clone https://github.com/Xilinx/finn/
+```
+
+Then you will want to navigate inside the directory.
+
+### Verify Installation of FINN
+
+To verify your FINN installation you will use a docker quicktest and verify the output.
+
+Run `./run-docker.sh quicktest` and ensure there are no errors.
+
+
