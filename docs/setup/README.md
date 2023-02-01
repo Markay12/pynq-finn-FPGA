@@ -18,6 +18,7 @@ There are many requirements that are needed to setup your local machine to use B
 	1. [Set Up Docker Engine Without Root](https://github.com/Markay12/pynq-finn-FPGA/blob/main/docs/setup/ubuntu_setup.md#setting-up-docker-engine-to-run-without-root)
 2. [Install Vitis and Vivado]()
 3. [Run Vitis and Vivado]()
+4. [Set-up Environment Variables]() 
 
 
 ## Installing Docker Engine 
@@ -169,3 +170,20 @@ Your PATH will now be set and you can run Vivado and Vitis with the command
 
 `vivado&` or `vitis&` 
 
+
+## Set-up Environment Variables
+
+The next thing to do now that Vitis and Vivado is installed is to work on the FINN environment variables.
+
+We need to set up `FINN_XILINX_PATH` AND `FINN_XILINX_VERSION` environment variables pointing respectively to the Xilinx tools installation directory.
+
+In this case our finn path was installed to `/opt/Xilinx/` and the version we are using for Vivado and Vitis is `2022.2`. This will be important for the next step.
+
+To set up environment variables we use the `export` command in Bash.
+
+```Shell
+user:$ export FINN_XILINX_PATH=/opt/Xilinx
+user:$ export FINN_XILINX_VERSION=2022.2
+```
+
+The environment variables have now been set to work with FINN.
