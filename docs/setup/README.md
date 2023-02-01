@@ -17,7 +17,7 @@ There are many requirements that are needed to setup your local machine to use B
 1. [Installing Docker Engine](https://github.com/Markay12/pynq-finn-FPGA/blob/main/docs/setup/ubuntu_setup.md#installing-docker-engine)
 	1. [Set Up Docker Engine Without Root](https://github.com/Markay12/pynq-finn-FPGA/blob/main/docs/setup/ubuntu_setup.md#setting-up-docker-engine-to-run-without-root)
 2. [Install Vitis and Vivado]()
-
+	1. [Vitis Cable Drivers Install]()
 
 ## Installing Docker Engine 
 
@@ -147,4 +147,14 @@ This will then open the visual installer for Xilinx Vivado. Follow the steps by 
 
 8. Install Vitis and Vivado.
 
-This may take a while as these two programs take up a lot of space. Have patience as well as a large storage space for these programs. 
+This may take a while as these two programs take up a lot of space. Have patience as well as a large storage space for these programs.
+
+### Install Vitis and Vivado Cable Drivers
+
+The cable drivers for the Vivado installation process are installed separately. After installation this script should be installed to ensure the correct drivers.
+
+```Shell
+sudo ./tools/Xilinx/data/xicom/cable_drivers/lin64/install_script/install_drivers/install_drivers
+```
+
+ 
