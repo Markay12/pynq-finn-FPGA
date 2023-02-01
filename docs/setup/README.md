@@ -207,4 +207,8 @@ To verify your FINN installation you will use a docker quicktest and verify the 
 
 Run `./run-docker.sh quicktest` and ensure there are no errors.
 
+After running this command a new message asked the PLATFORM\_REPO\_PATHS to be set for Vitis. This is done with the command `export PLATFORM_REPO_PATHS=/opt/Xilinx/Vitis/2022.2/base_platforms`
 
+This final test may take some time. Once complete, make sure there are no errors. It is okay if some are skipped.
+
+ 
