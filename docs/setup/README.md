@@ -182,8 +182,9 @@ In this case our finn path was installed to `/opt/Xilinx/` and the version we ar
 To set up environment variables we use the `export` command in Bash.
 
 ```Shell
-user:$ export FINN_XILINX_PATH=/opt/Xilinx
-user:$ export FINN_XILINX_VERSION=2022.2
+export FINN_XILINX_PATH=/opt/Xilinx
+export FINN_XILINX_VERSION=2022.2
+export PLATFORM_REPO_PATHS=/opt/Xilinx/Vitis/2022.2/base_platforms
 ```
 
 The environment variables have now been set to work with FINN.
