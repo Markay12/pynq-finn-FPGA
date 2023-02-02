@@ -212,4 +212,20 @@ After running this command a new message asked the PLATFORM\_REPO\_PATHS to be s
 
 This final test may take some time. Once complete, make sure there are no errors. It is okay if some are skipped.
 
- 
+### Running Docker with Sudo
+
+To run docker as sudo and still keep the environment variables, you will need to add Defaults to the visudo page.
+
+To do this open visudo and add the defaults.
+
+```Shell
+sudo visudo
+```
+
+This will open visudo and add these lines.
+
+```Shell
+Defaults        env_keep += "FINN_XILINX_PATH"
+Defaults        env_keep += "FINN_XILINX_VERSION"
+Defaults        env_keep += "PLATFORM_REPO_PATHS"
+``` 
