@@ -85,4 +85,9 @@ At the end of README.md, you should be able to start a session with Docker, FINN
 
 This file includes a PDF document with photos that shows how to set up the Pynq-Z1 board. The Pynq-Z1 board is what is being used for this project. Full documentation in this file will provide the user with enough information to run the board locally or via ethernet. For more full setup information consult: [https://pynq.readthedocs.io/en/v2.5.1/getting\_started/pynq\_z1\_setup.html](https://pynq.readthedocs.io/en/v2.5.1/getting_started/pynq_z1_setup.html)
 
+- running\_FINN.md
+
+This file contains information on how to run FINN with Docker in three different ways. The most useful and the one used for most tasks is Running FINN with Jupyer Notebooks online. An interactive shell as well as launching the build with `build_dataflow` is included.
+
+It is not recommended to user `build_dataflow` because FINN is used more as compiler infrastructure rather than a compiler itself. However, this is included for special use cases. 
  
