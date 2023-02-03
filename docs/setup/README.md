@@ -16,10 +16,11 @@ There are many requirements that are needed to setup your local machine to use B
 
 1. [Installing Docker Engine](https://github.com/Markay12/pynq-finn-FPGA/blob/main/docs/setup/ubuntu_setup.md#installing-docker-engine)
 	1. [Set Up Docker Engine Without Root](https://github.com/Markay12/pynq-finn-FPGA/blob/main/docs/setup/ubuntu_setup.md#setting-up-docker-engine-to-run-without-root)
-2. [Install Vitis and Vivado]()
-3. [Run Vitis and Vivado]()
-4. [Set-up Environment Variables]() 
-5. [Clone FINN from Repository]()
+2. [Install Vitis and Vivado](https://github.com/Markay12/pynq-finn-FPGA/tree/main/docs/setup#install-vitis-and-vivado-softare)
+3. [Run Vitis and Vivado](https://github.com/Markay12/pynq-finn-FPGA/tree/main/docs/setup#launch-vivado)
+4. [Set-up Environment Variables](https://github.com/Markay12/pynq-finn-FPGA/tree/main/docs/setup#set-up-environment-variables) 
+5. [Clone FINN from Repository](https://github.com/Markay12/pynq-finn-FPGA/tree/main/docs/setup#clone-finn-compiler-from-repository)
+6. [Verify FINN Installation](https://github.com/Markay12/pynq-finn-FPGA/tree/main/docs/setup#verify-installation-of-finn)
 
 ## Installing Docker Engine 
 
