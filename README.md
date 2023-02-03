@@ -71,8 +71,18 @@ The long term goal of this project is to program this FPGA device while studying
 
 ## Directory Overview
 
-1. [/docs/setup](https://github.com/Markay12/pynq-finn-FPGA/tree/main/docs/setup)
+### [/docs/setup](https://github.com/Markay12/pynq-finn-FPGA/tree/main/docs/setup)
 
 Docs is the location where all setup information will be stored. This includes but is not limited to Pynq information, Ubuntu setup information, FINN and Brevitas information. Each separate setup will have their own subpath and will be updated as time progresses. The setup should be done in chronological order beginning with the Pynq setup information.
+
+- README.md
+
+The README.md file explains most of what is required to set up FINN on your desktop machine. This includes information on setting up Docker Engine as a non-root user, setting environment variables, installing Xilinx Vitis and Vivado as well as connecting to the Pynq board itself.
+
+At the end of README.md, you should be able to start a session with Docker, FINN and Brevitas working together.
+
+- pynq\_setup.md
+
+This file includes a PDF document with photos that shows how to set up the Pynq-Z1 board. The Pynq-Z1 board is what is being used for this project. Full documentation in this file will provide the user with enough information to run the board locally or via ethernet. For more full setup information consult: [https://pynq.readthedocs.io/en/v2.5.1/getting\_started/pynq\_z1\_setup.html](https://pynq.readthedocs.io/en/v2.5.1/getting_started/pynq_z1_setup.html)
 
  
