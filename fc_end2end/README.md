@@ -62,4 +62,6 @@ The model that is used for this CNN is the TFC-w1a1 model as the example network
 
 Once the model has been exported and loaded with the pretrained weights we can visualize the expoerted model. The exported model will look something like this:
 
+![TFC\_FirstExport](https://github.com/Markay12/pynq-finn-FPGA/blob/main/fc_end2end/assets/TFC_NetronView_1.png?raw=true)
+
 
