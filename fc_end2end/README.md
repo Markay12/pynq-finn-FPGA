@@ -4,6 +4,20 @@ This is a fully connected, simple and binarized network trained on the MNIST dat
 
 The full process is explained in the Jupyter Notebook but will also be explained here.
 
+
+Note: Numpy has to be downgraded to 1.22.0 in order to work with this notebook. This cannot be done with just pip uninstall and re-install. This must be done with anaconda. 
+
+To do this with anaconda, execute the below code and answer `y` if prompted.
+
+```
+# pip uninstall numpy
+
+# conda install -c conda-forge numpy=1.22.0
+```
+
+This should successfully install the version of numpy required for the fully connected notebook completion.
+
+
 ## Table of Contents
 
 ---
