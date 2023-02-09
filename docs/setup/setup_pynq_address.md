@@ -10,7 +10,7 @@ sudo vim /etc/network/interfaces
 
 The file will usually have some data in it that looks like this.
 
-![Interfaces 1](Interfaces_1.png)
+![Interfaces 1](https://github.com/Markay12/pynq-finn-FPGA/blob/main/docs/setup/assets/Interfaces_1.png?raw=true)
 
 When updating this we are going to add the static IP `192.168.2.1` to this file.
 
@@ -22,4 +22,4 @@ iface eth0 inet static
 
 The final file should look like this. Now you have finished.
 
-![Interfaces Final](/assets/Interfaces_2.png)
+![Interfaces Final](https://github.com/Markay12/pynq-finn-FPGA/blob/main/docs/setup/assets/Interfaces_2.png?raw=true)
