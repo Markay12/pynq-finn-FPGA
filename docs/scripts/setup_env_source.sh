@@ -10,4 +10,3 @@ source /opt/Xilinx/Vitis/2022.2/settings64.sh
 echo "FINN_XILINX_PATH is set to: $FINN_XILINX_PATH"
 echo "FINN_XILINX_VERSION is set to: $FINN_XILINX_VERSION"
 echo "PLATFORM_REPO_PATHS is set to: $PLATFORM_REPO_PATHS"
-

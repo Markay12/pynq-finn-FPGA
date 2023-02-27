@@ -64,4 +64,8 @@ Once the model has been exported and loaded with the pretrained weights we can v
 
 ![TFC\_FirstExport](https://github.com/Markay12/pynq-finn-FPGA/blob/main/fc_end2end/assets/TFC_NetronView_1.png?raw=true)
 
+By clicking on the individual nodes to view their properties.
+
+![TFC Properties](https://github.com/Markay12/pynq-finn-FPGA/blob/main/fc_end2end/assets/TFC_NodeProperties.png?raw=true)
+
 
