@@ -1,4 +1,4 @@
-# Convolutional End-2-End Nerual Network
+# Convolutional End-to-End Nerual Network
 
 This convolutional end to end neural network is the first one we are going to use to port information to the Pynq-Z1 board.
 
@@ -16,7 +16,8 @@ conda install -c conda-forge numpy=1.22.0
 2. [End-to-End Recapitulation]()
 3. [Brevitas Export, FINN Import and Tidy Up Transformations]()
 4. [Add Pre and Post Processing]()
-
+5. [How FINN Implements Convolutions]()
+6. [Partitioning, Conversion to HLS Layers and Folding]()
 
 ---
 
@@ -42,4 +43,56 @@ The notebook starts by exporting the pretrained CNV-w1a1 network to ONNX, import
 Postprocessing is done using a Softmax activation function to convert the output of the last layer to probabilities. The final ONNX model is generated with preprocessing and postprocessing steps included. 
 
 The model is ready for the next stage of the FINN flow, which involves the use of Vivado HLS and Vivado IP Integrator for generating the hardware design, which is not covered in this notebook.
+
+## How FINN Implements Convolutions
+
+This section contains the implementation of convolutions in the FINN framework using lowering.  In this approach, convolutions are converted to matrix-matrix multiplication operations by sliding a window over the input image. The resulting dataflow architecture looks similar to a fully connected layer, but with the addition of a sliding window unit that produces the matrix from the input image.
+
+To target this hardware architecture using a Neural Network, a convolution lowering transform, as well as a streamlining is used to get rid of floating point scaling operations. Streamlining simplifies the network along with the lowering transform. The version of streamlining that is used in this implementation is only good for this current network and may not work with other networks that you use.
+
+Along with this, specific transformations are applied to the network using FINN. The Streamline transformation in particular moves floating point scaling and addition operations closer to the input of the nearest thresholding activation and absorbs them into thresholds. 
+
+Additionally, the LowerConvsToMatMul transformation converts ONNX Conv nodes into sequences of Im2Col, MatMul nodes, and the MakeMaxPoolNHWC and AbsorbTransposeIntoMultiThreshold transformations convert the data layout of the network into the NHWC data layout that finn-hlslib primitives use.
+
+Finally, the ConvertBipolarMatMulToXnorPopcount transformation is used to correctly implement bipolar-by-bipolar (w1a1) networks using finn-hlslib. The resulting streamlined and lowered network is visualized using Netron, showing how Conv nodes have been replaced with pairs of Im2Col, MatMul nodes, and many nodes have been replaced with MultiThreshold nodes.
+
+## Partitioning, Conversion to HLS Layers and Folding
+
+The next steps are similar to what was done for the TFC-w1a1 network. Fist we convert the layers that we can put into the FPGA into their HLS equivalents and separate them out into a dataflow partition.
+
+```Python
+import finn.transformation.fpgadataflow.convert_to_hls_layers as to_hls
+from finn.transformation.fpgadataflow.create_dataflow_partition import CreateDataflowPartition
+from finn.transformation.move_reshape import RemoveCNVtoFCFlatten
+from qonnx.custom_op.registry import getCustomOp
+from qonnx.transformation.infer_data_layouts import InferDataLayouts
+
+# choose the memory mode for the MVTU units, decoupled or const
+mem_mode = "decoupled"
+
+model = ModelWrapper(build_dir + "/end2end_cnv_w1a1_streamlined.onnx")
+model = model.transform(to_hls.InferBinaryMatrixVectorActivation(mem_mode))
+model = model.transform(to_hls.InferQuantizedMatrixVectorActivation(mem_mode))
+# TopK to LabelSelect
+model = model.transform(to_hls.InferLabelSelectLayer())
+# input quantization (if any) to standalone thresholding
+model = model.transform(to_hls.InferThresholdingLayer())
+model = model.transform(to_hls.InferConvInpGen())
+model = model.transform(to_hls.InferStreamingMaxPool())
+# get rid of Reshape(-1, 1) operation between hlslib nodes
+model = model.transform(RemoveCNVtoFCFlatten())
+# get rid of Tranpose -> Tranpose identity seq
+model = model.transform(absorb.AbsorbConsecutiveTransposes())
+# infer tensor data layouts
+model = model.transform(InferDataLayouts())
+parent_model = model.transform(CreateDataflowPartition())
+parent_model.save(build_dir + "/end2end_cnv_w1a1_dataflow_parent.onnx")
+sdp_node = parent_model.get_nodes_by_op_type("StreamingDataflowPartition")[0]
+sdp_node = getCustomOp(sdp_node)
+dataflow_model_filename = sdp_node.get_nodeattr("model")
+# save the dataflow partition with a different name for easier access
+dataflow_model = ModelWrapper(dataflow_model_filename)
+dataflow_model.save(build_dir + "/end2end_cnv_w1a1_dataflow_model.onnx")
+```
+
 
