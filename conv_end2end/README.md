@@ -95,4 +95,15 @@ dataflow_model = ModelWrapper(dataflow_model_filename)
 dataflow_model.save(build_dir + "/end2end_cnv_w1a1_dataflow_model.onnx")
 ```
 
+Notice the additional RemoveCNVtoFCFlatten transformation that was not used for TFC-w1a1. In the last Netron visualization, you may have noticed a Reshape operation towards the end of the network where the convolutional part of the network ends and the fully-connected layers started. That Reshape is essentially a tensor flattening operation, which we can remove for the purposes of hardware implementation. We can examine the contents of the dataflow partition with Netron and observe the ConvolutionInputGenerator, MatrixVectorActivation, and StreamingMaxPool\_Batch nodes that implement the sliding window, matrix multiply, and maxpool operations in hlslib. Note that the MatrixVectorActivation instances following the ConvolutionInputGenerator nodes are really implementing the convolutions, despite the name. The final three MatrixVectorActivation instances implement actual FC layers.
+
+```Python
+showInNetron(build_dir + "/end2end_cnv_w1a1_dataflow_parent.onnx")
+```
+
+Note that pretty much everything has gone into the StreamingDataflowPartition node; the only operation remaining is to apply a Transpose to obtain NHWC input from an NCHW input (the ONNX default).
+
+```python
+showInNet
+```
 
