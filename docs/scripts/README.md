@@ -24,4 +24,65 @@ Finally, the script prints a message indicating that the environment variables h
 
 To use the script, save it as a file and run it as the root user using the command sudo ./scriptname.sh (replacing "scriptname.sh" with the actual name of the script file). The environment variables will then be available when running commands with sudo.
 
+## SSH Key Generation and Installation Script
+
+This shell script generates a new RSA key pair and installs the public key on a remote server for passwordless SSH authentication. It also creates a new directory `.ssh` at `/tmp/home_dir/` for storing the keys.
+
+### Pre-requisites
+
+- The script requires access to the `ssh-keygen` and `ssh` commands, which are usually pre-installed on most Unix-like systems.
+
+- You need to have the necessary permissions to create a directory and write to files in the `/tmp/home_dir/` directory.
+
+### Usage
+
+1. Open the directory where `ssh_keygen_install.sh` is held.
+2. `cat` the file to make sure the hostname and IP are correct. 
+3. Save and close the file.
+4. Make sure to set execution permissions. `chmod +x ssh_keygen_install.sh`
+5. Run the script with `./ssh_keygen_install.ssh`
+
+### Steps Performed by the Script
+
+1. The script prompts the user to enter a filename to save the key pair. The default is `/tmp/home_dir/.ssh/id_rsa`.
+2. The script prompts the user to enter a passphrase for the key pair. You can leave it empty for no passphrase.
+3. The script generates the key pair using the ssh-keygen command.
+4. The script creates the `.ssh` directory in the `/tmp/home_dir/` directory.
+5. The script copies the public key to the remote server using the ssh command and adds it to the `authorized_keys` file in the `.ssh` directory of the remote user's home directory.
+6. The script tests the key pair by logging into the remote server using the private key.
+
+```shell
+#!/bin/bash
+
+# Set the IP address or hostname of the remote server
+REMOTE_SERVER="10.206.148.244"
+
+# Prompt the user for a filename to save the key pair
+read -p "Enter file in which to save the key (/tmp/home_dir/.ssh/id_rsa): " KEY_FILE
+KEY_FILE=${KEY_FILE:-/tmp/home_dir/.ssh/id_rsa}
+
+# Prompt the user for a passphrase for the key pair
+read -s -p "Enter passphrase (empty for no passphrase): " PASSPHRASE
+echo
+read -s -p "Enter same passphrase again: " PASSPHRASE2
+echo
+
+# Check that the two passphrases match
+if [[ "$PASSPHRASE" != "$PASSPHRASE2" ]]; then
+  echo "Passphrases do not match"
+  exit 1
+fi
+
+# Generate the key pair
+ssh-keygen -t rsa -b 2048 -f "$KEY_FILE" -N "$PASSPHRASE"
+
+# Create the .ssh directory in /tmp/home_dir/
+mkdir -p /tmp/home_dir/.ssh
+
+# Copy the public key to the remote server
+cat "${KEY_FILE}.pub" | ssh xilinx@${REMOTE_SERVER} "mkdir -p ~/.ssh && cat >>  ~/.ssh/authorized_keys"
+
+# Test the key pair by logging into the remote server
+ssh -i "$KEY_FILE" xilinx@${REMOTE_SERVER}
+```
 
