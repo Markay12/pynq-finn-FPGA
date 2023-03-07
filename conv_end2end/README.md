@@ -18,6 +18,7 @@ conda install -c conda-forge numpy=1.22.0
 4. [Add Pre and Post Processing]()
 5. [How FINN Implements Convolutions]()
 6. [Partitioning, Conversion to HLS Layers and Folding]()
+7. [Hardware Generation]()
 
 ---
 
@@ -107,3 +108,32 @@ Note that pretty much everything has gone into the StreamingDataflowPartition no
 showInNet
 ```
 
+## Hardware Generation
+
+In this section, the focus is on generating the hardware for the network. The steps involved in this process are the same for any network and are identical to the TFC-w1a1 example. The time required for this process can vary, depending on the host computer, but it typically takes around 30 minutes. For more information about this step, please refer to the TFC end-to-end notebook or the appropriate section in the FINN documentation.
+
+The first step is to define the PYNQ board and the target clock speed. The example provided in this document uses the "Pynq-Z1" board and a target clock speed of 10 nanoseconds.
+
+```Python
+test_pynq_board = "Pynq-Z1"
+target_clk_ns = 10
+```
+
+Next, we load the network model using the ModelWrapper function and then transform the model using the ZynqBuild function to generate the hardware.
+
+```Python
+model = ModelWrapper(build_dir+"/end2end_cnv_w1a1_folded.onnx")
+model = model.transform(ZynqBuild(platform=test_pynq_board, period_ns=target_clk_ns))
+```
+
+After the ZynqBuild transformation, we run an additional transformation to generate a PYNQ driver for the accelerator using the MakePYNQDriver function.
+
+```Python
+model = model.transform(MakePYNQDriver("zynq-iodma"))
+```
+
+Finally, we save the resulting model to disk for future use.
+
+```Python
+model.save(build_dir + "/end2end_cnv_w1a1_synth.onnx")
+```
