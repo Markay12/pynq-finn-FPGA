@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set the IP address or hostname of the remote server
-REMOTE_SERVER="10.206.148.244"
+REMOTE_SERVER="10.206.149.0"
 
 # Prompt the user for a filename to save the key pair
 read -p "Enter file in which to save the key (/tmp/home_dir/.ssh/id_rsa): " KEY_FILE
