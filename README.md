@@ -91,3 +91,8 @@ This file contains information on how to run FINN with Docker in three different
 
 It is not recommended to user `build_dataflow` because FINN is used more as compiler infrastructure rather than a compiler itself. However, this is included for special use cases. 
  
+- setup\_pynq\_address.md
+
+This file contains information for how to get your pynq board setup to connect online and have a static IP address for access. This is a small file and just contains the information for setting up your network interface. 
+
+### [/docs/scripts](https://github.com/Markay12/pynq-finn-FPGA/tree/main/docs/scripts)
