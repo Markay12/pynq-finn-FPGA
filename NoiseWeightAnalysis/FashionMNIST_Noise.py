@@ -266,6 +266,8 @@ def test(model, test_loader):
 # Add noise to weight and or bias matrices. 
 # The weight is a centered normal around the weight values with a sigma difference.
 
+from copy import deepcopy
+
 def add_noise(matrix, sigma):
     
     noised_weight = np.random.normal(loc=matrix, scale=sigma)
@@ -335,8 +337,12 @@ for s in range(len(sigma_vector)):
 
 # In[54]:
 
-
+import os
 import matplotlib.pyplot as plt
+
+# Create directory for plots
+if not os.path.exists("noise_plots"):
+    os.makedirs("noise_plots")
 
 # Initialize the standard deviation values
 sigma_vector = np.linspace(0, 0.2, 31)
@@ -361,6 +367,7 @@ for layer in [1,2,3,4,5]:
     plt.xlabel('Standard Deviation')
     plt.ylabel('Test Accuracy')
     plt.title('Effect of Noise on Test Accuracy (Layer {})'.format(layer))
+    plt.savefig("noise_plots/layer_{}.png".format(layer))
     plt.show()
 
 
@@ -404,8 +411,12 @@ plt.title('Effect of Noise on Test Accuracy')
 # Show the legend
 plt.legend()
 
+# Save the plot as a PNG file
+plt.savefig("noise_plots/average.png")
+
 # Show the plot
 plt.show()
+
 
 #####
 #  layer1 is the first convolutional layer, followed by batch normalization, ReLU activation, and max pooling
