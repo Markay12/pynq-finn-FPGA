@@ -53,26 +53,9 @@ print("Samples in each set: train = %d, test = %s" % (len(train_set), len(train_
 print("Shape of one input sample: " +  str(train_set[0][0].shape))
 
 
-# In[3]:
-
-
-image, label = next(iter(train_set))
-
-plt.imshow(image.squeeze(), cmap="gray")
-print(label)
-
 
 # In[4]:
 
-
-demo_loader = torch.utils.data.DataLoader(train_set, batch_size=10)
-batch = next(iter(demo_loader))
-images, labels = batch
-
-grid = torchvision.utils.make_grid(images, nrow=10)
-
-plt.figure(figsize=(15, 20))
-plt.imshow(np.transpose(grid, (1, 2, 0)))
 
 
 # ## Data Loader
@@ -343,6 +326,8 @@ import matplotlib.pyplot as plt
 # Create directory for plots
 if not os.path.exists("noise_plots"):
     os.makedirs("noise_plots")
+
+plt.style.use('default')
 
 # Initialize the standard deviation values
 sigma_vector = np.linspace(0, 0.2, 31)
