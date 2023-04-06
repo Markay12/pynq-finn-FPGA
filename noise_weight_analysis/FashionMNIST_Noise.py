@@ -72,14 +72,6 @@ batch_size = 1000
 train_quantized_loader = DataLoader(train_set, batch_size=batch_size)
 test_quantized_loader = DataLoader(test_set, batch_size=batch_size)
 
-# Get the first batch from the demo_loader
-batch = next(iter(demo_loader))
-
-# Split the batch into images and labels tensors
-images, labels = batch
-print(type(images), type(labels))
-print(images.shape, labels.shape)
-
 
 # In[6]:
 
