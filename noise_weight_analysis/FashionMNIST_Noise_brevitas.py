@@ -259,6 +259,9 @@ def test(model, test_loader):
 # The weight is a centered normal around the weight values with a sigma difference.
 
 
+## Test to see how to get model parameters
+model.eval()
+
 # Ensure Randomness
 random.seed(time.time())
 
