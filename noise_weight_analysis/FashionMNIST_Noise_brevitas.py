@@ -382,10 +382,6 @@ for s in range(len(sigma_vector)):
 #  fc3 is the final fully connected layer (output layer)
 ###
 
-
-import os
-import matplotlib.pyplot as plt
-
 # Create directory for plots
 if not os.path.exists("noise_plots_brevitas"):
     os.makedirs("noise_plots_brevitas")
@@ -460,7 +456,7 @@ plt.title('Effect of Noise on Test Accuracy')
 plt.legend()
 
 # Save the plot as a PNG file
-plt.savefig("noise_plots_pytorch/updated_randomness/average.png")
+plt.savefig("noise_plots_brevitas/average.png")
 
 # Show the plot
 plt.show()
