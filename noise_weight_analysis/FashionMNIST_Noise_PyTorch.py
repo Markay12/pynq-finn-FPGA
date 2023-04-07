@@ -321,7 +321,6 @@ for s in range(len(sigma_vector)):
 #  fc3 is the final fully connected layer (output layer)
 ###
 
-
 import os
 import matplotlib.pyplot as plt
 
