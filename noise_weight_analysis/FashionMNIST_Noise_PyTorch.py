@@ -5,7 +5,7 @@
 
 # Load imports. Make sure that onnx is imported before Torch. __ONNX is always imported before Torch__
 
-# In[1]:
+
 
 
 import numpy as np
@@ -21,6 +21,10 @@ import torchvision.transforms as transforms
 from torch.utils.data import Dataset, DataLoader
 from sklearn.metrics import confusion_matrix
 
+# add imports for randomness
+import time
+import random
+
 
 # ## Load The Fashion MNIST Dataset Using PyTorch
 # 
@@ -30,7 +34,7 @@ from sklearn.metrics import confusion_matrix
 # 
 # Finally, we use `next(iter(train_loader))` to retrieve the first batch of training data from the `train_loader`, and print the size of the batch and the total number of training examples in train_set.
 
-# In[2]:
+
 
 
 # Load Fashion MNIST dataset
@@ -54,7 +58,6 @@ print("Shape of one input sample: " +  str(train_set[0][0].shape))
 
 
 
-# In[4]:
 
 
 
@@ -62,7 +65,7 @@ print("Shape of one input sample: " +  str(train_set[0][0].shape))
 # 
 # Using PyTorch dataloader we can create a convenient iterator over the dataset that returns batches of data, rather than requiring manual batch creation. 
 
-# In[5]:
+
 
 
 # set batch size
@@ -73,7 +76,6 @@ train_quantized_loader = DataLoader(train_set, batch_size=batch_size)
 test_quantized_loader = DataLoader(test_set, batch_size=batch_size)
 
 
-# In[6]:
 
 
 count = 0
@@ -89,7 +91,7 @@ for x,y in train_loader:
 # 
 # GPUs can significantly speed-up training of deep neural networks. We check for availability of a GPU and if so define it as target device.
 
-# In[7]:
+
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -98,7 +100,7 @@ print("Target device: " + str(device))
 
 # ## Define the Quantized Model
 
-# In[8]:
+
 
 
 class FashionCNN(nn.Module):
@@ -137,8 +139,6 @@ class FashionCNN(nn.Module):
         return out
 
 
-# In[10]:
-
 
 model = FashionCNN().to(device)
 
@@ -156,7 +156,6 @@ print(model)
 # 
 # During training, the code prints the loss after every 100 batches. After each epoch, the code evaluates the model on the test set and prints the test accuracy.
 
-# In[12]:
 
 
 num_epochs = 15
@@ -199,7 +198,7 @@ for epoch in range(num_epochs):
 # 
 # Then we run a script that defines a function called test that evaluates the performance of a given model on a given dataset. Then it defines two more functions called add_noise and add_noise_to_model, which add Gaussian noise to the weight and bias parameters of the given model, respectively. Finally, the script applies the add_noise_to_model function to the given model for a single layer, specified in the layers list, with increasing standard deviation values in sigma_vector, and measures the resulting test accuracy using the test function. The output is a series of test accuracy values for the model with increasing noise added to the specified layer.
 
-# In[52]:
+
 
 
 # Get all model Parameters
@@ -209,7 +208,7 @@ trained_state_dict = model.state_dict()
 weight_layer1 = model.state_dict()['layer1.0.weight']
 
 
-# In[43]:
+
 
 
 def test(model, test_loader):
@@ -232,7 +231,7 @@ def test(model, test_loader):
     return accuracy
 
 
-# In[44]:
+
 
 
 # Sigma is weight dependent
@@ -243,6 +242,10 @@ def test(model, test_loader):
 
 from copy import deepcopy
 
+# Ensure Randomness
+random.seed(time.time())
+
+
 def add_noise(matrix, sigma):
     
     noised_weight = np.random.normal(loc=matrix, scale=sigma)
@@ -250,7 +253,7 @@ def add_noise(matrix, sigma):
     return noised_weight
 
 
-# In[45]:
+
 
 
 def add_noise_to_model(model, layers, sigma):
@@ -279,7 +282,7 @@ def add_noise_to_model(model, layers, sigma):
     return modified_model
 
 
-# In[46]:
+
 
 
 # Define the standard deviation values to test
@@ -304,13 +307,20 @@ for s in range(len(sigma_vector)):
     print(test(noisy_model, test_quantized_loader))
 
 
-# ## Plotting Analysis
+### Plotting Analysis
 # 
 # This code is exploring the effect of adding Gaussian noise to a trained Fashion CNN model on its test accuracy. It first initializes the standard deviation values to be tested and loops over each layer of the model. Within each layer loop, the code initializes an empty list to store the test accuracies for that layer, and then loops over each standard deviation value in the sigma vector. For each standard deviation value, the code creates a copy of the original model and adds Gaussian noise to the parameters of the specified layer only. Then, it tests the accuracy of the noisy model on a quantized test dataset and appends the result to the list of test accuracies for that layer. The code then plots the test accuracies as a function of the standard deviation for that layer.
 # 
 # After looping over all layers and plotting the test accuracies for each layer, the code initializes an empty list to store the averaged test accuracies for each standard deviation value. It then loops over each layer again, adds noise to the specified layer of the model for each standard deviation value, and tests the accuracy of the noisy model. For each standard deviation value, it appends the test accuracy to the corresponding element of the averaged test accuracies list. The code then plots the test accuracies for each layer as a function of the standard deviation on the same graph and plots the averaged test accuracies as a function of the standard deviation on a separate line. Finally, the code adds labels to the plot and displays it. 
+#
+#  layer1 is the first convolutional layer, followed by batch normalization, ReLU activation, and max pooling
+#  layer2 is the second convolutional layer, followed by batch normalization, ReLU activation, and max pooling
+#  fc1 is the first fully connected layer
+#  drop is the dropout layer
+#  fc2 is the second fully connected layer
+#  fc3 is the final fully connected layer (output layer)
+###
 
-# In[54]:
 
 import os
 import matplotlib.pyplot as plt
@@ -395,11 +405,4 @@ plt.savefig("noise_plots/average.png")
 plt.show()
 
 
-#####
-#  layer1 is the first convolutional layer, followed by batch normalization, ReLU activation, and max pooling
-#  layer2 is the second convolutional layer, followed by batch normalization, ReLU activation, and max pooling
-#  fc1 is the first fully connected layer
-#  drop is the dropout layer
-#  fc2 is the second fully connected layer
-#  fc3 is the final fully connected layer (output layer)
-#####
+
