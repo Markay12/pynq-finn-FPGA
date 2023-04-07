@@ -128,7 +128,7 @@ print("Target device: " + str(device))
 #          Weights are again quantized to 4 bits and input to 8 bits.
 #      
 
-class FashionCNN(qnn.QuantModule):
+class FashionCNN(nn.Module):
     
     def __init__(self):
         super(FashionCNN, self).__init__()
@@ -139,7 +139,7 @@ class FashionCNN(qnn.QuantModule):
             input_quant=QuantType.INT, input_bit_width=8
         )
         self.relu1 = qnn.QuantReLU(
-            quant_type=QuantType.INT, bit_width=BitWidth.4,
+            quant_type=QuantType.INT, bit_width=4,
             input_quant=QuantType.INT, input_bit_width=8
         )
         self.bn1 = qnn.QuantBatchNorm2d(32, quant_type=QuantType.INT, bit_width=4)
