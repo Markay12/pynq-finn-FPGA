@@ -134,45 +134,46 @@ class FashionCNN(nn.Module):
     
     def __init__(self):
         super(FashionCNN, self).__init__()
-        
+
         self.quant_inp = qnn.QuantIdentity(bit_width = 4, return_quant_tensor = True)
-        
+
         # One input channel for the 28x28 images in grayscale
-        self.conv1 = qnn.QuantConv2d(1, 6, 5, bias = True, weight_bit_width = 4, bias_quant = Int32Bias)   # in_channels = 1, out_channels = 6, kernel_size = 5
-        
+        self.layer1 = qnn.QuantConv2d(1, 6, 5, bias = True, weight_bit_width = 4, bias_quant = Int32Bias)   # in_channels = 1, out_channels = 6, kernel_size = 5
+
         self.relu1 = qnn.QuantReLU(bit_width = 4, return_quant_tensor = True)
-        
+
         # input channels is the output of the last Conv2d
-        self.conv2 = qnn.QuantConv2d(6, 16, 5, bias = True, weight_bit_width = 4, bias_quant = Int32Bias)  # in_channels = 6, out_channels = 16, kernel_size = 5
-        
+        self.layer2 = qnn.QuantConv2d(6, 16, 5, bias = True, weight_bit_width = 4, bias_quant = Int32Bias)  # in_channels = 6, out_channels = 16, kernel_size = 5
+
         self.relu2 = qnn.QuantReLU(bit_width = 4, return_quant_tensor = True)
-        
+
         # Fully Connected Layers using Brevitas
-        self.fc1 = qnn.QuantLinear(16 * 4 * 4, 120, bias = True, weight_bit_width = 4, bias_quant = Int32Bias)
-        
+        self.layer3 = qnn.QuantLinear(16 * 4 * 4, 120, bias = True, weight_bit_width = 4, bias_quant = Int32Bias)
+
         self.relu3 = qnn.QuantReLU(bit_width = 4, return_quant_tensor = True)
-        
-        self.fc2 = qnn.QuantLinear(120, 84, bias = True, weight_bit_width = 4, bias_quant = Int32Bias)
-        
+
+        self.layer4 = qnn.QuantLinear(120, 84, bias = True, weight_bit_width = 4, bias_quant = Int32Bias)
+
         self.relu4 = qnn.QuantReLU(bit_width = 4, return_quant_tensor = True)
-        
-        self.fc3 = qnn.QuantLinear(84, 10, bias = True, weight_bit_width = 4, bias_quant = Int32Bias)
-        
+
+        self.layer5 = qnn.QuantLinear(84, 10, bias = True, weight_bit_width = 4, bias_quant = Int32Bias)
+    
     # feed forward
     def forward(self, x):
-        
+
         # forward pass
         x = self.quant_inp(x)
-        x = self.relu1(self.conv1(x))
+        x = self.relu1(self.layer1(x))
         x = F.max_pool2d(x, 2)
-        x = self.relu2(self.conv2(x))
+        x = self.relu2(self.layer2(x))
         x = F.max_pool2d(x, 2)
         x = x.reshape(x.shape[0], -1)
-        x = self.relu3(self.fc1(x))
-        x = self.relu4(self.fc2(x))
-        x = self.fc3(x)
-        
+        x = self.relu3(self.layer3(x))
+        x = self.relu4(self.layer4(x))
+        x = self.layer5(x)
+
         return x      # output
+
 
 
 
@@ -355,7 +356,7 @@ plt.style.use('default')
 sigma_vector = np.linspace(0, 0.2, 31)
 
 # Loop over each layer and plot the test accuracy as a function of the standard deviation for that layer
-for layer in range(1, 14):
+for layer in range(1, 6):
     
     # Initialize a list to store the test accuracies for this layer
     test_accs = []
@@ -385,7 +386,7 @@ sigma_vector = np.linspace(0, 0.2, 31)
 avg_test_accs = [0] * len(sigma_vector)
 
 # Loop over each layer and add noise to the model for that layer only, and average the test accuracies across all layers
-for layer in range(1, 14):
+for layer in range(1, 6):
     
     # Initialize a list to store the test accuracies for this layer
     test_accs = []
