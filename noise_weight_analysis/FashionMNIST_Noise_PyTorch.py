@@ -326,8 +326,8 @@ import os
 import matplotlib.pyplot as plt
 
 # Create directory for plots
-if not os.path.exists("noise_plots"):
-    os.makedirs("noise_plots")
+if not os.path.exists("noise_plots_pytorch"):
+    os.makedirs("noise_plots_pytorch")
 
 plt.style.use('default')
 
@@ -354,7 +354,7 @@ for layer in [1,2,3,4,5]:
     plt.xlabel('Standard Deviation')
     plt.ylabel('Test Accuracy')
     plt.title('Effect of Noise on Test Accuracy (Layer {})'.format(layer))
-    plt.savefig("noise_plots/layer_{}.png".format(layer))
+    plt.savefig("noise_plots_pytorch/updated_randomness/layer_{}.png".format(layer))
     plt.show()
 
 
@@ -399,7 +399,7 @@ plt.title('Effect of Noise on Test Accuracy')
 plt.legend()
 
 # Save the plot as a PNG file
-plt.savefig("noise_plots/average.png")
+plt.savefig("noise_plots_pytorch/updated_randomness/average.png")
 
 # Show the plot
 plt.show()
