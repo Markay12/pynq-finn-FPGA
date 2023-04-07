@@ -28,7 +28,8 @@ import random
 # Brevitas imports
 import brevitas.nn as qnn
 from brevitas.core.quant import QuantType
-
+from brevitas.quant import Int32Bias
+import torch.nn.functional as F
 
 # ## Load The Fashion MNIST Dataset Using PyTorch
 # 
@@ -239,9 +240,6 @@ for epoch in range(num_epochs):
 
 # Get all model Parameters
 trained_state_dict = model.state_dict()
-
-# Get individual weights from layers
-weight_layer1 = model.state_dict()['layer1.0.weight']
 
 
 def test(model, test_loader):
