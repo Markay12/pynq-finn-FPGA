@@ -128,85 +128,51 @@ print("Target device: " + str(device))
 #          Weights are again quantized to 4 bits and input to 8 bits.
 #      
 
+# setup class for the neural network building
 class FashionCNN(nn.Module):
     
     def __init__(self):
         super(FashionCNN, self).__init__()
         
-        self.layer1 = qnn.QuantConv2d(
-            in_channels=1, out_channels=32, kernel_size=3, padding=1,
-            weight_quant_type=QuantType.INT, weight_bit_width=4,
-            input_quant=QuantType.INT, input_bit_width=8
-        )
-        self.relu1 = qnn.QuantReLU(
-            quant_type=QuantType.INT, bit_width=4,
-            input_quant=QuantType.INT, input_bit_width=8
-        )
-        self.bn1 = qnn.QuantBatchNorm2d(32, quant_type=QuantType.INT, bit_width=4)
-        self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.quant_inp = qnn.QuantIdentity(bit_width = 4, return_quant_tensor = True)
         
-        self.layer2 = qnn.QuantConv2d(
-            in_channels=32, out_channels=64, kernel_size=3,
-            weight_quant_type=QuantType.INT, weight_bit_width=4,
-            input_quant=QuantType.INT, input_bit_width=8
-        )
-        self.relu2 = qnn.QuantReLU(
-            quant_type=QuantType.INT, bit_width=4,
-            input_quant=QuantType.INT, input_bit_width=8
-        )
-        self.bn2 = qnn.QuantBatchNorm2d(64, quant_type=QuantType.INT, bit_width=4)
-        self.pool2 = nn.MaxPool2d(2)
+        # One input channel for the 28x28 images in grayscale
+        self.conv1 = qnn.QuantConv2d(1, 6, 5, bias = True, weight_bit_width = 4, bias_quant = Int32Bias)   # in_channels = 1, out_channels = 6, kernel_size = 5
         
-        self.fc1 = qnn.QuantLinear(
-            in_features=64*6*6, out_features=600,
-            weight_quant_type=QuantType.INT, weight_bit_width=4,
-            input_quant=QuantType.INT, input_bit_width=8
-        )
-        self.relu3 = qnn.QuantReLU(
-            quant_type=QuantType.INT, bit_width=4,
-            input_quant=QuantType.INT, input_bit_width=8
-        )
-        self.bn3 = qnn.QuantBatchNorm1d(600, quant_type=QuantType.INT, bit_width=4)
-        self.fc2 = qnn.QuantLinear(
-            in_features=600, out_features=120,
-            weight_quant_type=QuantType.INT, weight_bit_width=4,
-            input_quant=QuantType.INT, input_bit_width=8
-        )
-        self.relu4 = qnn.QuantReLU(
-            quant_type=QuantType.INT, bit_width=4,
-            input_quant=QuantType.INT, input_bit_width=8
-        )
-        self.bn4 = qnn.QuantBatchNorm1d(120, quant_type=QuantType.INT, bit_width=4)
-        self.fc3 = qnn.QuantLinear(
-            in_features=120, out_features=10,
-            weight_quant_type=QuantType.INT, weight_bit_width=4,
-            input_quant=QuantType.INT, input_bit_width=8
-        )
-        self.bn5 = qnn.QuantBatchNorm1d(10, quant_type=QuantType.INT, bit_width=4)
-        self.drop = nn.Dropout(0.25)
-
+        self.relu1 = qnn.QuantReLU(bit_width = 4, return_quant_tensor = True)
         
+        # input channels is the output of the last Conv2d
+        self.conv2 = qnn.QuantConv2d(6, 16, 5, bias = True, weight_bit_width = 4, bias_quant = Int32Bias)  # in_channels = 6, out_channels = 16, kernel_size = 5
+        
+        self.relu2 = qnn.QuantReLU(bit_width = 4, return_quant_tensor = True)
+        
+        # Fully Connected Layers using Brevitas
+        self.fc1 = qnn.QuantLinear(16 * 4 * 4, 120, bias = True, weight_bit_width = 4, bias_quant = Int32Bias)
+        
+        self.relu3 = qnn.QuantReLU(bit_width = 4, return_quant_tensor = True)
+        
+        self.fc2 = qnn.QuantLinear(120, 84, bias = True, weight_bit_width = 4, bias_quant = Int32Bias)
+        
+        self.relu4 = qnn.QuantReLU(bit_width = 4, return_quant_tensor = True)
+        
+        self.fc3 = qnn.QuantLinear(84, 10, bias = True, weight_bit_width = 4, bias_quant = Int32Bias)
+        
+    # feed forward
     def forward(self, x):
-        x = self.layer1(x)
-        x = self.relu1(x)
-        x = self.bn1(x)
-        x = self.pool1(x)
         
-        x = self.layer2(x)
-        x = self.relu2(x)
-        x = self.bn2(x)
-        x = self.pool2(x)
-        
-        x = x.view(x.size(0), -1)
-        x = self.fc1(x)
-        x = self.relu3(x)
-        x = self.fc2(x)
-        x = self.relu4(x)
+        # forward pass
+        x = self.quant_inp(x)
+        x = self.relu1(self.conv1(x))
+        x = F.max_pool2d(x, 2)
+        x = self.relu2(self.conv2(x))
+        x = F.max_pool2d(x, 2)
+        x = x.reshape(x.shape[0], -1)
+        x = self.relu3(self.fc1(x))
+        x = self.relu4(self.fc2(x))
         x = self.fc3(x)
-        x = self.bn5(x)
-        x = self.drop(x)
         
-        return x
+        return x      # output
+
 
 
 
