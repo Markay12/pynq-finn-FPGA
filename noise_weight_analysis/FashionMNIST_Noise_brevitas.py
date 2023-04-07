@@ -179,7 +179,7 @@ criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 print(model)
 
-print(model.layer1.quant_weight())
+# print(model.layer1.quant_weight())
 
 # ## Train and Test
 #
@@ -260,7 +260,6 @@ def test(model, test_loader):
 # The weight is a centered normal around the weight values with a sigma difference.
 
 
-
 # Ensure Randomness
 random.seed(time.time())
 
@@ -281,17 +280,19 @@ def add_noise_to_model(model, layers, sigma):
         layer_name = f'layer{i + 1}'
         layer = getattr(modified_model, layer_name)
 
+        print(layer)
+
         # get weight and bias for layer
-        weight_temp = layer[0].weight.data.detach().numpy()
-        bias_temp = layer[0].bias.data.detach().numpy()
+        weight_temp = layer.quant_weight().data.detach().numpy()
+        bias_temp = layer.quant_bias().data.detach().numpy()
 
         # add noise to the weight and bias
         noise_w = add_noise(weight_temp, sigma)
         noise_b = add_noise(bias_temp, sigma)
 
         # place values back into the modified model for analysis
-        layer[0].weight.data = torch.from_numpy(noise_w).float()
-        layer[0].bias.data = torch.from_numpy(noise_b).float()
+        layer.quant_weight().data = torch.from_numpy(noise_w).float()
+        layer.quant_bias().data = torch.from_numpy(noise_b).float()
 
     return modified_model
 
