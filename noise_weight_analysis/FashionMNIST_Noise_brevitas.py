@@ -179,6 +179,7 @@ criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 print(model)
 
+print(model.layer1.quant_weight())
 
 # ## Train and Test
 #
@@ -259,8 +260,6 @@ def test(model, test_loader):
 # The weight is a centered normal around the weight values with a sigma difference.
 
 
-## Test to see how to get model parameters
-model.eval()
 
 # Ensure Randomness
 random.seed(time.time())
