@@ -277,6 +277,11 @@ def add_noise_to_model(model, layers, sigma):
         layer_name = f'layer{i + 1}'
         layer = getattr(modified_model, layer_name)
 
+        # Set cache_inference_quant_bias to True for each layer
+        # Run a forward pass on the model with random input data to cache the quantization bias
+        layer.cache_inference_quant_bias = True
+        _ = modified_model(torch.rand(1, 1, 28, 28))
+
         # get weight and bias for layer
         weight_temp = layer.quant_weight().detach()
         bias_temp = layer.quant_bias().detach()
