@@ -271,29 +271,21 @@ def add_noise(matrix, sigma):
     return noised_weight
 
 
-def add_noise_to_model(model, layers, sigma):
+def add_noise_to_model(model, layer_names, sigma):
     modified_model = deepcopy(model)
-    for i in range(len(layers)):
-        layer_name = f'layer{i + 1}'
-        layer = getattr(modified_model, layer_name)
+    for name, module in modified_model.named_modules():
+        if name in layer_names and isinstance(module, (qnn.QuantConv2d, qnn.QuantLinear)):
+            # get weight and bias for layer
+            weight_temp = module.quant_weight()
+            bias_temp = module.quant_bias()
 
-        # Set cache_inference_quant_bias to True for each layer
-        # Run a forward pass on the model with random input data to cache the quantization bias
-        layer.cache_inference_quant_bias = True
-        _ = modified_model(torch.rand(1, 1, 28, 28))
+            # add noise to the weight and bias
+            noise_w = add_noise(weight_temp.detach().numpy(), sigma)
+            noise_b = add_noise(bias_temp.detach().numpy(), sigma)
 
-        # get weight and bias for layer
-        weight_temp = layer.quant_weight().detach()
-        bias_temp = layer.quant_bias().detach()
-
-        # add noise to the weight and bias
-        noise_w = add_noise(weight_temp, sigma)
-        noise_b = add_noise(bias_temp, sigma)
-
-        # place values back into the modified model for analysis
-        layer.set_quant_weight(torch.from_numpy(noise_w).float())
-        layer.set_quant_bias(torch.from_numpy(noise_b).float())
-
+            # set the modified weights and biases back into the module
+            module.set_quant_weight(torch.from_numpy(noise_w).float())
+            module.set_quant_bias(torch.from_numpy(noise_b).float())
     return modified_model
 
 
@@ -305,7 +297,7 @@ sigma_vector = np.linspace(0, 0.2, 11)
 # layers = range(1, num_layers + 1)
 
 # add noise to only the first layer
-layers = [1]
+layers = ['layer1']
 
 # Loop over each standard deviation value in sigma_vector
 for s in range(len(sigma_vector)):
