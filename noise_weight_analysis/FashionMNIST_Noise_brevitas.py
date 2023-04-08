@@ -272,27 +272,22 @@ def add_noise(matrix, sigma):
 
 
 def add_noise_to_model(model, layers, sigma):
-
     modified_model = deepcopy(model)
-
     for i in range(len(layers)):
-
         layer_name = f'layer{i + 1}'
         layer = getattr(modified_model, layer_name)
 
-        print(layer)
-
         # get weight and bias for layer
-        weight_temp = layer.quant_weight().data.detach().numpy()
-        bias_temp = layer.quant_bias().data.detach().numpy()
+        weight_temp = layer.quant_weight().detach().numpy()
+        bias_temp = layer.quant_bias().detach().numpy()
 
         # add noise to the weight and bias
         noise_w = add_noise(weight_temp, sigma)
         noise_b = add_noise(bias_temp, sigma)
 
         # place values back into the modified model for analysis
-        layer.quant_weight().data = torch.from_numpy(noise_w).float()
-        layer.quant_bias().data = torch.from_numpy(noise_b).float()
+        layer.set_quant_weight(torch.from_numpy(noise_w).float())
+        layer.set_quant_bias(torch.from_numpy(noise_b).float())
 
     return modified_model
 
