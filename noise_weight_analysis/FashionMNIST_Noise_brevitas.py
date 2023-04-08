@@ -271,6 +271,12 @@ def add_noise(matrix, sigma):
     return noised_weight
 
 
+# To allow for updates to the model
+model.eval()
+with torch.no_grad():
+    _ = model(torch.randn(1, 1, 28, 28))
+
+
 def add_noise_to_model(model, layer_names, sigma):
     modified_model = deepcopy(model)
     for name, module in modified_model.named_modules():
