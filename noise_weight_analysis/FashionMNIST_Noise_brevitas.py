@@ -271,18 +271,17 @@ def add_noise(matrix, sigma):
     return noised_weight
 
 
-
-
 # To allow for updates to the model
 # To allow for updates to the model
 model.eval()
 for name, module in model.named_modules():
     if isinstance(module, qnn.QuantConv2d) or isinstance(module, qnn.QuantLinear):
-        module.cache_inference_quant_bias=True
+        module.cache_inference_quant_bias = True
 
 trained_state_dict = model.state_dict()
 model.eval()
 model(torch.randn(1, 1, 28, 28))
+
 
 def add_noise_to_model(model, layer_names, sigma):
     modified_model = deepcopy(model)
