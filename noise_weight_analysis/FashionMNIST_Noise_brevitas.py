@@ -278,8 +278,8 @@ def add_noise_to_model(model, layers, sigma):
         layer = getattr(modified_model, layer_name)
 
         # get weight and bias for layer
-        weight_temp = layer.quant_weight().detach().numpy()
-        bias_temp = layer.quant_bias().detach().numpy()
+        weight_temp = layer.quant_weight().detach()
+        bias_temp = layer.quant_bias().detach()
 
         # add noise to the weight and bias
         noise_w = add_noise(weight_temp, sigma)
