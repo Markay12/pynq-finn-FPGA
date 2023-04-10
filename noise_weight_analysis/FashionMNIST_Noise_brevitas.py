@@ -193,9 +193,6 @@ print(model)
 # model.eval()
 #model(torch.randn(1, 1, 28, 28))
 
-layer = getattr(model, 'layer1')
-weight = layer.weight().detach().numpy()
-print(weight)
 
 
 # ## Train and Test
@@ -207,7 +204,7 @@ print(weight)
 # During training, the code prints the loss after every 100 batches. After each epoch, the code evaluates the model on the test set and prints the test accuracy.
 
 
-num_epochs = 20
+num_epochs = 1
 for epoch in range(num_epochs):
     # training phase
     model.train()
@@ -290,19 +287,26 @@ def add_noise(matrix, sigma):
 
 def add_noise_to_model(model, layer_names, sigma):
     modified_model = deepcopy(model)
-    for name, module in modified_model.named_modules():
-        if name in layer_names and isinstance(module, (qnn.QuantConv2d, qnn.QuantLinear)):
-            # get weight and bias for layer
-            weight_temp = module.quant_weight()
-            bias_temp = module.quant_bias()
 
-            # add noise to the weight and bias
-            noise_w = add_noise(weight_temp.tensor().detach().numpy(), sigma)
-            noise_b = add_noise(bias_temp.tensor().detach().numpy(), sigma)
+    # add noise to the modified model
+    for layer_name in layer_names:
+        layer = getattr(modified_model, layer_name)
+        
+        with torch.no_grad():
+            # Get the weight and bias tensors
+            weight = layer.weight.detach().numpy()
+            bias = layer.bias.detach().numpy() if layer.bias is not None else None
 
-            # set the modified weights and biases back into the module
-            module.set_quant_weight(torch.from_numpy(noise_w).float())
-            module.set_quant_bias(torch.from_numpy(noise_b).float())
+            # Add noise to the weight and bias tensors
+            noised_weight = add_noise(weight, sigma)
+            if bias is not None:
+                noised_bias = add_noise(bias, sigma)
+
+            # Update the layer's weight and bias tensors with the noised values
+            layer.weight = torch.nn.Parameter(torch.tensor(noised_weight, dtype=torch.float))
+            if bias is not None:
+                layer.bias = torch.nn.Parameter(torch.tensor(noised_bias, dtype=torch.float))
+
     return modified_model
 
 
