@@ -189,7 +189,7 @@ print(model)
 # During training, the code prints the loss after every 100 batches. After each epoch, the code evaluates the model on the test set and prints the test accuracy.
 
 
-num_epochs = 1
+num_epochs = 20
 for epoch in range(num_epochs):
     # training phase
     model.train()
@@ -313,7 +313,9 @@ sigma_vector = np.linspace(0, 0.2, 11)
 layers = ['layer1']
 
 # test 5 times and average to smooth out the curve
-num_perturbations = 5
+num_perturbations = 10
+
+print("Testing Perturbations for Layer 1:\n")
 
 # Loop over each standard deviation value in sigma_vector
 for s in range(len(sigma_vector)):
@@ -335,4 +337,5 @@ for s in range(len(sigma_vector)):
 
     # Calculate the average accuracy and print the result
     avg_accuracy = sum(accuracies) / len(accuracies)
-    print("Average accuracy:", avg_accuracy)
+    print("Sigma Value:", sigma_vector[s], ", Average Accuracy:", avg_accuracy, "%")
+    
