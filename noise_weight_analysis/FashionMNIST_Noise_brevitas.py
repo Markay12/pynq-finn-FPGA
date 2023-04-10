@@ -315,7 +315,7 @@ layers = ['layer1']
 # test 5 times and average to smooth out the curve
 num_perturbations = 10
 
-print("Testing Perturbations for Layer 1:\n")
+print("\nTesting Perturbations for Layer 1:\n")
 
 # Loop over each standard deviation value in sigma_vector
 for s in range(len(sigma_vector)):
