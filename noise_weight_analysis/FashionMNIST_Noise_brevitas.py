@@ -360,13 +360,24 @@ for layer in layer_names:
 
     # Iterate over the standard deviation values and add noise to the model for this layer only
     for sigma in sigma_vector:
-        noisy_model = add_noise_to_model(
-            model, [layer], sigma, num_perturbations)
-        noisy_model.to(device)
 
-        # Test the accuracy of the noisy model and append the result to the list of test accuracies
-        test_acc = test(noisy_model, test_quantized_loader)
-        test_accs.append(test_acc)
+        # Add noise to the model for the defined layer only
+        noisy_models = add_noise_to_model(
+            model, [layer], sigma, num_perturbations)
+
+        accuracies = []
+        # Test the accuracy of each noisy model and append the result to the accuracies list
+        for noisy_model in noisy_models:
+            # Move the model back to the target device
+            noisy_model.to(device)
+
+            accuracies.append(test(noisy_model, test_quantized_loader))
+
+        # Calculate the average accuracy and print the result
+        avg_accuracy = sum(accuracies) / len(accuracies)
+
+        # Append the average accuracy to the test_accs list
+        test_accs.append(avg_accuracy)
 
     # Plot the test accuracies as a function of the standard deviation for this layer
     plt.plot(sigma_vector, test_accs)
@@ -376,52 +387,3 @@ for layer in layer_names:
     plt.savefig(
         "noise_plots_pytorch/updated_randomness/layer_{}.png".format(layer))
     plt.show()
-
-
-# Initialize the standard deviation values
-sigma_vector = np.linspace(0, 0.2, 31)
-
-# Initialize a list to store the averaged test accuracies for each standard deviation value
-avg_test_accs = [0] * len(sigma_vector)
-
-# Loop over each layer and add noise to the model for that layer only, and average the test accuracies across all layers
-for layer in layer_names:
-
-    # Initialize a list to store the test accuracies for this layer
-    test_accs = []
-
-    # Iterate over the standard deviation values and add noise to the model for this layer only
-    for sigma in sigma_vector:
-        noisy_model = add_noise_to_model(
-            model, [layer], sigma, num_perturbations)
-        noisy_model.to(device)
-
-        # Test the accuracy of the noisy model and append the result to the list of test accuracies
-        test_acc = test(noisy_model, test_quantized_loader)
-        test_accs.append(test_acc)
-
-        # Add the test accuracy to the corresponding element of the averaged test accuracies list
-        avg_test_accs[sigma_vector.tolist().index(sigma)] += test_acc
-
-    # Plot the test accuracies as a function of the standard deviation for this layer
-    plt.plot(sigma_vector, test_accs, label='Layer {}'.format(layer))
-
-# Average the test accuracies across all layers for each standard deviation value
-avg_test_accs = [acc / 13 for acc in avg_test_accs]
-
-# Plot the averaged test accuracies as a function of the standard deviation
-plt.plot(sigma_vector, avg_test_accs, label='Average',
-         linewidth=3, linestyle='--', color="black")
-# Set the plot labels and title
-plt.xlabel('Standard Deviation')
-plt.ylabel('Test Accuracy')
-plt.title('Effect of Noise on Test Accuracy')
-
-# Show the legend
-plt.legend()
-
-# Save the plot as a PNG file
-plt.savefig("noise_plots_brevitas/average.png")
-
-# Show the plot
-plt.show()
