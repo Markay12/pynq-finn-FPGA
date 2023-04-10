@@ -180,21 +180,6 @@ optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 print(model)
 
 
-# testing to see how we can get weights and biases per layer
-# To allow for updates to the model
-
-# To allow for updates to the model
-# model.eval()
-# for name, module in model.named_modules():
-#    if isinstance(module, qnn.QuantConv2d) or isinstance(module, qnn.QuantLinear):
-#        module.cache_inference_quant_bias = True
-#
-#trained_state_dict = model.state_dict()
-# model.eval()
-#model(torch.randn(1, 1, 28, 28))
-
-
-
 # ## Train and Test
 #
 # This code trains a convolutional neural network (CNN) on the Fashion MNIST dataset using PyTorch. The code uses the torchvision module to download and preprocess the dataset, and defines a CNN with two convolutional layers, two max-pooling layers, and three fully connected layers. The code uses the cross-entropy loss function and the Adam optimizer to train the model.
@@ -285,29 +270,36 @@ def add_noise(matrix, sigma):
     return noised_weight
 
 
-def add_noise_to_model(model, layer_names, sigma):
-    modified_model = deepcopy(model)
+def add_noise_to_model(model, layer_names, sigma, num_perturbations):
+    modified_models = []
 
-    # add noise to the modified model
-    for layer_name in layer_names:
-        layer = getattr(modified_model, layer_name)
-        
-        with torch.no_grad():
-            # Get the weight and bias tensors
-            weight = layer.weight.detach().numpy()
-            bias = layer.bias.detach().numpy() if layer.bias is not None else None
+    for _ in range(num_perturbations):
+        modified_model = deepcopy(model)
 
-            # Add noise to the weight and bias tensors
-            noised_weight = add_noise(weight, sigma)
-            if bias is not None:
-                noised_bias = add_noise(bias, sigma)
+        # add noise to the modified model
+        for layer_name in layer_names:
+            layer = getattr(modified_model, layer_name)
 
-            # Update the layer's weight and bias tensors with the noised values
-            layer.weight = torch.nn.Parameter(torch.tensor(noised_weight, dtype=torch.float))
-            if bias is not None:
-                layer.bias = torch.nn.Parameter(torch.tensor(noised_bias, dtype=torch.float))
+            with torch.no_grad():
+                # Get the weight and bias tensors
+                weight = layer.weight.detach().numpy()
+                bias = layer.bias.detach().numpy() if layer.bias is not None else None
 
-    return modified_model
+                # Add noise to the weight and bias tensors
+                noised_weight = add_noise(weight, sigma)
+                if bias is not None:
+                    noised_bias = add_noise(bias, sigma)
+
+                # Update the layer's weight and bias tensors with the noised values
+                layer.weight = torch.nn.Parameter(
+                    torch.tensor(noised_weight, dtype=torch.float))
+                if bias is not None:
+                    layer.bias = torch.nn.Parameter(
+                        torch.tensor(noised_bias, dtype=torch.float))
+
+        modified_models.append(modified_model)
+
+    return modified_models
 
 
 # Define the standard deviation values to test
@@ -320,6 +312,9 @@ sigma_vector = np.linspace(0, 0.2, 11)
 # add noise to only the first layer
 layers = ['layer1']
 
+# test 5 times and average to smooth out the curve
+num_perturbations = 5
+
 # Loop over each standard deviation value in sigma_vector
 for s in range(len(sigma_vector)):
 
@@ -327,106 +322,17 @@ for s in range(len(sigma_vector)):
     print(sigma_vector[s])
 
     # Add noise to the model for the defined layer only
-    noisy_model = add_noise_to_model(model, layers, sigma_vector[s])
+    noisy_models = add_noise_to_model(
+        model, layers, sigma_vector[s], num_perturbations)
 
-    # Move the model back to the target device
-    noisy_model.to(device)
-
-    # Test the accuracy of the noisy model and print the result
-    print(test(noisy_model, test_quantized_loader))
-
-
-# Plotting Analysis
-#
-# This code is exploring the effect of adding Gaussian noise to a trained Fashion CNN model on its test accuracy. It first initializes the standard deviation values to be tested and loops over each layer of the model. Within each layer loop, the code initializes an empty list to store the test accuracies for that layer, and then loops over each standard deviation value in the sigma vector. For each standard deviation value, the code creates a copy of the original model and adds Gaussian noise to the parameters of the specified layer only. Then, it tests the accuracy of the noisy model on a quantized test dataset and appends the result to the list of test accuracies for that layer. The code then plots the test accuracies as a function of the standard deviation for that layer.
-#
-# After looping over all layers and plotting the test accuracies for each layer, the code initializes an empty list to store the averaged test accuracies for each standard deviation value. It then loops over each layer again, adds noise to the specified layer of the model for each standard deviation value, and tests the accuracy of the noisy model. For each standard deviation value, it appends the test accuracy to the corresponding element of the averaged test accuracies list. The code then plots the test accuracies for each layer as a function of the standard deviation on the same graph and plots the averaged test accuracies as a function of the standard deviation on a separate line. Finally, the code adds labels to the plot and displays it.
-#
-#  layer1 is the first convolutional layer, followed by batch normalization, ReLU activation, and max pooling
-#  layer2 is the second convolutional layer, followed by batch normalization, ReLU activation, and max pooling
-#  fc1 is the first fully connected layer
-#  drop is the dropout layer
-#  fc2 is the second fully connected layer
-#  fc3 is the final fully connected layer (output layer)
-###
-
-# Create directory for plots
-if not os.path.exists("noise_plots_brevitas"):
-    os.makedirs("noise_plots_brevitas")
-
-plt.style.use('default')
-
-# Initialize the standard deviation values
-sigma_vector = np.linspace(0, 0.2, 31)
-
-# Loop over each layer and plot the test accuracy as a function of the standard deviation for that layer
-for layer in range(1, 6):
-
-    # Initialize a list to store the test accuracies for this layer
-    test_accs = []
-
-    # Iterate over the standard deviation values and add noise to the model for this layer only
-    for sigma in sigma_vector:
-        noisy_model = add_noise_to_model(model, [layer], sigma)
+    accuracies = []
+    # Test the accuracy of each noisy model and append the result to the accuracies list
+    for noisy_model in noisy_models:
+        # Move the model back to the target device
         noisy_model.to(device)
 
-        # Test the accuracy of the noisy model and append the result to the list of test accuracies
-        test_acc = test(noisy_model, test_quantized_loader)
-        test_accs.append(test_acc)
+        accuracies.append(test(noisy_model, test_quantized_loader))
 
-    # Plot the test accuracies as a function of the standard deviation for this layer
-    plt.plot(sigma_vector, test_accs)
-    plt.xlabel('Standard Deviation')
-    plt.ylabel('Test Accuracy')
-    plt.title('Effect of Noise on Test Accuracy (Layer {})'.format(layer))
-    plt.savefig(
-        "noise_plots_pytorch/updated_randomness/layer_{}.png".format(layer))
-    plt.show()
-
-
-# Initialize the standard deviation values
-sigma_vector = np.linspace(0, 0.2, 31)
-
-# Initialize a list to store the averaged test accuracies for each standard deviation value
-avg_test_accs = [0] * len(sigma_vector)
-
-# Loop over each layer and add noise to the model for that layer only, and average the test accuracies across all layers
-for layer in range(1, 6):
-
-    # Initialize a list to store the test accuracies for this layer
-    test_accs = []
-
-    # Iterate over the standard deviation values and add noise to the model for this layer only
-    for sigma in sigma_vector:
-        noisy_model = add_noise_to_model(model, [layer], sigma)
-        noisy_model.to(device)
-
-        # Test the accuracy of the noisy model and append the result to the list of test accuracies
-        test_acc = test(noisy_model, test_quantized_loader)
-        test_accs.append(test_acc)
-
-        # Add the test accuracy to the corresponding element of the averaged test accuracies list
-        avg_test_accs[sigma_vector.tolist().index(sigma)] += test_acc
-
-    # Plot the test accuracies as a function of the standard deviation for this layer
-    plt.plot(sigma_vector, test_accs, label='Layer {}'.format(layer))
-
-# Average the test accuracies across all layers for each standard deviation value
-avg_test_accs = [acc / 13 for acc in avg_test_accs]
-
-# Plot the averaged test accuracies as a function of the standard deviation
-plt.plot(sigma_vector, avg_test_accs, label='Average',
-         linewidth=3, linestyle='--', color="black")
-# Set the plot labels and title
-plt.xlabel('Standard Deviation')
-plt.ylabel('Test Accuracy')
-plt.title('Effect of Noise on Test Accuracy')
-
-# Show the legend
-plt.legend()
-
-# Save the plot as a PNG file
-plt.savefig("noise_plots_brevitas/average.png")
-
-# Show the plot
-plt.show()
+    # Calculate the average accuracy and print the result
+    avg_accuracy = sum(accuracies) / len(accuracies)
+    print("Average accuracy:", avg_accuracy)
