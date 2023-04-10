@@ -385,5 +385,7 @@ for layer in layer_names:
     plt.ylabel('Test Accuracy')
     plt.title('Effect of Noise on Test Accuracy (Layer {})'.format(layer))
     plt.savefig(
-        "noise_plots_pytorch/updated_randomness/layer_{}.png".format(layer))
+        "noise_plots_brevitas/layer_{}.png".format(layer))
     plt.show()
+
+    print('Done with Plot {}'.format(layer))
