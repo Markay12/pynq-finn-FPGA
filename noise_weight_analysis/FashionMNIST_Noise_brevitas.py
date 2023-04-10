@@ -179,7 +179,24 @@ criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 print(model)
 
-# print(model.layer1.quant_weight())
+
+# testing to see how we can get weights and biases per layer
+# To allow for updates to the model
+
+# To allow for updates to the model
+# model.eval()
+# for name, module in model.named_modules():
+#    if isinstance(module, qnn.QuantConv2d) or isinstance(module, qnn.QuantLinear):
+#        module.cache_inference_quant_bias = True
+#
+#trained_state_dict = model.state_dict()
+# model.eval()
+#model(torch.randn(1, 1, 28, 28))
+
+layer = getattr(model, 'layer1')
+weight = layer.weight().detach().numpy()
+print(weight)
+
 
 # ## Train and Test
 #
@@ -190,7 +207,7 @@ print(model)
 # During training, the code prints the loss after every 100 batches. After each epoch, the code evaluates the model on the test set and prints the test accuracy.
 
 
-num_epochs = 15
+num_epochs = 20
 for epoch in range(num_epochs):
     # training phase
     model.train()
@@ -269,18 +286,6 @@ def add_noise(matrix, sigma):
     noised_weight = np.random.normal(loc=matrix, scale=sigma)
 
     return noised_weight
-
-
-# To allow for updates to the model
-# To allow for updates to the model
-model.eval()
-for name, module in model.named_modules():
-    if isinstance(module, qnn.QuantConv2d) or isinstance(module, qnn.QuantLinear):
-        module.cache_inference_quant_bias = True
-
-trained_state_dict = model.state_dict()
-model.eval()
-model(torch.randn(1, 1, 28, 28))
 
 
 def add_noise_to_model(model, layer_names, sigma):
