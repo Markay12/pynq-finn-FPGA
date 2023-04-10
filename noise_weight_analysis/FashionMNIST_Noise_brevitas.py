@@ -338,6 +338,9 @@ for s in range(len(sigma_vector)):
           ", Average Accuracy:", avg_accuracy, "%")
 
 
+# update number of perturbations
+num_perturbations = 20
+
 # Define layer names
 layer_names = ['layer1', 'layer2', 'layer3', 'layer4', 'layer5']
 
@@ -347,7 +350,7 @@ if not os.path.exists("noise_plots_brevitas"):
 plt.style.use('default')
 
 # Initialize the standard deviation values
-sigma_vector = np.linspace(0, 0.2, 31)
+sigma_vector = np.linspace(0, 0.2, 41)
 
 # Create a list to store the test accuracies for all layers
 all_test_accs = []
