@@ -349,6 +349,9 @@ plt.style.use('default')
 # Initialize the standard deviation values
 sigma_vector = np.linspace(0, 0.2, 31)
 
+# Create a list to store the test accuracies for all layers
+all_test_accs = []
+
 # Loop over each layer and plot the test accuracy as a function of the standard deviation for that layer
 for layer in layer_names:
 
@@ -378,13 +381,34 @@ for layer in layer_names:
 
         print("Sigma Value: {}, Average Accuracy: {}%".format(sigma, avg_accuracy))
 
+    # Store the test accuracies for this layer in the all_test_accs list
+    all_test_accs.append(test_accs)
+
     # Plot the test accuracies as a function of the standard deviation for this layer
-    plt.plot(sigma_vector, test_accs)
+    plt.plot(sigma_vector, test_accs, label='{} Accuracy at Different Perturbation Levels'.format(layer))
     plt.xlabel('Standard Deviation')
     plt.ylabel('Test Accuracy')
-    plt.title('Effect of Noise on Test Accuracy ({})'.format(layer))
-    plt.savefig(
-        "noise_plots_brevitas/{}.png".format(layer))
-    plt.show()
+    plt.title('Effect of Noise on Test Accuracy')
+    plt.legend()
+
+    plt.savefig("noise_plots_brevitas/{}.png".format(layer))
+    plt.clf()
 
     print('Done with Plot {}'.format(layer))
+
+# Compute the average test accuracy across all layers for each standard deviation value
+avg_test_accs = [sum(x) / len(x) for x in zip(*all_test_accs)]
+
+# Plot the averaged test accuracies as a function of the standard deviation
+plt.plot(sigma_vector, avg_test_accs, label='Average', linewidth=3, linestyle='--', color="black")
+
+plt.xlabel('Standard Deviation')
+plt.ylabel('Test Accuracy')
+plt.title('Effect of Noise on Test Accuracy (Average)')
+
+plt.legend()
+plt.savefig("noise_plots_brevitas/average.png")
+plt.show()
+
+plt.clf()
+
