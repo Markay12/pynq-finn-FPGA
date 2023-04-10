@@ -320,9 +320,6 @@ print("\nTesting Perturbations for Layer 1:\n")
 # Loop over each standard deviation value in sigma_vector
 for s in range(len(sigma_vector)):
 
-    # Print the current standard deviation value
-    print(sigma_vector[s])
-
     # Add noise to the model for the defined layer only
     noisy_models = add_noise_to_model(
         model, layers, sigma_vector[s], num_perturbations)
@@ -379,13 +376,15 @@ for layer in layer_names:
         # Append the average accuracy to the test_accs list
         test_accs.append(avg_accuracy)
 
+        print("Sigma Value: {}, Average Accuracy: {}%".format(sigma, avg_accuracy))
+
     # Plot the test accuracies as a function of the standard deviation for this layer
     plt.plot(sigma_vector, test_accs)
     plt.xlabel('Standard Deviation')
     plt.ylabel('Test Accuracy')
-    plt.title('Effect of Noise on Test Accuracy (Layer {})'.format(layer))
+    plt.title('Effect of Noise on Test Accuracy ({})'.format(layer))
     plt.savefig(
-        "noise_plots_brevitas/layer_{}.png".format(layer))
+        "noise_plots_brevitas/{}.png".format(layer))
     plt.show()
 
     print('Done with Plot {}'.format(layer))
