@@ -141,7 +141,7 @@ print(model)
 
 
 
-num_epochs = 15
+num_epochs = 20 
 for epoch in range(num_epochs):
     # training phase
     model.train()
@@ -237,8 +237,7 @@ def add_noise_to_model(model, layers, sigma, num_perturbations):
         # create individual modified model
         modified_model = deepcopy(model)
 
-        for i in range(len(layers)):
-        
+        for i in range(len(layers)): 
             layer_name = f'layer{i + 1}'
             layer = getattr(modified_model, layer_name)
     
@@ -251,13 +250,13 @@ def add_noise_to_model(model, layers, sigma, num_perturbations):
             noise_w = add_noise(weight_temp, sigma)
             noise_b = add_noise(bias_temp, sigma)
 
-
             # place values back into the modified model for analysis
             layer[0].weight.data = torch.from_numpy(noise_w).float()
             layer[0].bias.data = torch.from_numpy(noise_b).float()
 
         # append this modified model to the list
         modified_models.append(modified_model)
+
         
     return modified_models
 
@@ -320,12 +319,14 @@ if not os.path.exists("noise_plots_pytorch"):
 plt.style.use('default')
 
 # Initialize the standard deviation values
-sigma_vector = np.linspace(0, 0.2, 31)
+sigma_vector = np.linspace(0, 0.2, 41)
 
 all_test_accs = []
 
+layers = [1,2,3,4,5]
+
 # Loop over each layer and plot the test accuracy as a function of the standard deviation for that layer
-for layer in [1,2,3,4,5]:
+for layer in layers:
     
     # Initialize a list to store the test accuracies for this layer
     test_accs = []
@@ -333,7 +334,7 @@ for layer in [1,2,3,4,5]:
     # Iterate over the standard deviation values and add noise to the model for this layer only
     for sigma in sigma_vector:
 
-        noisy_models = add_noise_to_model(model, layer, sigma, num_perturbations)
+        noisy_models = add_noise_to_model(model, [layer], sigma, num_perturbations)
 
         accuracies = []
 
@@ -362,7 +363,7 @@ for layer in [1,2,3,4,5]:
     plt.show()
 
     # clear plot
-    plot.clf()
+    plt.clf()
 
     print("Done with plot Layer {}".format(layer))
 
