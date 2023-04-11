@@ -259,7 +259,8 @@ def add_noise(matrix, sigma):
 def add_noise_to_model(model, layers, sigma):
     
     modified_model = deepcopy(model)
-    
+
+    for _ in range(num_perturbations):    
     for i in range(len(layers)):
         
         layer_name = f'layer{i + 1}'
