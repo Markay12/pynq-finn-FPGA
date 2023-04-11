@@ -303,7 +303,7 @@ with open('brevitas_output.txt', 'w') as file:
     layers = ['layer1']
 
     # test 5 times and average to smooth out the curve
-    num_perturbations = 20
+    num_perturbations = 5
 
     print("\nTesting Perturbations for Layer 1:\n")
 
