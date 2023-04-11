@@ -273,8 +273,10 @@ for s in range(len(sigma_vector)):
     avg_accuracy = sum(accuracies) / len(accuracies)
     print("Sigma Value:", sigma_vector[s],
           ", Average Accuracy:", avg_accuracy, "%")
+
 # update number of perturbations
-num_perturbations = 20
+num_perturbations = 15
+
 # Define layer names
 layer_names = ['layer1', 'layer2', 'layer3', 'layer4', 'layer5']
 if not os.path.exists("noise_plots_brevitas"):

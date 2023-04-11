@@ -1,0 +1,727 @@
+torch.Size([1000, 1, 28, 28])
+60000
+Samples in each set: train = 60000, test = 60
+Shape of one input sample: torch.Size([1, 28, 28])
+Input shape for 1 batch: torch.Size([1000, 1, 28, 28])
+Label shape for 1 batch: torch.Size([1000])
+Target device: cpu
+FashionCNN(
+  (quant_inp): QuantIdentity(
+    (input_quant): ActQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+    )
+    (act_quant): ActQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+      (fused_activation_quant_proxy): FusedActivationQuantProxy(
+        (activation_impl): Identity()
+        (tensor_quant): RescalingIntQuant(
+          (int_quant): IntQuant(
+            (float_to_int_impl): RoundSte()
+            (tensor_clamp_impl): TensorClamp()
+            (delay_wrapper): DelayWrapper(
+              (delay_impl): _NoDelay()
+            )
+          )
+          (scaling_impl): ParameterFromRuntimeStatsScaling(
+            (stats_input_view_shape_impl): OverTensorView()
+            (stats): _Stats(
+              (stats_impl): AbsPercentile()
+            )
+            (restrict_scaling): _RestrictValue(
+              (restrict_value_impl): FloatRestrictValue()
+            )
+            (clamp_scaling): _ClampValue(
+              (clamp_min_ste): ScalarClampMinSte()
+            )
+            (restrict_inplace_preprocess): Identity()
+            (restrict_preprocess): Identity()
+          )
+          (int_scaling_impl): IntScaling()
+          (zero_point_impl): ZeroZeroPoint(
+            (zero_point): StatelessBuffer()
+          )
+          (msb_clamp_bit_width_impl): BitWidthConst(
+            (bit_width): StatelessBuffer()
+          )
+        )
+      )
+    )
+  )
+  (layer1): QuantConv2d(
+    1, 6, kernel_size=(5, 5), stride=(1, 1)
+    (input_quant): ActQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+    )
+    (output_quant): ActQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+    )
+    (weight_quant): WeightQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+      (tensor_quant): RescalingIntQuant(
+        (int_quant): IntQuant(
+          (float_to_int_impl): RoundSte()
+          (tensor_clamp_impl): TensorClampSte()
+          (delay_wrapper): DelayWrapper(
+            (delay_impl): _NoDelay()
+          )
+        )
+        (scaling_impl): StatsFromParameterScaling(
+          (parameter_list_stats): _ParameterListStats(
+            (first_tracked_param): _ViewParameterWrapper(
+              (view_shape_impl): OverTensorView()
+            )
+            (stats): _Stats(
+              (stats_impl): AbsMax()
+            )
+          )
+          (stats_scaling_impl): _StatsScaling(
+            (affine_rescaling): Identity()
+            (restrict_clamp_scaling): _RestrictClampValue(
+              (clamp_min_ste): ScalarClampMinSte()
+              (restrict_value_impl): FloatRestrictValue()
+            )
+            (restrict_scaling_pre): Identity()
+          )
+        )
+        (int_scaling_impl): IntScaling()
+        (zero_point_impl): ZeroZeroPoint(
+          (zero_point): StatelessBuffer()
+        )
+        (msb_clamp_bit_width_impl): BitWidthConst(
+          (bit_width): StatelessBuffer()
+        )
+      )
+    )
+    (bias_quant): BiasQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+      (tensor_quant): PrescaledRestrictIntQuant(
+        (int_quant): IntQuant(
+          (float_to_int_impl): RoundSte()
+          (tensor_clamp_impl): TensorClamp()
+          (delay_wrapper): DelayWrapper(
+            (delay_impl): _NoDelay()
+          )
+        )
+        (msb_clamp_bit_width_impl): BitWidthConst(
+          (bit_width): StatelessBuffer()
+        )
+        (zero_point): StatelessBuffer()
+      )
+    )
+  )
+  (relu1): QuantReLU(
+    (input_quant): ActQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+    )
+    (act_quant): ActQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+      (fused_activation_quant_proxy): FusedActivationQuantProxy(
+        (activation_impl): ReLU()
+        (tensor_quant): RescalingIntQuant(
+          (int_quant): IntQuant(
+            (float_to_int_impl): RoundSte()
+            (tensor_clamp_impl): TensorClamp()
+            (delay_wrapper): DelayWrapper(
+              (delay_impl): _NoDelay()
+            )
+          )
+          (scaling_impl): ParameterFromRuntimeStatsScaling(
+            (stats_input_view_shape_impl): OverTensorView()
+            (stats): _Stats(
+              (stats_impl): AbsPercentile()
+            )
+            (restrict_scaling): _RestrictValue(
+              (restrict_value_impl): FloatRestrictValue()
+            )
+            (clamp_scaling): _ClampValue(
+              (clamp_min_ste): ScalarClampMinSte()
+            )
+            (restrict_inplace_preprocess): Identity()
+            (restrict_preprocess): Identity()
+          )
+          (int_scaling_impl): IntScaling()
+          (zero_point_impl): ZeroZeroPoint(
+            (zero_point): StatelessBuffer()
+          )
+          (msb_clamp_bit_width_impl): BitWidthConst(
+            (bit_width): StatelessBuffer()
+          )
+        )
+      )
+    )
+  )
+  (layer2): QuantConv2d(
+    6, 16, kernel_size=(5, 5), stride=(1, 1)
+    (input_quant): ActQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+    )
+    (output_quant): ActQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+    )
+    (weight_quant): WeightQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+      (tensor_quant): RescalingIntQuant(
+        (int_quant): IntQuant(
+          (float_to_int_impl): RoundSte()
+          (tensor_clamp_impl): TensorClampSte()
+          (delay_wrapper): DelayWrapper(
+            (delay_impl): _NoDelay()
+          )
+        )
+        (scaling_impl): StatsFromParameterScaling(
+          (parameter_list_stats): _ParameterListStats(
+            (first_tracked_param): _ViewParameterWrapper(
+              (view_shape_impl): OverTensorView()
+            )
+            (stats): _Stats(
+              (stats_impl): AbsMax()
+            )
+          )
+          (stats_scaling_impl): _StatsScaling(
+            (affine_rescaling): Identity()
+            (restrict_clamp_scaling): _RestrictClampValue(
+              (clamp_min_ste): ScalarClampMinSte()
+              (restrict_value_impl): FloatRestrictValue()
+            )
+            (restrict_scaling_pre): Identity()
+          )
+        )
+        (int_scaling_impl): IntScaling()
+        (zero_point_impl): ZeroZeroPoint(
+          (zero_point): StatelessBuffer()
+        )
+        (msb_clamp_bit_width_impl): BitWidthConst(
+          (bit_width): StatelessBuffer()
+        )
+      )
+    )
+    (bias_quant): BiasQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+      (tensor_quant): PrescaledRestrictIntQuant(
+        (int_quant): IntQuant(
+          (float_to_int_impl): RoundSte()
+          (tensor_clamp_impl): TensorClamp()
+          (delay_wrapper): DelayWrapper(
+            (delay_impl): _NoDelay()
+          )
+        )
+        (msb_clamp_bit_width_impl): BitWidthConst(
+          (bit_width): StatelessBuffer()
+        )
+        (zero_point): StatelessBuffer()
+      )
+    )
+  )
+  (relu2): QuantReLU(
+    (input_quant): ActQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+    )
+    (act_quant): ActQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+      (fused_activation_quant_proxy): FusedActivationQuantProxy(
+        (activation_impl): ReLU()
+        (tensor_quant): RescalingIntQuant(
+          (int_quant): IntQuant(
+            (float_to_int_impl): RoundSte()
+            (tensor_clamp_impl): TensorClamp()
+            (delay_wrapper): DelayWrapper(
+              (delay_impl): _NoDelay()
+            )
+          )
+          (scaling_impl): ParameterFromRuntimeStatsScaling(
+            (stats_input_view_shape_impl): OverTensorView()
+            (stats): _Stats(
+              (stats_impl): AbsPercentile()
+            )
+            (restrict_scaling): _RestrictValue(
+              (restrict_value_impl): FloatRestrictValue()
+            )
+            (clamp_scaling): _ClampValue(
+              (clamp_min_ste): ScalarClampMinSte()
+            )
+            (restrict_inplace_preprocess): Identity()
+            (restrict_preprocess): Identity()
+          )
+          (int_scaling_impl): IntScaling()
+          (zero_point_impl): ZeroZeroPoint(
+            (zero_point): StatelessBuffer()
+          )
+          (msb_clamp_bit_width_impl): BitWidthConst(
+            (bit_width): StatelessBuffer()
+          )
+        )
+      )
+    )
+  )
+  (layer3): QuantLinear(
+    in_features=256, out_features=120, bias=True
+    (input_quant): ActQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+    )
+    (output_quant): ActQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+    )
+    (weight_quant): WeightQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+      (tensor_quant): RescalingIntQuant(
+        (int_quant): IntQuant(
+          (float_to_int_impl): RoundSte()
+          (tensor_clamp_impl): TensorClampSte()
+          (delay_wrapper): DelayWrapper(
+            (delay_impl): _NoDelay()
+          )
+        )
+        (scaling_impl): StatsFromParameterScaling(
+          (parameter_list_stats): _ParameterListStats(
+            (first_tracked_param): _ViewParameterWrapper(
+              (view_shape_impl): OverTensorView()
+            )
+            (stats): _Stats(
+              (stats_impl): AbsMax()
+            )
+          )
+          (stats_scaling_impl): _StatsScaling(
+            (affine_rescaling): Identity()
+            (restrict_clamp_scaling): _RestrictClampValue(
+              (clamp_min_ste): ScalarClampMinSte()
+              (restrict_value_impl): FloatRestrictValue()
+            )
+            (restrict_scaling_pre): Identity()
+          )
+        )
+        (int_scaling_impl): IntScaling()
+        (zero_point_impl): ZeroZeroPoint(
+          (zero_point): StatelessBuffer()
+        )
+        (msb_clamp_bit_width_impl): BitWidthConst(
+          (bit_width): StatelessBuffer()
+        )
+      )
+    )
+    (bias_quant): BiasQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+      (tensor_quant): PrescaledRestrictIntQuant(
+        (int_quant): IntQuant(
+          (float_to_int_impl): RoundSte()
+          (tensor_clamp_impl): TensorClamp()
+          (delay_wrapper): DelayWrapper(
+            (delay_impl): _NoDelay()
+          )
+        )
+        (msb_clamp_bit_width_impl): BitWidthConst(
+          (bit_width): StatelessBuffer()
+        )
+        (zero_point): StatelessBuffer()
+      )
+    )
+  )
+  (relu3): QuantReLU(
+    (input_quant): ActQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+    )
+    (act_quant): ActQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+      (fused_activation_quant_proxy): FusedActivationQuantProxy(
+        (activation_impl): ReLU()
+        (tensor_quant): RescalingIntQuant(
+          (int_quant): IntQuant(
+            (float_to_int_impl): RoundSte()
+            (tensor_clamp_impl): TensorClamp()
+            (delay_wrapper): DelayWrapper(
+              (delay_impl): _NoDelay()
+            )
+          )
+          (scaling_impl): ParameterFromRuntimeStatsScaling(
+            (stats_input_view_shape_impl): OverTensorView()
+            (stats): _Stats(
+              (stats_impl): AbsPercentile()
+            )
+            (restrict_scaling): _RestrictValue(
+              (restrict_value_impl): FloatRestrictValue()
+            )
+            (clamp_scaling): _ClampValue(
+              (clamp_min_ste): ScalarClampMinSte()
+            )
+            (restrict_inplace_preprocess): Identity()
+            (restrict_preprocess): Identity()
+          )
+          (int_scaling_impl): IntScaling()
+          (zero_point_impl): ZeroZeroPoint(
+            (zero_point): StatelessBuffer()
+          )
+          (msb_clamp_bit_width_impl): BitWidthConst(
+            (bit_width): StatelessBuffer()
+          )
+        )
+      )
+    )
+  )
+  (layer4): QuantLinear(
+    in_features=120, out_features=84, bias=True
+    (input_quant): ActQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+    )
+    (output_quant): ActQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+    )
+    (weight_quant): WeightQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+      (tensor_quant): RescalingIntQuant(
+        (int_quant): IntQuant(
+          (float_to_int_impl): RoundSte()
+          (tensor_clamp_impl): TensorClampSte()
+          (delay_wrapper): DelayWrapper(
+            (delay_impl): _NoDelay()
+          )
+        )
+        (scaling_impl): StatsFromParameterScaling(
+          (parameter_list_stats): _ParameterListStats(
+            (first_tracked_param): _ViewParameterWrapper(
+              (view_shape_impl): OverTensorView()
+            )
+            (stats): _Stats(
+              (stats_impl): AbsMax()
+            )
+          )
+          (stats_scaling_impl): _StatsScaling(
+            (affine_rescaling): Identity()
+            (restrict_clamp_scaling): _RestrictClampValue(
+              (clamp_min_ste): ScalarClampMinSte()
+              (restrict_value_impl): FloatRestrictValue()
+            )
+            (restrict_scaling_pre): Identity()
+          )
+        )
+        (int_scaling_impl): IntScaling()
+        (zero_point_impl): ZeroZeroPoint(
+          (zero_point): StatelessBuffer()
+        )
+        (msb_clamp_bit_width_impl): BitWidthConst(
+          (bit_width): StatelessBuffer()
+        )
+      )
+    )
+    (bias_quant): BiasQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+      (tensor_quant): PrescaledRestrictIntQuant(
+        (int_quant): IntQuant(
+          (float_to_int_impl): RoundSte()
+          (tensor_clamp_impl): TensorClamp()
+          (delay_wrapper): DelayWrapper(
+            (delay_impl): _NoDelay()
+          )
+        )
+        (msb_clamp_bit_width_impl): BitWidthConst(
+          (bit_width): StatelessBuffer()
+        )
+        (zero_point): StatelessBuffer()
+      )
+    )
+  )
+  (relu4): QuantReLU(
+    (input_quant): ActQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+    )
+    (act_quant): ActQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+      (fused_activation_quant_proxy): FusedActivationQuantProxy(
+        (activation_impl): ReLU()
+        (tensor_quant): RescalingIntQuant(
+          (int_quant): IntQuant(
+            (float_to_int_impl): RoundSte()
+            (tensor_clamp_impl): TensorClamp()
+            (delay_wrapper): DelayWrapper(
+              (delay_impl): _NoDelay()
+            )
+          )
+          (scaling_impl): ParameterFromRuntimeStatsScaling(
+            (stats_input_view_shape_impl): OverTensorView()
+            (stats): _Stats(
+              (stats_impl): AbsPercentile()
+            )
+            (restrict_scaling): _RestrictValue(
+              (restrict_value_impl): FloatRestrictValue()
+            )
+            (clamp_scaling): _ClampValue(
+              (clamp_min_ste): ScalarClampMinSte()
+            )
+            (restrict_inplace_preprocess): Identity()
+            (restrict_preprocess): Identity()
+          )
+          (int_scaling_impl): IntScaling()
+          (zero_point_impl): ZeroZeroPoint(
+            (zero_point): StatelessBuffer()
+          )
+          (msb_clamp_bit_width_impl): BitWidthConst(
+            (bit_width): StatelessBuffer()
+          )
+        )
+      )
+    )
+  )
+  (layer5): QuantLinear(
+    in_features=84, out_features=10, bias=True
+    (input_quant): ActQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+    )
+    (output_quant): ActQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+    )
+    (weight_quant): WeightQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+      (tensor_quant): RescalingIntQuant(
+        (int_quant): IntQuant(
+          (float_to_int_impl): RoundSte()
+          (tensor_clamp_impl): TensorClampSte()
+          (delay_wrapper): DelayWrapper(
+            (delay_impl): _NoDelay()
+          )
+        )
+        (scaling_impl): StatsFromParameterScaling(
+          (parameter_list_stats): _ParameterListStats(
+            (first_tracked_param): _ViewParameterWrapper(
+              (view_shape_impl): OverTensorView()
+            )
+            (stats): _Stats(
+              (stats_impl): AbsMax()
+            )
+          )
+          (stats_scaling_impl): _StatsScaling(
+            (affine_rescaling): Identity()
+            (restrict_clamp_scaling): _RestrictClampValue(
+              (clamp_min_ste): ScalarClampMinSte()
+              (restrict_value_impl): FloatRestrictValue()
+            )
+            (restrict_scaling_pre): Identity()
+          )
+        )
+        (int_scaling_impl): IntScaling()
+        (zero_point_impl): ZeroZeroPoint(
+          (zero_point): StatelessBuffer()
+        )
+        (msb_clamp_bit_width_impl): BitWidthConst(
+          (bit_width): StatelessBuffer()
+        )
+      )
+    )
+    (bias_quant): BiasQuantProxyFromInjector(
+      (_zero_hw_sentinel): StatelessBuffer()
+      (tensor_quant): PrescaledRestrictIntQuant(
+        (int_quant): IntQuant(
+          (float_to_int_impl): RoundSte()
+          (tensor_clamp_impl): TensorClamp()
+          (delay_wrapper): DelayWrapper(
+            (delay_impl): _NoDelay()
+          )
+        )
+        (msb_clamp_bit_width_impl): BitWidthConst(
+          (bit_width): StatelessBuffer()
+        )
+        (zero_point): StatelessBuffer()
+      )
+    )
+  )
+)
+Epoch [1/20], Test Accuracy: 66.84%
+Epoch [2/20], Test Accuracy: 71.63%
+Epoch [3/20], Test Accuracy: 74.43%
+Epoch [4/20], Test Accuracy: 75.68%
+Epoch [5/20], Test Accuracy: 77.52%
+Epoch [6/20], Test Accuracy: 78.00%
+Epoch [7/20], Test Accuracy: 79.28%
+Epoch [8/20], Test Accuracy: 79.94%
+Epoch [9/20], Test Accuracy: 80.88%
+Epoch [10/20], Test Accuracy: 81.46%
+Epoch [11/20], Test Accuracy: 81.80%
+Epoch [12/20], Test Accuracy: 82.22%
+Epoch [13/20], Test Accuracy: 82.61%
+Epoch [14/20], Test Accuracy: 83.32%
+Epoch [15/20], Test Accuracy: 83.34%
+Epoch [16/20], Test Accuracy: 83.83%
+Epoch [17/20], Test Accuracy: 83.76%
+Epoch [18/20], Test Accuracy: 84.06%
+Epoch [19/20], Test Accuracy: 84.59%
+Epoch [20/20], Test Accuracy: 84.68%
+
+Testing Perturbations for Layer 1:
+
+Sigma Value: 0.0 , Average Accuracy: 84.68 %
+Sigma Value: 0.02 , Average Accuracy: 83.83600000000001 %
+Sigma Value: 0.04 , Average Accuracy: 81.726 %
+Sigma Value: 0.06 , Average Accuracy: 79.374 %
+Sigma Value: 0.08 , Average Accuracy: 68.44200000000001 %
+Sigma Value: 0.1 , Average Accuracy: 78.59 %
+Sigma Value: 0.12 , Average Accuracy: 58.902 %
+Sigma Value: 0.14 , Average Accuracy: 63.903999999999996 %
+Sigma Value: 0.16 , Average Accuracy: 62.788 %
+Sigma Value: 0.18 , Average Accuracy: 63.948 %
+Sigma Value: 0.2 , Average Accuracy: 60.422000000000004 %
+Sigma Value: 0.0, Average Accuracy: 84.68000000000004%
+Sigma Value: 0.005, Average Accuracy: 84.24000000000001%
+Sigma Value: 0.01, Average Accuracy: 84.24066666666667%
+Sigma Value: 0.015, Average Accuracy: 83.90466666666667%
+Sigma Value: 0.02, Average Accuracy: 83.97999999999999%
+Sigma Value: 0.025, Average Accuracy: 83.04533333333333%
+Sigma Value: 0.03, Average Accuracy: 82.31266666666666%
+Sigma Value: 0.035, Average Accuracy: 82.25066666666666%
+Sigma Value: 0.04, Average Accuracy: 83.256%
+Sigma Value: 0.045, Average Accuracy: 82.07533333333335%
+Sigma Value: 0.05, Average Accuracy: 80.014%
+Sigma Value: 0.055, Average Accuracy: 80.93%
+Sigma Value: 0.06, Average Accuracy: 80.81466666666668%
+Sigma Value: 0.065, Average Accuracy: 77.46266666666665%
+Sigma Value: 0.07, Average Accuracy: 79.39933333333333%
+Sigma Value: 0.075, Average Accuracy: 79.82266666666666%
+Sigma Value: 0.08, Average Accuracy: 74.17933333333333%
+Sigma Value: 0.085, Average Accuracy: 75.43333333333334%
+Sigma Value: 0.09, Average Accuracy: 71.698%
+Sigma Value: 0.095, Average Accuracy: 74.06400000000001%
+Sigma Value: 0.1, Average Accuracy: 71.596%
+Sigma Value: 0.105, Average Accuracy: 64.61866666666667%
+Sigma Value: 0.11, Average Accuracy: 71.54400000000001%
+Sigma Value: 0.115, Average Accuracy: 71.31400000000001%
+Sigma Value: 0.12, Average Accuracy: 75.3%
+Sigma Value: 0.125, Average Accuracy: 61.52%
+Sigma Value: 0.13, Average Accuracy: 60.744666666666674%
+Sigma Value: 0.135, Average Accuracy: 58.704666666666675%
+Sigma Value: 0.14, Average Accuracy: 54.36%
+Sigma Value: 0.145, Average Accuracy: 67.63466666666666%
+Sigma Value: 0.15, Average Accuracy: 58.12533333333332%
+Sigma Value: 0.155, Average Accuracy: 53.368%
+Sigma Value: 0.16, Average Accuracy: 49.37333333333333%
+Sigma Value: 0.165, Average Accuracy: 53.947333333333326%
+Sigma Value: 0.17, Average Accuracy: 63.09066666666667%
+Sigma Value: 0.17500000000000002, Average Accuracy: 56.79133333333333%
+Sigma Value: 0.18, Average Accuracy: 50.56933333333333%
+Sigma Value: 0.185, Average Accuracy: 40.57000000000001%
+Sigma Value: 0.19, Average Accuracy: 49.59066666666667%
+Sigma Value: 0.195, Average Accuracy: 53.322%
+Sigma Value: 0.2, Average Accuracy: 47.376%
+Done with Plot layer1
+Sigma Value: 0.0, Average Accuracy: 84.68000000000004%
+Sigma Value: 0.005, Average Accuracy: 84.44866666666667%
+Sigma Value: 0.01, Average Accuracy: 84.20866666666666%
+Sigma Value: 0.015, Average Accuracy: 83.93133333333331%
+Sigma Value: 0.02, Average Accuracy: 83.89333333333335%
+Sigma Value: 0.025, Average Accuracy: 83.37133333333335%
+Sigma Value: 0.03, Average Accuracy: 83.23800000000001%
+Sigma Value: 0.035, Average Accuracy: 82.52266666666668%
+Sigma Value: 0.04, Average Accuracy: 82.18399999999998%
+Sigma Value: 0.045, Average Accuracy: 81.89333333333335%
+Sigma Value: 0.05, Average Accuracy: 81.86933333333333%
+Sigma Value: 0.055, Average Accuracy: 80.884%
+Sigma Value: 0.06, Average Accuracy: 80.54600000000002%
+Sigma Value: 0.065, Average Accuracy: 78.618%
+Sigma Value: 0.07, Average Accuracy: 78.01266666666669%
+Sigma Value: 0.075, Average Accuracy: 77.026%
+Sigma Value: 0.08, Average Accuracy: 78.21133333333333%
+Sigma Value: 0.085, Average Accuracy: 72.474%
+Sigma Value: 0.09, Average Accuracy: 68.46199999999999%
+Sigma Value: 0.095, Average Accuracy: 69.90666666666667%
+Sigma Value: 0.1, Average Accuracy: 71.44200000000001%
+Sigma Value: 0.105, Average Accuracy: 69.13533333333334%
+Sigma Value: 0.11, Average Accuracy: 69.73133333333334%
+Sigma Value: 0.115, Average Accuracy: 68.856%
+Sigma Value: 0.12, Average Accuracy: 63.965999999999994%
+Sigma Value: 0.125, Average Accuracy: 63.12333333333334%
+Sigma Value: 0.13, Average Accuracy: 63.32399999999999%
+Sigma Value: 0.135, Average Accuracy: 60.87333333333332%
+Sigma Value: 0.14, Average Accuracy: 61.89666666666666%
+Sigma Value: 0.145, Average Accuracy: 58.745333333333335%
+Sigma Value: 0.15, Average Accuracy: 59.89800000000001%
+Sigma Value: 0.155, Average Accuracy: 59.85933333333333%
+Sigma Value: 0.16, Average Accuracy: 48.17066666666666%
+Sigma Value: 0.165, Average Accuracy: 52.58733333333332%
+Sigma Value: 0.17, Average Accuracy: 52.35733333333334%
+Sigma Value: 0.17500000000000002, Average Accuracy: 49.82600000000001%
+Sigma Value: 0.18, Average Accuracy: 54.50066666666667%
+Sigma Value: 0.185, Average Accuracy: 53.056%
+Sigma Value: 0.19, Average Accuracy: 49.442%
+Sigma Value: 0.195, Average Accuracy: 46.88066666666667%
+Sigma Value: 0.2, Average Accuracy: 49.501999999999995%
+Done with Plot layer2
+Sigma Value: 0.0, Average Accuracy: 84.68000000000004%
+Sigma Value: 0.005, Average Accuracy: 84.40799999999999%
+Sigma Value: 0.01, Average Accuracy: 84.31933333333333%
+Sigma Value: 0.015, Average Accuracy: 83.94533333333334%
+Sigma Value: 0.02, Average Accuracy: 83.73733333333332%
+Sigma Value: 0.025, Average Accuracy: 83.53200000000001%
+Sigma Value: 0.03, Average Accuracy: 82.39733333333334%
+Sigma Value: 0.035, Average Accuracy: 81.91333333333334%
+Sigma Value: 0.04, Average Accuracy: 81.87066666666666%
+Sigma Value: 0.045, Average Accuracy: 81.36200000000001%
+Sigma Value: 0.05, Average Accuracy: 79.18666666666665%
+Sigma Value: 0.055, Average Accuracy: 79.14866666666667%
+Sigma Value: 0.06, Average Accuracy: 78.58733333333333%
+Sigma Value: 0.065, Average Accuracy: 76.95000000000002%
+Sigma Value: 0.07, Average Accuracy: 73.328%
+Sigma Value: 0.075, Average Accuracy: 73.22266666666665%
+Sigma Value: 0.08, Average Accuracy: 73.93599999999999%
+Sigma Value: 0.085, Average Accuracy: 71.20333333333332%
+Sigma Value: 0.09, Average Accuracy: 70.99933333333334%
+Sigma Value: 0.095, Average Accuracy: 66.262%
+Sigma Value: 0.1, Average Accuracy: 65.99666666666667%
+Sigma Value: 0.105, Average Accuracy: 62.736%
+Sigma Value: 0.11, Average Accuracy: 62.08066666666669%
+Sigma Value: 0.115, Average Accuracy: 59.77%
+Sigma Value: 0.12, Average Accuracy: 58.81533333333332%
+Sigma Value: 0.125, Average Accuracy: 53.157333333333334%
+Sigma Value: 0.13, Average Accuracy: 57.873333333333335%
+Sigma Value: 0.135, Average Accuracy: 56.553333333333335%
+Sigma Value: 0.14, Average Accuracy: 52.384666666666675%
+Sigma Value: 0.145, Average Accuracy: 51.53666666666666%
+Sigma Value: 0.15, Average Accuracy: 49.962%
+Sigma Value: 0.155, Average Accuracy: 42.48933333333333%
+Sigma Value: 0.16, Average Accuracy: 48.314666666666675%
+Sigma Value: 0.165, Average Accuracy: 45.327999999999996%
+Sigma Value: 0.17, Average Accuracy: 39.684%
+Sigma Value: 0.17500000000000002, Average Accuracy: 40.814%
+Sigma Value: 0.18, Average Accuracy: 44.61533333333333%
+Sigma Value: 0.185, Average Accuracy: 39.946666666666665%
+Sigma Value: 0.19, Average Accuracy: 38.29933333333334%
+Sigma Value: 0.195, Average Accuracy: 37.20866666666667%
+Sigma Value: 0.2, Average Accuracy: 38.26733333333333%
+Done with Plot layer3
+Sigma Value: 0.0, Average Accuracy: 84.68000000000004%
+Sigma Value: 0.005, Average Accuracy: 84.462%
+Sigma Value: 0.01, Average Accuracy: 84.29733333333334%
+Sigma Value: 0.015, Average Accuracy: 84.10066666666667%
+Sigma Value: 0.02, Average Accuracy: 83.98800000000001%
+Sigma Value: 0.025, Average Accuracy: 83.81733333333334%
+Sigma Value: 0.03, Average Accuracy: 83.11933333333334%
+Sigma Value: 0.035, Average Accuracy: 82.652%
+Sigma Value: 0.04, Average Accuracy: 82.56066666666666%
+Sigma Value: 0.045, Average Accuracy: 82.286%
+Sigma Value: 0.05, Average Accuracy: 81.19866666666668%
+Sigma Value: 0.055, Average Accuracy: 80.02933333333335%
+Sigma Value: 0.06, Average Accuracy: 80.39133333333334%
+Sigma Value: 0.065, Average Accuracy: 79.60533333333332%
+Sigma Value: 0.07, Average Accuracy: 77.748%
+Sigma Value: 0.075, Average Accuracy: 79.064%
+Sigma Value: 0.08, Average Accuracy: 77.91066666666667%
+Sigma Value: 0.085, Average Accuracy: 76.64666666666668%
+Sigma Value: 0.09, Average Accuracy: 74.34999999999998%
+Sigma Value: 0.095, Average Accuracy: 74.05066666666667%
+Sigma Value: 0.1, Average Accuracy: 72.63933333333333%
+Sigma Value: 0.105, Average Accuracy: 73.984%
+Sigma Value: 0.11, Average Accuracy: 70.872%
+Sigma Value: 0.115, Average Accuracy: 68.52%
+Sigma Value: 0.12, Average Accuracy: 71.44333333333334%
+Sigma Value: 0.125, Average Accuracy: 69.85933333333334%
+Sigma Value: 0.13, Average Accuracy: 66.696%
+Sigma Value: 0.135, Average Accuracy: 67.20133333333332%
+Sigma Value: 0.14, Average Accuracy: 66.29866666666666%
+Sigma Value: 0.145, Average Accuracy: 65.07933333333334%
+Sigma Value: 0.15, Average Accuracy: 63.20533333333334%
+Sigma Value: 0.155, Average Accuracy: 58.62200000000001%
+Sigma Value: 0.16, Average Accuracy: 60.37800000000001%
+Sigma Value: 0.165, Average Accuracy: 57.02533333333334%
+Sigma Value: 0.17, Average Accuracy: 57.28533333333334%
+Sigma Value: 0.17500000000000002, Average Accuracy: 56.13199999999999%
+Sigma Value: 0.18, Average Accuracy: 55.64333333333334%
+Sigma Value: 0.185, Average Accuracy: 55.45266666666667%
+Sigma Value: 0.19, Average Accuracy: 53.61%
+Sigma Value: 0.195, Average Accuracy: 52.71333333333334%
+Sigma Value: 0.2, Average Accuracy: 48.83266666666667%
+Done with Plot layer4
+
