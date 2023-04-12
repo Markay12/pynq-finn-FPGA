@@ -522,206 +522,248 @@ FashionCNN(
     )
   )
 )
-Epoch [1/20], Test Accuracy: 66.84%
-Epoch [2/20], Test Accuracy: 71.63%
-Epoch [3/20], Test Accuracy: 74.43%
-Epoch [4/20], Test Accuracy: 75.68%
-Epoch [5/20], Test Accuracy: 77.52%
-Epoch [6/20], Test Accuracy: 78.00%
-Epoch [7/20], Test Accuracy: 79.28%
-Epoch [8/20], Test Accuracy: 79.94%
-Epoch [9/20], Test Accuracy: 80.88%
-Epoch [10/20], Test Accuracy: 81.46%
-Epoch [11/20], Test Accuracy: 81.80%
-Epoch [12/20], Test Accuracy: 82.22%
-Epoch [13/20], Test Accuracy: 82.61%
-Epoch [14/20], Test Accuracy: 83.32%
-Epoch [15/20], Test Accuracy: 83.34%
-Epoch [16/20], Test Accuracy: 83.83%
-Epoch [17/20], Test Accuracy: 83.76%
-Epoch [18/20], Test Accuracy: 84.06%
-Epoch [19/20], Test Accuracy: 84.59%
-Epoch [20/20], Test Accuracy: 84.68%
+Epoch [1/20], Test Accuracy: 65.08%
+Epoch [2/20], Test Accuracy: 71.36%
+Epoch [3/20], Test Accuracy: 73.61%
+Epoch [4/20], Test Accuracy: 75.33%
+Epoch [5/20], Test Accuracy: 75.89%
+Epoch [6/20], Test Accuracy: 77.25%
+Epoch [7/20], Test Accuracy: 78.58%
+Epoch [8/20], Test Accuracy: 78.72%
+Epoch [9/20], Test Accuracy: 79.22%
+Epoch [10/20], Test Accuracy: 81.08%
+Epoch [11/20], Test Accuracy: 81.17%
+Epoch [12/20], Test Accuracy: 81.95%
+Epoch [13/20], Test Accuracy: 81.55%
+Epoch [14/20], Test Accuracy: 82.94%
+Epoch [15/20], Test Accuracy: 82.75%
+Epoch [16/20], Test Accuracy: 83.31%
+Epoch [17/20], Test Accuracy: 83.61%
+Epoch [18/20], Test Accuracy: 84.11%
+Epoch [19/20], Test Accuracy: 83.63%
+Epoch [20/20], Test Accuracy: 84.64%
 
 Testing Perturbations for Layer 1:
 
-Sigma Value: 0.0 , Average Accuracy: 84.68 %
-Sigma Value: 0.02 , Average Accuracy: 83.83600000000001 %
-Sigma Value: 0.04 , Average Accuracy: 81.726 %
-Sigma Value: 0.06 , Average Accuracy: 79.374 %
-Sigma Value: 0.08 , Average Accuracy: 68.44200000000001 %
-Sigma Value: 0.1 , Average Accuracy: 78.59 %
-Sigma Value: 0.12 , Average Accuracy: 58.902 %
-Sigma Value: 0.14 , Average Accuracy: 63.903999999999996 %
-Sigma Value: 0.16 , Average Accuracy: 62.788 %
-Sigma Value: 0.18 , Average Accuracy: 63.948 %
-Sigma Value: 0.2 , Average Accuracy: 60.422000000000004 %
-Sigma Value: 0.0, Average Accuracy: 84.68000000000004%
-Sigma Value: 0.005, Average Accuracy: 84.24000000000001%
-Sigma Value: 0.01, Average Accuracy: 84.24066666666667%
-Sigma Value: 0.015, Average Accuracy: 83.90466666666667%
-Sigma Value: 0.02, Average Accuracy: 83.97999999999999%
-Sigma Value: 0.025, Average Accuracy: 83.04533333333333%
-Sigma Value: 0.03, Average Accuracy: 82.31266666666666%
-Sigma Value: 0.035, Average Accuracy: 82.25066666666666%
-Sigma Value: 0.04, Average Accuracy: 83.256%
-Sigma Value: 0.045, Average Accuracy: 82.07533333333335%
-Sigma Value: 0.05, Average Accuracy: 80.014%
-Sigma Value: 0.055, Average Accuracy: 80.93%
-Sigma Value: 0.06, Average Accuracy: 80.81466666666668%
-Sigma Value: 0.065, Average Accuracy: 77.46266666666665%
-Sigma Value: 0.07, Average Accuracy: 79.39933333333333%
-Sigma Value: 0.075, Average Accuracy: 79.82266666666666%
-Sigma Value: 0.08, Average Accuracy: 74.17933333333333%
-Sigma Value: 0.085, Average Accuracy: 75.43333333333334%
-Sigma Value: 0.09, Average Accuracy: 71.698%
-Sigma Value: 0.095, Average Accuracy: 74.06400000000001%
-Sigma Value: 0.1, Average Accuracy: 71.596%
-Sigma Value: 0.105, Average Accuracy: 64.61866666666667%
-Sigma Value: 0.11, Average Accuracy: 71.54400000000001%
-Sigma Value: 0.115, Average Accuracy: 71.31400000000001%
-Sigma Value: 0.12, Average Accuracy: 75.3%
-Sigma Value: 0.125, Average Accuracy: 61.52%
-Sigma Value: 0.13, Average Accuracy: 60.744666666666674%
-Sigma Value: 0.135, Average Accuracy: 58.704666666666675%
-Sigma Value: 0.14, Average Accuracy: 54.36%
-Sigma Value: 0.145, Average Accuracy: 67.63466666666666%
-Sigma Value: 0.15, Average Accuracy: 58.12533333333332%
-Sigma Value: 0.155, Average Accuracy: 53.368%
-Sigma Value: 0.16, Average Accuracy: 49.37333333333333%
-Sigma Value: 0.165, Average Accuracy: 53.947333333333326%
-Sigma Value: 0.17, Average Accuracy: 63.09066666666667%
-Sigma Value: 0.17500000000000002, Average Accuracy: 56.79133333333333%
-Sigma Value: 0.18, Average Accuracy: 50.56933333333333%
-Sigma Value: 0.185, Average Accuracy: 40.57000000000001%
-Sigma Value: 0.19, Average Accuracy: 49.59066666666667%
-Sigma Value: 0.195, Average Accuracy: 53.322%
-Sigma Value: 0.2, Average Accuracy: 47.376%
+Sigma Value: 0.0 , Average Accuracy: 84.64 %
+Sigma Value: 0.02 , Average Accuracy: 83.872 %
+Sigma Value: 0.04 , Average Accuracy: 83.58 %
+Sigma Value: 0.06 , Average Accuracy: 76.662 %
+Sigma Value: 0.08 , Average Accuracy: 81.97 %
+Sigma Value: 0.1 , Average Accuracy: 65.474 %
+Sigma Value: 0.12 , Average Accuracy: 74.04999999999998 %
+Sigma Value: 0.14 , Average Accuracy: 72.274 %
+Sigma Value: 0.16 , Average Accuracy: 66.558 %
+Sigma Value: 0.18 , Average Accuracy: 65.822 %
+Sigma Value: 0.2 , Average Accuracy: 62.525999999999996 %
+Sigma Value: 0.0, Average Accuracy: 84.64000000000001%
+Sigma Value: 0.005, Average Accuracy: 84.51533333333334%
+Sigma Value: 0.01, Average Accuracy: 84.26933333333334%
+Sigma Value: 0.015, Average Accuracy: 83.82133333333331%
+Sigma Value: 0.02, Average Accuracy: 84.04%
+Sigma Value: 0.025, Average Accuracy: 83.82%
+Sigma Value: 0.03, Average Accuracy: 83.33333333333333%
+Sigma Value: 0.035, Average Accuracy: 83.77933333333334%
+Sigma Value: 0.04, Average Accuracy: 82.88400000000001%
+Sigma Value: 0.045, Average Accuracy: 82.21600000000002%
+Sigma Value: 0.05, Average Accuracy: 82.35799999999999%
+Sigma Value: 0.055, Average Accuracy: 81.74666666666666%
+Sigma Value: 0.06, Average Accuracy: 80.17466666666665%
+Sigma Value: 0.065, Average Accuracy: 80.89266666666667%
+Sigma Value: 0.07, Average Accuracy: 77.73800000000001%
+Sigma Value: 0.075, Average Accuracy: 76.61266666666667%
+Sigma Value: 0.08, Average Accuracy: 81.25933333333333%
+Sigma Value: 0.085, Average Accuracy: 76.914%
+Sigma Value: 0.09, Average Accuracy: 78.80466666666666%
+Sigma Value: 0.095, Average Accuracy: 76.05333333333333%
+Sigma Value: 0.1, Average Accuracy: 77.43599999999999%
+Sigma Value: 0.105, Average Accuracy: 73.02933333333334%
+Sigma Value: 0.11, Average Accuracy: 67.40133333333334%
+Sigma Value: 0.115, Average Accuracy: 71.39333333333335%
+Sigma Value: 0.12, Average Accuracy: 74.02399999999999%
+Sigma Value: 0.125, Average Accuracy: 78.05466666666666%
+Sigma Value: 0.13, Average Accuracy: 70.24066666666667%
+Sigma Value: 0.135, Average Accuracy: 68.224%
+Sigma Value: 0.14, Average Accuracy: 71.96133333333333%
+Sigma Value: 0.145, Average Accuracy: 68.53333333333332%
+Sigma Value: 0.15, Average Accuracy: 67.12466666666666%
+Sigma Value: 0.155, Average Accuracy: 69.92066666666666%
+Sigma Value: 0.16, Average Accuracy: 69.42466666666665%
+Sigma Value: 0.165, Average Accuracy: 69.89200000000001%
+Sigma Value: 0.17, Average Accuracy: 70.91666666666666%
+Sigma Value: 0.17500000000000002, Average Accuracy: 70.30333333333333%
+Sigma Value: 0.18, Average Accuracy: 65.66133333333333%
+Sigma Value: 0.185, Average Accuracy: 67.83733333333333%
+Sigma Value: 0.19, Average Accuracy: 60.83866666666667%
+Sigma Value: 0.195, Average Accuracy: 59.25266666666667%
+Sigma Value: 0.2, Average Accuracy: 61.93%
 Done with Plot layer1
-Sigma Value: 0.0, Average Accuracy: 84.68000000000004%
-Sigma Value: 0.005, Average Accuracy: 84.44866666666667%
-Sigma Value: 0.01, Average Accuracy: 84.20866666666666%
-Sigma Value: 0.015, Average Accuracy: 83.93133333333331%
-Sigma Value: 0.02, Average Accuracy: 83.89333333333335%
-Sigma Value: 0.025, Average Accuracy: 83.37133333333335%
-Sigma Value: 0.03, Average Accuracy: 83.23800000000001%
-Sigma Value: 0.035, Average Accuracy: 82.52266666666668%
-Sigma Value: 0.04, Average Accuracy: 82.18399999999998%
-Sigma Value: 0.045, Average Accuracy: 81.89333333333335%
-Sigma Value: 0.05, Average Accuracy: 81.86933333333333%
-Sigma Value: 0.055, Average Accuracy: 80.884%
-Sigma Value: 0.06, Average Accuracy: 80.54600000000002%
-Sigma Value: 0.065, Average Accuracy: 78.618%
-Sigma Value: 0.07, Average Accuracy: 78.01266666666669%
-Sigma Value: 0.075, Average Accuracy: 77.026%
-Sigma Value: 0.08, Average Accuracy: 78.21133333333333%
-Sigma Value: 0.085, Average Accuracy: 72.474%
-Sigma Value: 0.09, Average Accuracy: 68.46199999999999%
-Sigma Value: 0.095, Average Accuracy: 69.90666666666667%
-Sigma Value: 0.1, Average Accuracy: 71.44200000000001%
-Sigma Value: 0.105, Average Accuracy: 69.13533333333334%
-Sigma Value: 0.11, Average Accuracy: 69.73133333333334%
-Sigma Value: 0.115, Average Accuracy: 68.856%
-Sigma Value: 0.12, Average Accuracy: 63.965999999999994%
-Sigma Value: 0.125, Average Accuracy: 63.12333333333334%
-Sigma Value: 0.13, Average Accuracy: 63.32399999999999%
-Sigma Value: 0.135, Average Accuracy: 60.87333333333332%
-Sigma Value: 0.14, Average Accuracy: 61.89666666666666%
-Sigma Value: 0.145, Average Accuracy: 58.745333333333335%
-Sigma Value: 0.15, Average Accuracy: 59.89800000000001%
-Sigma Value: 0.155, Average Accuracy: 59.85933333333333%
-Sigma Value: 0.16, Average Accuracy: 48.17066666666666%
-Sigma Value: 0.165, Average Accuracy: 52.58733333333332%
-Sigma Value: 0.17, Average Accuracy: 52.35733333333334%
-Sigma Value: 0.17500000000000002, Average Accuracy: 49.82600000000001%
-Sigma Value: 0.18, Average Accuracy: 54.50066666666667%
-Sigma Value: 0.185, Average Accuracy: 53.056%
-Sigma Value: 0.19, Average Accuracy: 49.442%
-Sigma Value: 0.195, Average Accuracy: 46.88066666666667%
-Sigma Value: 0.2, Average Accuracy: 49.501999999999995%
+Sigma Value: 0.0, Average Accuracy: 84.64000000000001%
+Sigma Value: 0.005, Average Accuracy: 84.69066666666666%
+Sigma Value: 0.01, Average Accuracy: 84.17999999999999%
+Sigma Value: 0.015, Average Accuracy: 83.65599999999999%
+Sigma Value: 0.02, Average Accuracy: 82.59933333333335%
+Sigma Value: 0.025, Average Accuracy: 82.18066666666667%
+Sigma Value: 0.03, Average Accuracy: 81.66399999999999%
+Sigma Value: 0.035, Average Accuracy: 80.99666666666666%
+Sigma Value: 0.04, Average Accuracy: 78.44466666666668%
+Sigma Value: 0.045, Average Accuracy: 79.13400000000001%
+Sigma Value: 0.05, Average Accuracy: 77.18933333333332%
+Sigma Value: 0.055, Average Accuracy: 76.67466666666665%
+Sigma Value: 0.06, Average Accuracy: 75.43133333333336%
+Sigma Value: 0.065, Average Accuracy: 73.40266666666666%
+Sigma Value: 0.07, Average Accuracy: 71.79133333333334%
+Sigma Value: 0.075, Average Accuracy: 72.13133333333332%
+Sigma Value: 0.08, Average Accuracy: 69.464%
+Sigma Value: 0.085, Average Accuracy: 65.118%
+Sigma Value: 0.09, Average Accuracy: 67.14%
+Sigma Value: 0.095, Average Accuracy: 63.21066666666666%
+Sigma Value: 0.1, Average Accuracy: 65.02600000000001%
+Sigma Value: 0.105, Average Accuracy: 60.839333333333336%
+Sigma Value: 0.11, Average Accuracy: 58.95333333333333%
+Sigma Value: 0.115, Average Accuracy: 58.329333333333324%
+Sigma Value: 0.12, Average Accuracy: 59.69866666666667%
+Sigma Value: 0.125, Average Accuracy: 53.47400000000001%
+Sigma Value: 0.13, Average Accuracy: 57.80933333333333%
+Sigma Value: 0.135, Average Accuracy: 56.64266666666667%
+Sigma Value: 0.14, Average Accuracy: 55.31799999999999%
+Sigma Value: 0.145, Average Accuracy: 49.15466666666667%
+Sigma Value: 0.15, Average Accuracy: 50.605999999999995%
+Sigma Value: 0.155, Average Accuracy: 51.13733333333332%
+Sigma Value: 0.16, Average Accuracy: 44.336666666666666%
+Sigma Value: 0.165, Average Accuracy: 48.00333333333333%
+Sigma Value: 0.17, Average Accuracy: 43.60866666666666%
+Sigma Value: 0.17500000000000002, Average Accuracy: 39.62333333333334%
+Sigma Value: 0.18, Average Accuracy: 43.291999999999994%
+Sigma Value: 0.185, Average Accuracy: 40.01466666666666%
+Sigma Value: 0.19, Average Accuracy: 40.459333333333326%
+Sigma Value: 0.195, Average Accuracy: 39.67933333333333%
+Sigma Value: 0.2, Average Accuracy: 38.531333333333336%
 Done with Plot layer2
-Sigma Value: 0.0, Average Accuracy: 84.68000000000004%
-Sigma Value: 0.005, Average Accuracy: 84.40799999999999%
-Sigma Value: 0.01, Average Accuracy: 84.31933333333333%
-Sigma Value: 0.015, Average Accuracy: 83.94533333333334%
-Sigma Value: 0.02, Average Accuracy: 83.73733333333332%
-Sigma Value: 0.025, Average Accuracy: 83.53200000000001%
-Sigma Value: 0.03, Average Accuracy: 82.39733333333334%
-Sigma Value: 0.035, Average Accuracy: 81.91333333333334%
-Sigma Value: 0.04, Average Accuracy: 81.87066666666666%
-Sigma Value: 0.045, Average Accuracy: 81.36200000000001%
-Sigma Value: 0.05, Average Accuracy: 79.18666666666665%
-Sigma Value: 0.055, Average Accuracy: 79.14866666666667%
-Sigma Value: 0.06, Average Accuracy: 78.58733333333333%
-Sigma Value: 0.065, Average Accuracy: 76.95000000000002%
-Sigma Value: 0.07, Average Accuracy: 73.328%
-Sigma Value: 0.075, Average Accuracy: 73.22266666666665%
-Sigma Value: 0.08, Average Accuracy: 73.93599999999999%
-Sigma Value: 0.085, Average Accuracy: 71.20333333333332%
-Sigma Value: 0.09, Average Accuracy: 70.99933333333334%
-Sigma Value: 0.095, Average Accuracy: 66.262%
-Sigma Value: 0.1, Average Accuracy: 65.99666666666667%
-Sigma Value: 0.105, Average Accuracy: 62.736%
-Sigma Value: 0.11, Average Accuracy: 62.08066666666669%
-Sigma Value: 0.115, Average Accuracy: 59.77%
-Sigma Value: 0.12, Average Accuracy: 58.81533333333332%
-Sigma Value: 0.125, Average Accuracy: 53.157333333333334%
-Sigma Value: 0.13, Average Accuracy: 57.873333333333335%
-Sigma Value: 0.135, Average Accuracy: 56.553333333333335%
-Sigma Value: 0.14, Average Accuracy: 52.384666666666675%
-Sigma Value: 0.145, Average Accuracy: 51.53666666666666%
-Sigma Value: 0.15, Average Accuracy: 49.962%
-Sigma Value: 0.155, Average Accuracy: 42.48933333333333%
-Sigma Value: 0.16, Average Accuracy: 48.314666666666675%
-Sigma Value: 0.165, Average Accuracy: 45.327999999999996%
-Sigma Value: 0.17, Average Accuracy: 39.684%
-Sigma Value: 0.17500000000000002, Average Accuracy: 40.814%
-Sigma Value: 0.18, Average Accuracy: 44.61533333333333%
-Sigma Value: 0.185, Average Accuracy: 39.946666666666665%
-Sigma Value: 0.19, Average Accuracy: 38.29933333333334%
-Sigma Value: 0.195, Average Accuracy: 37.20866666666667%
-Sigma Value: 0.2, Average Accuracy: 38.26733333333333%
+Sigma Value: 0.0, Average Accuracy: 84.64000000000001%
+Sigma Value: 0.005, Average Accuracy: 84.40133333333331%
+Sigma Value: 0.01, Average Accuracy: 84.41066666666669%
+Sigma Value: 0.015, Average Accuracy: 83.97666666666667%
+Sigma Value: 0.02, Average Accuracy: 84.00066666666667%
+Sigma Value: 0.025, Average Accuracy: 83.19466666666666%
+Sigma Value: 0.03, Average Accuracy: 82.82533333333335%
+Sigma Value: 0.035, Average Accuracy: 81.60066666666667%
+Sigma Value: 0.04, Average Accuracy: 81.574%
+Sigma Value: 0.045, Average Accuracy: 80.01466666666666%
+Sigma Value: 0.05, Average Accuracy: 79.25933333333334%
+Sigma Value: 0.055, Average Accuracy: 78.20866666666664%
+Sigma Value: 0.06, Average Accuracy: 77.09866666666667%
+Sigma Value: 0.065, Average Accuracy: 76.80999999999999%
+Sigma Value: 0.07, Average Accuracy: 75.92800000000001%
+Sigma Value: 0.075, Average Accuracy: 71.92133333333332%
+Sigma Value: 0.08, Average Accuracy: 71.15333333333334%
+Sigma Value: 0.085, Average Accuracy: 71.002%
+Sigma Value: 0.09, Average Accuracy: 67.33333333333334%
+Sigma Value: 0.095, Average Accuracy: 65.81666666666666%
+Sigma Value: 0.1, Average Accuracy: 64.89266666666666%
+Sigma Value: 0.105, Average Accuracy: 66.91799999999999%
+Sigma Value: 0.11, Average Accuracy: 59.758%
+Sigma Value: 0.115, Average Accuracy: 55.302%
+Sigma Value: 0.12, Average Accuracy: 58.800000000000004%
+Sigma Value: 0.125, Average Accuracy: 56.81933333333334%
+Sigma Value: 0.13, Average Accuracy: 55.580666666666666%
+Sigma Value: 0.135, Average Accuracy: 54.85800000000001%
+Sigma Value: 0.14, Average Accuracy: 56.940000000000005%
+Sigma Value: 0.145, Average Accuracy: 50.034666666666666%
+Sigma Value: 0.15, Average Accuracy: 49.61133333333332%
+Sigma Value: 0.155, Average Accuracy: 46.00666666666667%
+Sigma Value: 0.16, Average Accuracy: 49.419333333333334%
+Sigma Value: 0.165, Average Accuracy: 38.86266666666666%
+Sigma Value: 0.17, Average Accuracy: 42.39666666666667%
+Sigma Value: 0.17500000000000002, Average Accuracy: 41.684000000000005%
+Sigma Value: 0.18, Average Accuracy: 39.11933333333334%
+Sigma Value: 0.185, Average Accuracy: 37.32%
+Sigma Value: 0.19, Average Accuracy: 40.25733333333334%
+Sigma Value: 0.195, Average Accuracy: 40.21533333333333%
+Sigma Value: 0.2, Average Accuracy: 39.58666666666667%
 Done with Plot layer3
-Sigma Value: 0.0, Average Accuracy: 84.68000000000004%
-Sigma Value: 0.005, Average Accuracy: 84.462%
-Sigma Value: 0.01, Average Accuracy: 84.29733333333334%
-Sigma Value: 0.015, Average Accuracy: 84.10066666666667%
-Sigma Value: 0.02, Average Accuracy: 83.98800000000001%
-Sigma Value: 0.025, Average Accuracy: 83.81733333333334%
-Sigma Value: 0.03, Average Accuracy: 83.11933333333334%
-Sigma Value: 0.035, Average Accuracy: 82.652%
-Sigma Value: 0.04, Average Accuracy: 82.56066666666666%
-Sigma Value: 0.045, Average Accuracy: 82.286%
-Sigma Value: 0.05, Average Accuracy: 81.19866666666668%
-Sigma Value: 0.055, Average Accuracy: 80.02933333333335%
-Sigma Value: 0.06, Average Accuracy: 80.39133333333334%
-Sigma Value: 0.065, Average Accuracy: 79.60533333333332%
-Sigma Value: 0.07, Average Accuracy: 77.748%
-Sigma Value: 0.075, Average Accuracy: 79.064%
-Sigma Value: 0.08, Average Accuracy: 77.91066666666667%
-Sigma Value: 0.085, Average Accuracy: 76.64666666666668%
-Sigma Value: 0.09, Average Accuracy: 74.34999999999998%
-Sigma Value: 0.095, Average Accuracy: 74.05066666666667%
-Sigma Value: 0.1, Average Accuracy: 72.63933333333333%
-Sigma Value: 0.105, Average Accuracy: 73.984%
-Sigma Value: 0.11, Average Accuracy: 70.872%
-Sigma Value: 0.115, Average Accuracy: 68.52%
-Sigma Value: 0.12, Average Accuracy: 71.44333333333334%
-Sigma Value: 0.125, Average Accuracy: 69.85933333333334%
-Sigma Value: 0.13, Average Accuracy: 66.696%
-Sigma Value: 0.135, Average Accuracy: 67.20133333333332%
-Sigma Value: 0.14, Average Accuracy: 66.29866666666666%
-Sigma Value: 0.145, Average Accuracy: 65.07933333333334%
-Sigma Value: 0.15, Average Accuracy: 63.20533333333334%
-Sigma Value: 0.155, Average Accuracy: 58.62200000000001%
-Sigma Value: 0.16, Average Accuracy: 60.37800000000001%
-Sigma Value: 0.165, Average Accuracy: 57.02533333333334%
-Sigma Value: 0.17, Average Accuracy: 57.28533333333334%
-Sigma Value: 0.17500000000000002, Average Accuracy: 56.13199999999999%
-Sigma Value: 0.18, Average Accuracy: 55.64333333333334%
-Sigma Value: 0.185, Average Accuracy: 55.45266666666667%
-Sigma Value: 0.19, Average Accuracy: 53.61%
-Sigma Value: 0.195, Average Accuracy: 52.71333333333334%
-Sigma Value: 0.2, Average Accuracy: 48.83266666666667%
+Sigma Value: 0.0, Average Accuracy: 84.64000000000001%
+Sigma Value: 0.005, Average Accuracy: 84.26466666666667%
+Sigma Value: 0.01, Average Accuracy: 84.18466666666667%
+Sigma Value: 0.015, Average Accuracy: 83.72666666666666%
+Sigma Value: 0.02, Average Accuracy: 83.79866666666665%
+Sigma Value: 0.025, Average Accuracy: 83.20066666666666%
+Sigma Value: 0.03, Average Accuracy: 83.10466666666666%
+Sigma Value: 0.035, Average Accuracy: 81.95933333333332%
+Sigma Value: 0.04, Average Accuracy: 81.90066666666667%
+Sigma Value: 0.045, Average Accuracy: 81.64399999999999%
+Sigma Value: 0.05, Average Accuracy: 81.64066666666668%
+Sigma Value: 0.055, Average Accuracy: 80.356%
+Sigma Value: 0.06, Average Accuracy: 80.79733333333333%
+Sigma Value: 0.065, Average Accuracy: 79.67666666666668%
+Sigma Value: 0.07, Average Accuracy: 77.42333333333335%
+Sigma Value: 0.075, Average Accuracy: 76.66533333333334%
+Sigma Value: 0.08, Average Accuracy: 76.29066666666667%
+Sigma Value: 0.085, Average Accuracy: 76.02066666666666%
+Sigma Value: 0.09, Average Accuracy: 74.70133333333332%
+Sigma Value: 0.095, Average Accuracy: 72.57333333333332%
+Sigma Value: 0.1, Average Accuracy: 73.85266666666666%
+Sigma Value: 0.105, Average Accuracy: 71.926%
+Sigma Value: 0.11, Average Accuracy: 70.82133333333334%
+Sigma Value: 0.115, Average Accuracy: 71.754%
+Sigma Value: 0.12, Average Accuracy: 68.91400000000002%
+Sigma Value: 0.125, Average Accuracy: 65.19800000000001%
+Sigma Value: 0.13, Average Accuracy: 62.86600000000001%
+Sigma Value: 0.135, Average Accuracy: 62.94533333333334%
+Sigma Value: 0.14, Average Accuracy: 64.674%
+Sigma Value: 0.145, Average Accuracy: 58.830000000000005%
+Sigma Value: 0.15, Average Accuracy: 60.24666666666667%
+Sigma Value: 0.155, Average Accuracy: 58.403333333333336%
+Sigma Value: 0.16, Average Accuracy: 61.16200000000001%
+Sigma Value: 0.165, Average Accuracy: 58.749333333333325%
+Sigma Value: 0.17, Average Accuracy: 57.931999999999995%
+Sigma Value: 0.17500000000000002, Average Accuracy: 52.90399999999999%
+Sigma Value: 0.18, Average Accuracy: 51.84533333333333%
+Sigma Value: 0.185, Average Accuracy: 52.649333333333324%
+Sigma Value: 0.19, Average Accuracy: 53.93133333333335%
+Sigma Value: 0.195, Average Accuracy: 47.98733333333334%
+Sigma Value: 0.2, Average Accuracy: 47.563333333333325%
 Done with Plot layer4
+Sigma Value: 0.0, Average Accuracy: 84.64000000000001%
+Sigma Value: 0.005, Average Accuracy: 84.27066666666666%
+Sigma Value: 0.01, Average Accuracy: 83.654%
+Sigma Value: 0.015, Average Accuracy: 82.87466666666667%
+Sigma Value: 0.02, Average Accuracy: 82.96599999999998%
+Sigma Value: 0.025, Average Accuracy: 81.78333333333333%
+Sigma Value: 0.03, Average Accuracy: 81.99%
+Sigma Value: 0.035, Average Accuracy: 79.48333333333333%
+Sigma Value: 0.04, Average Accuracy: 78.74466666666666%
+Sigma Value: 0.045, Average Accuracy: 75.79133333333333%
+Sigma Value: 0.05, Average Accuracy: 78.20666666666668%
+Sigma Value: 0.055, Average Accuracy: 76.07466666666666%
+Sigma Value: 0.06, Average Accuracy: 75.83600000000001%
+Sigma Value: 0.065, Average Accuracy: 72.29466666666667%
+Sigma Value: 0.07, Average Accuracy: 73.71000000000001%
+Sigma Value: 0.075, Average Accuracy: 67.26066666666668%
+Sigma Value: 0.08, Average Accuracy: 70.652%
+Sigma Value: 0.085, Average Accuracy: 67.85200000000002%
+Sigma Value: 0.09, Average Accuracy: 66.57266666666665%
+Sigma Value: 0.095, Average Accuracy: 66.01666666666668%
+Sigma Value: 0.1, Average Accuracy: 65.10466666666667%
+Sigma Value: 0.105, Average Accuracy: 60.668%
+Sigma Value: 0.11, Average Accuracy: 62.27%
+Sigma Value: 0.115, Average Accuracy: 58.958666666666666%
+Sigma Value: 0.12, Average Accuracy: 62.54266666666665%
+Sigma Value: 0.125, Average Accuracy: 57.84200000000001%
+Sigma Value: 0.13, Average Accuracy: 58.01%
+Sigma Value: 0.135, Average Accuracy: 50.808%
+Sigma Value: 0.14, Average Accuracy: 53.47066666666665%
+Sigma Value: 0.145, Average Accuracy: 54.552%
+Sigma Value: 0.15, Average Accuracy: 58.48799999999999%
+Sigma Value: 0.155, Average Accuracy: 51.19133333333334%
+Sigma Value: 0.16, Average Accuracy: 49.08533333333334%
+Sigma Value: 0.165, Average Accuracy: 48.682%
+Sigma Value: 0.17, Average Accuracy: 49.593333333333334%
+Sigma Value: 0.17500000000000002, Average Accuracy: 44.65266666666668%
+Sigma Value: 0.18, Average Accuracy: 46.66666666666666%
+Sigma Value: 0.185, Average Accuracy: 42.154666666666664%
+Sigma Value: 0.19, Average Accuracy: 44.56333333333334%
+Sigma Value: 0.195, Average Accuracy: 37.00333333333333%
+Sigma Value: 0.2, Average Accuracy: 42.885999999999996%
+Done with Plot layer5
 
