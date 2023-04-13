@@ -132,3 +132,51 @@ print(model)
 
 
 
+# ## Train and Test
+# 
+# This code trains a convolutional neural network (CNN) on the Cifar10 dataset using PyTorch. 
+# The code uses the torchvision module to download and preprocess the dataset, and defines a CNN with two convolutional layers,
+# two max-pooling layers, and three fully connected layers. The code uses the cross-entropy loss function and the 
+# Adam optimizer to train the model.
+# 
+# To run the code, first make sure PyTorch and torchvision are installed on your system.
+# Then, run the code in a Python environment. The code should automatically download the Fashion MNIST dataset
+#  and train the model for 20 epochs.
+# 
+# During training, the code prints the loss after every 100 batches. 
+# After each epoch, the code evaluates the model on the test set and prints the test accuracy.
+
+num_epochs = 20 
+for epoch in range(num_epochs):
+    # training phase
+    model.train()
+    for i, (images, labels) in enumerate(train_loader):
+        images = images.to(device)
+        labels = labels.to(device)
+        
+        optimizer.zero_grad()
+        outputs = model(images)
+        loss = criterion(outputs, labels)
+        loss.backward()
+        optimizer.step()
+        
+        if (i+1) % 100 == 0:
+            print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'
+                  .format(epoch+1, num_epochs, i+1, len(train_loader), loss.item()))
+
+    # testing phase
+    model.eval()
+    with torch.no_grad():
+        correct = 0
+        total = 0
+        for images, labels in test_loader:
+            images = images.to(device)
+            labels = labels.to(device)
+            outputs = model(images)
+            _, predicted = torch.max(outputs.data, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+
+        print('Epoch [{}/{}] -- Test Accuracy --> {:.2f}%'.format(epoch+1, num_epochs, 100 * correct / total))
+
+
