@@ -71,27 +71,3 @@ def im_convert(tensor):
 # Different classes in Cifar10 dataset
 classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
-if not os.path.exists('images'):
-    os.makedirs('images')
-
-dataiter = iter(training_loader)
-
-for i in range(20):
-    # Get a batch of images and labels
-    images, labels = dataiter.next()
-
-    # Plot images
-    fig = plt.figure(figsize=(25, 4))
-    for idx in np.arange(20):
-        ax = fig.add_subplot(2, 10, idx+1, xticks=[], yticks=[]) 
-        plt.imshow(im_convert(images[idx]))
-        ax.set_title(classes[labels[idx].item()])
-
-    # Save figure to file
-    fig.savefig('images/image_{:03d}.png'.format(i))
-
-    # Close figure to prevent warning about too many open figures
-    plt.close(fig)
-
-
-
