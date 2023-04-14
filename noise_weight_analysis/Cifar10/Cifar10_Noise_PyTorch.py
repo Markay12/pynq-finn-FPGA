@@ -304,7 +304,7 @@ def add_noise_to_model(model, layers, sigma, num_perturbations):
     return modified_models
 
 
-num_perturbations = 2
+num_perturbations = 1
 
 
 # Define the standard deviation values to test
@@ -362,7 +362,7 @@ if not os.path.exists("noise_plots_pytorch"):
 plt.style.use('default')
 
 # Initialize the standard deviation values
-sigma_vector = np.linspace(0, 0.2, 41)
+sigma_vector = np.linspace(0, 0.05, 21)
 
 all_test_accs = []
 
@@ -422,7 +422,7 @@ plt.ylabel('Test Accuracy')
 plt.title('Effect of Noise on Test Accuracy (Average)')
 
 plt.legend()
-plt.savefig("noise_plots_pytorch/updated_randomness/average.png")
+plt.savefig("noise_plots_pytorch/average.png")
 plt.show()
 
 plt.clf()
