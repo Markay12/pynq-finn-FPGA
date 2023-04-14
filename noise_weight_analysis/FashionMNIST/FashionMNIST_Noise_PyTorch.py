@@ -144,7 +144,7 @@ print(model)
 # 
 # During training, the code prints the loss after every 100 batches. After each epoch, the code evaluates the model on the test set and prints the test accuracy.
 
-num_epochs = 20
+num_epochs = 2
 for epoch in range(num_epochs):
     # training phase
     model.train()
@@ -263,8 +263,8 @@ def add_noise_to_model(model, layers, sigma, num_perturbations):
             layer = getattr(modified_model, layer_name)
     
             # get weight and bias for layer
-            weight_temp = layer[0].weight.data.detach().numpy()
-            bias_temp = layer[0].bias.data.detach().numpy()
+            weight_temp = layer[0].weight.data.cpu().detach().numpy()
+            bias_temp = layer[0].bias.data.cpu().detach().numpy()
     
         
             # add noise to the weight and bias
@@ -280,6 +280,7 @@ def add_noise_to_model(model, layers, sigma, num_perturbations):
 
         
     return modified_models
+
 
 
 num_perturbations = 5
