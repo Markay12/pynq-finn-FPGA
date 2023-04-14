@@ -144,7 +144,7 @@ print(model)
 # 
 # During training, the code prints the loss after every 100 batches. After each epoch, the code evaluates the model on the test set and prints the test accuracy.
 
-num_epochs = 20
+num_epochs = 3
 for epoch in range(num_epochs):
     # training phase
     model.train()
@@ -340,7 +340,7 @@ if not os.path.exists("noise_plots_pytorch"):
 plt.style.use('default')
 
 # Initialize the standard deviation values
-sigma_vector = np.linspace(0, 0.2, 41)
+sigma_vector = np.linspace(0, 0.1, 21)
 
 all_test_accs = []
 
