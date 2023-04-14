@@ -5,9 +5,6 @@
 
 # Load imports. Make sure that onnx is imported before Torch. __ONNX is always imported before Torch__
 
-
-
-
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -25,6 +22,10 @@ from sklearn.metrics import confusion_matrix
 import time
 import random
 
+# For adaptive learning rate
+from torch.optim.lr_scheduler import ReduceLROnPlateau
+from torch.utils.data import random_split
+
 
 # ## Load The Fashion MNIST Dataset Using PyTorch
 # 
@@ -40,11 +41,15 @@ train_set = torchvision.datasets.FashionMNIST("./data", download=True, transform
 test_set = torchvision.datasets.FashionMNIST("./data", download=True, train=False, transform=
                                                transforms.Compose([transforms.ToTensor()]))  
 
-# Loaders
-train_loader = torch.utils.data.DataLoader(train_set, 
-                                           batch_size=1000)
-test_loader = torch.utils.data.DataLoader(test_set,
-                                          batch_size=1000)
+# Define the train and validation set sizes
+train_size = int(len(train_set) * 0.8)
+val_size = len(train_set) - train_size
+
+# Split the dataset into train and validation sets
+train_data, val_data = random_split(train_set, [train_size, val_size])
+
+train_loader = torch.utils.data.DataLoader(train_data, batch_size=1000)
+val_loader = torch.utils.data.DataLoader(val_data, batch_size=1000)
 
 a = next(iter(train_loader))
 print(a[0].size())
@@ -63,9 +68,6 @@ batch_size = 1000
 # Create a DataLoader for a training dataset with a batch size of 100
 train_quantized_loader = DataLoader(train_set, batch_size=batch_size)
 test_quantized_loader = DataLoader(test_set, batch_size=batch_size)
-
-
-
 
 count = 0
 for x,y in train_loader:
@@ -128,6 +130,9 @@ model = FashionCNN().to(device)
 learning_rate=0.001
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+
+# For the adaptive learning rate
+scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=5, verbose=True)
 print(model)
 
 
@@ -139,12 +144,13 @@ print(model)
 # 
 # During training, the code prints the loss after every 100 batches. After each epoch, the code evaluates the model on the test set and prints the test accuracy.
 
-
-
-num_epochs = 20 
+num_epochs = 20
 for epoch in range(num_epochs):
     # training phase
     model.train()
+    train_loss = 0.0
+    correct_train = 0
+    total_train = 0
     for i, (images, labels) in enumerate(train_loader):
         images = images.to(device)
         labels = labels.to(device)
@@ -155,24 +161,39 @@ for epoch in range(num_epochs):
         loss.backward()
         optimizer.step()
         
-        if (i+1) % 100 == 0:
-            print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'
-                  .format(epoch+1, num_epochs, i+1, len(train_loader), loss.item()))
+        train_loss += loss.item()
 
-    # testing phase
+        _, predicted = torch.max(outputs.data, 1)
+        total_train += labels.size(0)
+        correct_train += (predicted == labels).sum().item()
+
+    # validation phase
     model.eval()
+    val_loss = 0.0
+    correct_val = 0
+    total_val = 0
     with torch.no_grad():
-        correct = 0
-        total = 0
-        for images, labels in test_loader:
+        for images, labels in val_loader:
             images = images.to(device)
             labels = labels.to(device)
             outputs = model(images)
-            _, predicted = torch.max(outputs.data, 1)
-            total += labels.size(0)
-            correct += (predicted == labels).sum().item()
+            loss = criterion(outputs, labels)
+            val_loss += loss.item()
 
-        print('Epoch [{}/{}], Test Accuracy: {:.2f}%'.format(epoch+1, num_epochs, 100 * correct / total))
+            _, predicted = torch.max(outputs.data, 1)
+            total_val += labels.size(0)
+            correct_val += (predicted == labels).sum().item()
+
+    train_accuracy = 100 * correct_train / total_train
+    val_accuracy = 100 * correct_val / total_val
+
+    # call scheduler to adjust learning rate
+    scheduler.step(val_loss)
+
+    # print loss and accuracy
+    print('Epoch [{}/{}], Train Loss: {:.4f}, Train Accuracy: {:.2f}%, Validation Loss: {:.4f}, Validation Accuracy: {:.2f}%'
+          .format(epoch+1, num_epochs, train_loss/len(train_loader), train_accuracy, val_loss/len(val_loader), val_accuracy))
+
 
 
 # ## Changing Model Parameters (Weights/Biases)
