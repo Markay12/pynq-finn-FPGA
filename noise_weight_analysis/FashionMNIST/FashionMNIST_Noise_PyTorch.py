@@ -340,7 +340,7 @@ if not os.path.exists("noise_plots_pytorch"):
 plt.style.use('default')
 
 # Initialize the standard deviation values
-sigma_vector = np.linspace(0, 0.1, 21)
+sigma_vector = np.linspace(0, 0.075, 21)
 
 all_test_accs = []
 
