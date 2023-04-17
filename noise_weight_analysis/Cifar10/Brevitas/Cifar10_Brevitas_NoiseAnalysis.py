@@ -5,6 +5,7 @@
 
 from copy import deepcopy
 import os
+from unicodedata import decimal
 
 import numpy as np
 import pandas as pd
@@ -79,3 +80,49 @@ for x, y in train_loader:
         break
 
 
+class CIFAR10CNN(nn.Module):
+
+    def __init__(self):
+
+        super(CIFAR10CNN, self).__init__()
+
+        self.quant_inp = qnn.QuantIdentity(
+            bit_width=4, return_quant_tensor=True)
+
+        self.layer1 = qnn.QuantConv2d(
+            3, 32, 3, bias=True, weight_bit_width=4, bias_quant=Int32Bias)
+
+        self.relu1 = qnn.QuantReLU(bit_width=4, return_quant_tensor=True)
+
+        self.layer2 = qnn.QuantConv2d(
+            32, 64, 3, bias=True, weight_bit_width=4, bias_quant=Int32Bias)
+
+        self.relu2 = qnn.QuantReLU(bit_width=4, return_quant_tensor=True)
+
+        self.layer3 = qnn.QuantLinear(
+            64 * 6 * 6, 600, bias=True, weight_bit_width=4, bias_quant=Int32Bias)
+
+        self.relu3 = qnn.QuantReLU(bit_width=4, return_quant_tensor=True)
+
+        self.layer4 = qnn.QuantLinear(
+            600, 120, bias=True, weight_bit_width=4, bias_quant=Int32Bias)
+
+        self.relu4 = qnn.QuantReLU(bit_width=4, return_quant_tensor=True)
+
+        self.layer5 = qnn.QuantLinear(
+            120, 10, bias=True, weight_bit_width=4, bias_quant=Int32Bias)
+
+    def forward(self, x):
+        x = self.quant_inp(x)
+        x = self.relu1(self.layer1(x))
+        x = F.max_pool2d(x, 2)
+        x = self.relu2(self.layer2(x))
+        x = F.max_pool2d(x, 2)
+        x = x.view(x.size(0), -1)  # Flatten the tensor
+        x = self.relu3(self.layer3(x))
+        x = self.relu4(self.layer4(x))
+        x = self.layer5(x)
+        return x
+
+
+model = CIFAR10CNN().to(device)

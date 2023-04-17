@@ -79,6 +79,8 @@ for x, y in train_loader:
 # GPUs can significantly speed-up training of deep neural networks. We check for availability of a GPU and if so define it as target device.
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Target device: " + str(device))
+
+
 # ## Define the Quantized Model
 # Update module to use Brevitas
 ########################################################
