@@ -3,6 +3,8 @@
 
 ## MARK: Load Imports
 
+print("\n-------------------------\nLoading Imports\n")
+
 from copy import deepcopy
 import os
 from unicodedata import decimal
@@ -36,6 +38,9 @@ import torch.nn.functional as F
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import random_split
 
+print("Done Loading Imports\n-------------------------")
+print("\n\nBeginning Cifar10 Neural Networks Analysis with Brevitas\n--------------------------------------------------\n")
+
 ## Load The Cifar10 Dataset Using PyTorch
 # This will most likely already be downloaded based on the directory but good to check
 
@@ -46,16 +51,21 @@ from torch.utils.data import random_split
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Target device: " + str(device))
 
+
+print("\nLoading Dataset:\n-------------------------")
 # Load Cifar10 dataset
 train_set = torchvision.datasets.CIFAR10(
     "./data", download=True, transform=transforms.Compose([transforms.ToTensor()]))
 test_set = torchvision.datasets.CIFAR10(
     "./data", download=True, train=False, transform=transforms.Compose([transforms.ToTensor()]))
+
 # Loaders
 train_loader = torch.utils.data.DataLoader(train_set,
                                            batch_size=1000)
 test_loader = torch.utils.data.DataLoader(test_set,
                                           batch_size=1000)
+
+print("Dataset Values:\n-------------------------")
 a = next(iter(train_loader))
 print(a[0].size())
 print(len(train_set))
@@ -76,6 +86,8 @@ train_quantized_loader = DataLoader(train_set, batch_size=batch_size)
 test_quantized_loader = DataLoader(test_set, batch_size=batch_size)
 count = 0
 
+
+print("\nDataset Shape:\n-------------------------")
 for x, y in train_loader:
     print("Input shape for 1 batch: " + str(x.shape))
     print("Label shape for 1 batch: " + str(y.shape))
@@ -138,4 +150,7 @@ criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters())
 scheduler = ReduceLROnPlateau(optimizer, mode = "min", factor = 0.1, patience = 5, verbose = True)
 
+print("\n\nModel Details:\n-------------------------")
+
 print(model)
+
