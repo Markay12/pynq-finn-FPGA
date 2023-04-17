@@ -72,6 +72,8 @@ for x, y in train_loader:
     count += 1
     if count == 1:
         break
+
+
 # # Define a PyTorch Device
 #
 # GPUs can significantly speed-up training of deep neural networks. We check for availability of a GPU and if so define it as target device.
