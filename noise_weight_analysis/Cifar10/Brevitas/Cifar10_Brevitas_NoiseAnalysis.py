@@ -32,6 +32,10 @@ from brevitas.core.quant import QuantType
 from brevitas.quant import Int32Bias
 import torch.nn.functional as F
 
+# For adaptive learning rate import
+from torch.optim.lr_scheduler import ReduceLROnPlateau
+from torch.utils.data import random_split
+
 ## Load The Cifar10 Dataset Using PyTorch
 # This will most likely already be downloaded based on the directory but good to check
 
@@ -125,4 +129,13 @@ class CIFAR10CNN(nn.Module):
         return x
 
 
+# Model setup
 model = CIFAR10CNN().to(device)
+
+# Create adaptive learning rate
+learning_rate = 0.001
+criterion = nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(model.parameters())
+scheduler = ReduceLROnPlateau(optimizer, mode = "min", factor = 0.1, patience = 5, verbose = True)
+
+print(model)
