@@ -144,13 +144,109 @@ class CIFAR10CNN(nn.Module):
 # Model setup
 model = CIFAR10CNN().to(device)
 
-# Create adaptive learning rate
-learning_rate = 0.001
-criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters())
-scheduler = ReduceLROnPlateau(optimizer, mode = "min", factor = 0.1, patience = 5, verbose = True)
-
 print("\n\nModel Details:\n-------------------------")
 
 print(model)
 
+## Training and Testing
+# 
+# The CIFAR10CNN model is a quantized convolutional neural network designed to classify images from the CIFAR-10 dataset. The dataset consists of 60,000 32x32 color images in 10 classes, with 6,000 images per class. The model architecture consists of the following layers:
+# 
+# QuantIdentity: This layer quantizes the input image to 4-bit representation.
+#
+# QuantConv2d (layer1): A 2D quantized convolutional layer with 3 input channels 
+# (corresponding to the RGB color channels), 32 output channels, and a 3x3 kernel size. 
+# The weights are quantized to 4 bits, and biases are quantized with Int32Bias.
+#
+# QuantReLU (relu1): A quantized ReLU activation function with a 4-bit output.
+#
+# Max-pooling: A 2x2 max-pooling operation to reduce the spatial dimensions.
+#
+# QuantConv2d (layer2): A 2D quantized convolutional layer with 32 input channels, 64 output channels, 
+# and a 3x3 kernel size. The weights are quantized to 4 bits, and biases are quantized with Int32Bias.
+#
+# QuantReLU (relu2): A quantized ReLU activation function with a 4-bit output.
+#
+# Max-pooling: Another 2x2 max-pooling operation to reduce the spatial dimensions further.
+#
+# Flatten: A layer that reshapes the tensor into a 1D tensor, preparing it for the fully connected layers.
+#
+# QuantLinear (layer3): A fully connected (linear) layer with 64 * 6 * 6 input features and 600 output features. 
+# The weights are quantized to 4 bits, and biases are quantized with Int32Bias.
+#
+# QuantReLU (relu3): A quantized ReLU activation function with a 4-bit output.
+#
+# QuantLinear (layer4): A fully connected (linear) layer with 600 input features and 120 output features. 
+# The weights are quantized to 4 bits, and biases are quantized with Int32Bias.
+#
+# QuantReLU (relu4): A quantized ReLU activation function with a 4-bit output.
+#
+# QuantLinear (layer5): The final fully connected (linear) layer with 120 input features and 10 output features. The weights are quantized to 4 bits, and biases are quantized with Int32Bias. The 10 output features correspond to the 10 classes in the CIFAR-10 dataset.
+# 
+# The model processes the input image through these layers in sequence, and the output of the final layer represents the class probabilities.
+
+# Import testing
+import torch.optim.lr_scheduler as lr_scheduler
+from sklearn.metrics import precision_recall_fscore_support
+
+# Initialize the model, optimizer, and criterion
+model = CIFAR10CNN().to(device)
+optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)
+criterion = nn.CrossEntropyLoss()
+scheduler = lr_scheduler.StepLR(optimizer, step_size = 10, gamma = 0.1)
+
+num_epochs = 25
+best_test_accuracy = 0
+patience = 5
+no_improvement_counter = 0
+
+for epoch in range(num_epochs):
+    # training phase
+    model.train()
+    for i, (images, labels) in enumerate(train_loader):
+        images = images.to(device)
+        labels = labels.to(device)
+        optimizer.zero_grad()
+        outputs = model(images)
+        loss = criterion(outputs, labels)
+        loss.backward()
+        optimizer.step()
+        if (i+1) % 100 == 0:
+            print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'
+                  .format(epoch+1, num_epochs, i+1, len(train_loader), loss.item()))
+    
+    # Update the learning rate
+    scheduler.step()
+    
+    # testing phase
+    model.eval()
+    with torch.no_grad():
+        correct = 0
+        total = 0
+        all_labels = []
+        all_predictions = []
+        for images, labels in test_loader:
+            images = images.to(device)
+            labels = labels.to(device)
+            outputs = model(images)
+            _, predicted = torch.max(outputs.data, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+            all_labels.extend(labels.cpu().numpy())
+            all_predictions.extend(predicted.cpu().numpy())
+
+        test_accuracy = 100 * correct / total
+        precision, recall, f1, _ = precision_recall_fscore_support(all_labels, all_predictions, average='weighted')
+        
+        if test_accuracy > best_test_accuracy:
+            best_test_accuracy = test_accuracy
+            torch.save(model.state_dict(), 'best_model.pth')
+            no_improvement_counter = 0
+        else:
+            no_improvement_counter += 1
+            
+        if no_improvement_counter >= patience:
+            print("Early stopping")
+            break
+
+        print('Epoch [{}/{}], Test Accuracy: {:.2f}%, Precision: {:.2f}, Recall: {:.2f}, F1 score: {:.2f}'.format(epoch+1, num_epochs, test_accuracy, precision, recall, f1))
