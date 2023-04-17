@@ -188,6 +188,8 @@ for epoch in range(num_epochs):
             correct += (predicted == labels).sum().item()
         print('Epoch [{}/{}], Test Accuracy: {:.2f}%'.format(epoch +
               1, num_epochs, 100 * correct / total))
+
+
 # ## Changing Model Parameters (Weights/Biases)
 #
 # First we show how to get the trained_state_dictionary which shows all weights, biases etc. Then we also show how to extract just one layers weights.
