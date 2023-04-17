@@ -34,6 +34,13 @@ import torch.nn.functional as F
 ## Load The Cifar10 Dataset Using PyTorch
 # This will most likely already be downloaded based on the directory but good to check
 
+## Define a PyTorch Device
+#
+# GPUs can significantly speed-up training of deep neural networks. We check for availability of a GPU and if so define it as target device.
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print("Target device: " + str(device))
+
 # Load Cifar10 dataset
 train_set = torchvision.datasets.CIFAR10(
     "./data", download=True, transform=transforms.Compose([transforms.ToTensor()]))
@@ -70,3 +77,5 @@ for x, y in train_loader:
     count += 1
     if count == 1:
         break
+
+
