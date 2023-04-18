@@ -53,17 +53,27 @@ print("Target device: " + str(device))
 
 
 print("\nLoading Dataset:\n-------------------------")
-# Load Cifar10 dataset
-train_set = torchvision.datasets.CIFAR10(
-    "./data", download=True, transform=transforms.Compose([transforms.ToTensor()]))
-test_set = torchvision.datasets.CIFAR10(
-    "./data", download=True, train=False, transform=transforms.Compose([transforms.ToTensor()]))
 
-# Loaders
-train_loader = torch.utils.data.DataLoader(train_set,
-                                           batch_size=1000)
-test_loader = torch.utils.data.DataLoader(test_set,
-                                          batch_size=1000)
+# Define data augmentation transforms
+transform_train = transforms.Compose([
+    transforms.RandomHorizontalFlip(),
+    transforms.RandomVerticalFlip(),
+    transforms.RandomCrop(32, padding=4),
+    transforms.ToTensor(),
+])
+
+transform_test = transforms.Compose([
+    transforms.ToTensor(),
+])
+
+# Create the train and test datasets
+train_set = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_train)
+test_set = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform_test)
+
+# Create the train and test data loaders
+train_loader = torch.utils.data.DataLoader(train_set, batch_size=100, shuffle=True, num_workers=2)
+test_loader = torch.utils.data.DataLoader(test_set, batch_size=100, shuffle=False, num_workers=2)
+
 
 print("Dataset Values:\n-------------------------")
 a = next(iter(train_loader))
@@ -99,46 +109,49 @@ for x, y in train_loader:
 class CIFAR10CNN(nn.Module):
 
     def __init__(self):
-
         super(CIFAR10CNN, self).__init__()
+        self.quant_inp = qnn.QuantIdentity(bit_width=4, return_quant_tensor=True)
 
-        self.quant_inp = qnn.QuantIdentity(
-            bit_width=4, return_quant_tensor=True)
-
-        self.layer1 = qnn.QuantConv2d(
-            3, 32, 3, bias=True, weight_bit_width=4, bias_quant=Int32Bias)
-
+        self.layer1 = qnn.QuantConv2d(3, 32, 3, padding=1, bias=True, weight_bit_width=4, bias_quant=Int32Bias)
         self.relu1 = qnn.QuantReLU(bit_width=4, return_quant_tensor=True)
 
-        self.layer2 = qnn.QuantConv2d(
-            32, 64, 3, bias=True, weight_bit_width=4, bias_quant=Int32Bias)
-
+        self.layer2 = qnn.QuantConv2d(32, 32, 3, padding=1, bias=True, weight_bit_width=4, bias_quant=Int32Bias)
         self.relu2 = qnn.QuantReLU(bit_width=4, return_quant_tensor=True)
 
-        self.layer3 = qnn.QuantLinear(
-            64 * 6 * 6, 600, bias=True, weight_bit_width=4, bias_quant=Int32Bias)
-
+        self.layer3 = qnn.QuantConv2d(32, 64, 3, padding=1, bias=True, weight_bit_width=4, bias_quant=Int32Bias)
         self.relu3 = qnn.QuantReLU(bit_width=4, return_quant_tensor=True)
 
-        self.layer4 = qnn.QuantLinear(
-            600, 120, bias=True, weight_bit_width=4, bias_quant=Int32Bias)
-
+        self.layer4 = qnn.QuantConv2d(64, 64, 3, padding=1, bias=True, weight_bit_width=4, bias_quant=Int32Bias)
         self.relu4 = qnn.QuantReLU(bit_width=4, return_quant_tensor=True)
 
-        self.layer5 = qnn.QuantLinear(
-            120, 10, bias=True, weight_bit_width=4, bias_quant=Int32Bias)
+        self.layer5 = qnn.QuantConv2d(64, 64, 3, padding=1, bias=True, weight_bit_width=4, bias_quant=Int32Bias)
+        self.relu5 = qnn.QuantReLU(bit_width=4, return_quant_tensor=True)
+
+        self.fc1 = qnn.QuantLinear(64 * 8 * 8, 512, bias=True, weight_bit_width=4, bias_quant=Int32Bias)
+        self.relu6 = qnn.QuantReLU(bit_width=4, return_quant_tensor=True)
+
+        self.fc2 = qnn.QuantLinear(512, 10, bias=True, weight_bit_width=4, bias_quant=Int32Bias)
 
     def forward(self, x):
         x = self.quant_inp(x)
         x = self.relu1(self.layer1(x))
-        x = F.max_pool2d(x, 2)
         x = self.relu2(self.layer2(x))
         x = F.max_pool2d(x, 2)
-        x = x.view(x.size(0), -1)  # Flatten the tensor
+
         x = self.relu3(self.layer3(x))
         x = self.relu4(self.layer4(x))
-        x = self.layer5(x)
+        x = F.max_pool2d(x, 2)
+
+        x = self.relu5(self.layer5(x))
+
+        x = x.view(x.size(0), -1)
+
+        x = self.relu6(self.fc1(x))
+        x = self.fc2(x)
+
         return x
+
+
 
 
 # Model setup
@@ -195,9 +208,9 @@ optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)
 criterion = nn.CrossEntropyLoss()
 scheduler = lr_scheduler.StepLR(optimizer, step_size = 10, gamma = 0.1)
 
-num_epochs = 25
+num_epochs = 80
 best_test_accuracy = 0
-patience = 5
+patience = 10
 no_improvement_counter = 0
 
 for epoch in range(num_epochs):
