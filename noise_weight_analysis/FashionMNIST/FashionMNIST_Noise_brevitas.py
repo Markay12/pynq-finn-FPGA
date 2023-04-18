@@ -152,7 +152,8 @@ learning_rate = 0.001
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 print(model)
-# ## Train and Test
+
+## Train and Test
 #
 # This code trains a convolutional neural network (CNN) on the Fashion MNIST dataset using PyTorch. The code uses the torchvision module to download and preprocess the dataset, and defines a CNN with two convolutional layers, two max-pooling layers, and three fully connected layers. The code uses the cross-entropy loss function and the Adam optimizer to train the model.
 #
@@ -160,6 +161,7 @@ print(model)
 #
 # During training, the code prints the loss after every 100 batches. After each epoch, the code evaluates the model on the test set and prints the test accuracy.
 num_epochs = 20
+
 for epoch in range(num_epochs):
     # training phase
     model.train()
@@ -250,7 +252,9 @@ def add_noise_to_model(model, layer_names, sigma, num_perturbations):
                 if bias is not None:
                     layer.bias = torch.nn.Parameter(
                         torch.tensor(noised_bias, dtype=torch.float))
+
         modified_models.append(modified_model)
+
     return modified_models
 
 
