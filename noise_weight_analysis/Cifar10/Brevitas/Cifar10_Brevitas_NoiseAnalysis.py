@@ -38,6 +38,9 @@ import torch.nn.functional as F
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import random_split
 
+from multiprocessing import freeze_support
+
+
 print("Done Loading Imports\n-------------------------")
 print("\n\nBeginning Cifar10 Neural Networks Analysis with Brevitas\n--------------------------------------------------\n")
 
@@ -54,35 +57,45 @@ print("Target device: " + str(device))
 
 print("\nLoading Dataset:\n-------------------------")
 
-# Define data augmentation transforms
-transform_train = transforms.Compose([
+train_transform = transforms.Compose([
     transforms.RandomHorizontalFlip(),
     transforms.RandomVerticalFlip(),
-    transforms.RandomCrop(32, padding=4),
-    transforms.ToTensor(),
+    transforms.RandomAffine(degrees=0, translate=(0.1, 0.1)),
+    transforms.ToTensor()
 ])
 
-transform_test = transforms.Compose([
-    transforms.ToTensor(),
+test_transform = transforms.Compose([
+    transforms.ToTensor()
 ])
 
-# Create the train and test datasets
-train_set = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_train)
-test_set = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform_test)
-
-# Create the train and test data loaders
-train_loader = torch.utils.data.DataLoader(train_set, batch_size=100, shuffle=True, num_workers=2)
-test_loader = torch.utils.data.DataLoader(test_set, batch_size=100, shuffle=False, num_workers=2)
+# Load CIFAR-10 dataset
+train_set = torchvision.datasets.CIFAR10("./data", download=True, transform=train_transform)
+test_set = torchvision.datasets.CIFAR10("./data", download=True, train=False, transform=test_transform)
 
 
-print("Dataset Values:\n-------------------------")
+# Define the train and validation set sizes
+train_size = int(len(train_set) * 0.8)
+val_size = len(train_set) - train_size
+
+# Split the dataset into train and validation sets
+train_data, val_data = random_split(train_set, [train_size, val_size])
+
+train_loader = torch.utils.data.DataLoader(train_data, batch_size=1000)
+val_loader = torch.utils.data.DataLoader(val_data, batch_size=1000)
+
 a = next(iter(train_loader))
 print(a[0].size())
 print(len(train_set))
-print("Samples in each set: train = %d, test = %s" %
-      (len(train_set), len(train_loader)))
-print("Shape of one input sample: " + str(train_set[0][0].shape))
 
+print("Samples in each set: train = %d, test = %s" % (len(train_set), len(train_loader))) 
+print("Shape of one input sample: " +  str(train_set[0][0].shape))
+
+# set batch size
+batch_size = 1000
+
+# Create a DataLoader for a training dataset with a batch size of 100
+train_quantized_loader = DataLoader(train_set, batch_size=batch_size)
+test_quantized_loader = DataLoader(test_set, batch_size=batch_size)
 
 ## Data Loader
 #
@@ -198,6 +211,7 @@ print(model)
 # 
 # The model processes the input image through these layers in sequence, and the output of the final layer represents the class probabilities.
 
+
 # Import testing
 import torch.optim.lr_scheduler as lr_scheduler
 from sklearn.metrics import precision_recall_fscore_support
@@ -239,7 +253,7 @@ for epoch in range(num_epochs):
         total = 0
         all_labels = []
         all_predictions = []
-        for images, labels in test_loader:
+        for images, labels in val_loader:
             images = images.to(device)
             labels = labels.to(device)
             outputs = model(images)
