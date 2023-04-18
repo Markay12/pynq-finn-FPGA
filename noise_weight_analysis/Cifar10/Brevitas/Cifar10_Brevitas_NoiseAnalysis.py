@@ -201,6 +201,7 @@ patience = 5
 no_improvement_counter = 0
 
 for epoch in range(num_epochs):
+
     # training phase
     model.train()
     for i, (images, labels) in enumerate(train_loader):
