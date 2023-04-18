@@ -167,9 +167,6 @@ class CIFAR10CNN(nn.Module):
 
 
 
-# Model setup
-model = CIFAR10CNN().to(device)
-
 print("\n\nModel Details:\n-------------------------")
 
 print(model)
