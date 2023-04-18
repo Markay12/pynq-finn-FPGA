@@ -265,6 +265,9 @@ random.seed(time.time())
 
 
 def add_noise(matrix, sigma):
+
+    # State dependent
+    # noised_weight = matrix + matrix*np.random.normal(0,scale=sigma)
     
     noised_weight = np.random.normal(loc=matrix, scale=sigma)
     
