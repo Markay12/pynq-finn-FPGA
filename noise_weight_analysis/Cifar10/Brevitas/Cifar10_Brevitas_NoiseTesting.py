@@ -1,9 +1,10 @@
-# Mark Ashinhust
-# Cifar10 Noise Analysis with Cifar10
+#!/usr/bin/env python
+# coding: utf-8
 
-## MARK: Load Imports
+# ## Loading Imports
 
-print("\n-------------------------\nLoading Imports\n")
+# In[1]:
+
 
 from copy import deepcopy
 import os
@@ -38,50 +39,60 @@ import torch.nn.functional as F
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import random_split
 
-from multiprocessing import freeze_support
 
+# ## Define Target Device
 
-print("Done Loading Imports\n-------------------------")
-print("\n\nBeginning Cifar10 Neural Networks Analysis with Brevitas\n--------------------------------------------------\n")
+# In[2]:
 
-## Load The Cifar10 Dataset Using PyTorch
-# This will most likely already be downloaded based on the directory but good to check
-
-## Define a PyTorch Device
-#
-# GPUs can significantly speed-up training of deep neural networks. We check for availability of a GPU and if so define it as target device.
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Target device: " + str(device))
 
 
-print("\nLoading Dataset:\n-------------------------")
+# ## Load Dataset
+# 
+# Define the train and validation set sizes. Split dataset into train and validation sets.
+# 
+# Set the batch size. Create a dataloader for a training dataset with batch size of 1000.
+# 
+# ### Data Augmentation
+# 
+# This code block applies data augmentation to the CIFAR-10 training dataset using transforms.RandomCrop and transforms.RandomHorizontalFlip. This randomly crops and flips the images in the dataset, which creates new variations of the original images. This technique is called data augmentation and can help prevent overfitting by increasing the diversity of the training dataset.
+# 
+# Additionally, this code block also normalizes the pixel values of both the training and validation datasets to have a mean of 0.5 and a standard deviation of 0.5 using transforms.Normalize.
+# 
+# Furthermore, the code block uses PyTorch DataLoader to create an iterator over the dataset that returns batches of data. This avoids the need for manual batch creation and helps to efficiently load and process the data.
+# 
+# Finally, this code block creates a DataLoader for the training and validation datasets with a batch size of 1000. This means that the model will process 1000 images at a time during training and validation, which can help to speed up the training process.
 
+# In[7]:
+
+
+from torchvision import transforms
+
+# Define data augmentation transforms
 train_transform = transforms.Compose([
+    transforms.RandomCrop(32, padding=4),
     transforms.RandomHorizontalFlip(),
-    transforms.RandomVerticalFlip(),
-    transforms.RandomAffine(degrees=0, translate=(0.1, 0.1)),
-    transforms.ToTensor()
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
 ])
 
-test_transform = transforms.Compose([
-    transforms.ToTensor()
+val_transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
 ])
 
-# Load CIFAR-10 dataset
-train_set = torchvision.datasets.CIFAR10("./data", download=True, transform=train_transform)
-test_set = torchvision.datasets.CIFAR10("./data", download=True, train=False, transform=test_transform)
+# Apply data augmentation to the training dataset
+train_set = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=train_transform)
 
+# Use the validation transform for the validation dataset
+val_set =torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=val_transform)
 
-# Define the train and validation set sizes
-train_size = int(len(train_set) * 0.8)
-val_size = len(train_set) - train_size
+# Create the data loaders
+train_loader = torch.utils.data.DataLoader(train_set, batch_size=128, shuffle=True, num_workers=4)
+val_loader = torch.utils.data.DataLoader(val_set, batch_size=128, shuffle=False, num_workers=4)
 
-# Split the dataset into train and validation sets
-train_data, val_data = random_split(train_set, [train_size, val_size])
-
-train_loader = torch.utils.data.DataLoader(train_data, batch_size=1000)
-val_loader = torch.utils.data.DataLoader(val_data, batch_size=1000)
 
 a = next(iter(train_loader))
 print(a[0].size())
@@ -89,13 +100,6 @@ print(len(train_set))
 
 print("Samples in each set: train = %d, test = %s" % (len(train_set), len(train_loader))) 
 print("Shape of one input sample: " +  str(train_set[0][0].shape))
-
-# set batch size
-batch_size = 1000
-
-# Create a DataLoader for a training dataset with a batch size of 100
-train_quantized_loader = DataLoader(train_set, batch_size=batch_size)
-test_quantized_loader = DataLoader(test_set, batch_size=batch_size)
 
 ## Data Loader
 #
@@ -106,9 +110,13 @@ batch_size = 1000
 
 # Create a DataLoader for a training dataset with a batch size of 100
 train_quantized_loader = DataLoader(train_set, batch_size=batch_size)
-test_quantized_loader = DataLoader(test_set, batch_size=batch_size)
-count = 0
+test_quantized_loader = DataLoader(val_set, batch_size=batch_size)
 
+
+# In[8]:
+
+
+count = 0
 
 print("\nDataset Shape:\n-------------------------")
 for x, y in train_loader:
@@ -119,8 +127,16 @@ for x, y in train_loader:
         break
 
 
-class CIFAR10CNN(nn.Module):
+# ## Define Model
+# 
+# There are 5 convolution layers and 2 Fully Connected QuantLinear Layers
+# 
+# 
 
+# In[9]:
+
+
+class CIFAR10CNN(nn.Module):
     def __init__(self):
         super(CIFAR10CNN, self).__init__()
         self.quant_inp = qnn.QuantIdentity(bit_width=4, return_quant_tensor=True)
@@ -165,46 +181,7 @@ class CIFAR10CNN(nn.Module):
         return x
 
 
-
-
-print("\n\nModel Details:\n-------------------------")
-
-## Training and Testing
-# 
-# The CIFAR10CNN model is a quantized convolutional neural network designed to classify images from the CIFAR-10 dataset. The dataset consists of 60,000 32x32 color images in 10 classes, with 6,000 images per class. The model architecture consists of the following layers:
-# 
-# QuantIdentity: This layer quantizes the input image to 4-bit representation.
-#
-# QuantConv2d (layer1): A 2D quantized convolutional layer with 3 input channels 
-# (corresponding to the RGB color channels), 32 output channels, and a 3x3 kernel size. 
-# The weights are quantized to 4 bits, and biases are quantized with Int32Bias.
-#
-# QuantReLU (relu1): A quantized ReLU activation function with a 4-bit output.
-#
-# Max-pooling: A 2x2 max-pooling operation to reduce the spatial dimensions.
-#
-# QuantConv2d (layer2): A 2D quantized convolutional layer with 32 input channels, 64 output channels, 
-# and a 3x3 kernel size. The weights are quantized to 4 bits, and biases are quantized with Int32Bias.
-#
-# QuantReLU (relu2): A quantized ReLU activation function with a 4-bit output.
-#
-# Max-pooling: Another 2x2 max-pooling operation to reduce the spatial dimensions further.
-#
-# Flatten: A layer that reshapes the tensor into a 1D tensor, preparing it for the fully connected layers.
-#
-# QuantLinear (layer3): A fully connected (linear) layer with 64 * 6 * 6 input features and 600 output features. 
-# The weights are quantized to 4 bits, and biases are quantized with Int32Bias.
-#
-# QuantReLU (relu3): A quantized ReLU activation function with a 4-bit output.
-#
-# QuantLinear (layer4): A fully connected (linear) layer with 600 input features and 120 output features. 
-# The weights are quantized to 4 bits, and biases are quantized with Int32Bias.
-#
-# QuantReLU (relu4): A quantized ReLU activation function with a 4-bit output.
-#
-# QuantLinear (layer5): The final fully connected (linear) layer with 120 input features and 10 output features. The weights are quantized to 4 bits, and biases are quantized with Int32Bias. The 10 output features correspond to the 10 classes in the CIFAR-10 dataset.
-# 
-# The model processes the input image through these layers in sequence, and the output of the final layer represents the class probabilities.
+# In[11]:
 
 
 # Import testing
@@ -213,16 +190,22 @@ from sklearn.metrics import precision_recall_fscore_support
 
 # Initialize the model, optimizer, and criterion
 model = CIFAR10CNN().to(device)
-optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)
+optimizer = torch.optim.AdamW(model.parameters(), lr=0.001)
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=5, verbose=True)
 criterion = nn.CrossEntropyLoss()
-scheduler = lr_scheduler.StepLR(optimizer, step_size = 10, gamma = 0.1)
-
-print(model)
 
 num_epochs = 80
 best_test_accuracy = 0
 patience = 10
 no_improvement_counter = 0
+
+print(model)
+
+
+# ## Train and Test
+
+# In[12]:
+
 
 for epoch in range(num_epochs):
 
@@ -240,8 +223,8 @@ for epoch in range(num_epochs):
             print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'
                   .format(epoch+1, num_epochs, i+1, len(train_loader), loss.item()))
     
-    # Update the learning rate
-    scheduler.step()
+    # Initialize the validation loss
+    val_loss = 0
     
     # testing phase
     model.eval()
@@ -254,11 +237,18 @@ for epoch in range(num_epochs):
             images = images.to(device)
             labels = labels.to(device)
             outputs = model(images)
+            loss = criterion(outputs, labels)
+            val_loss += loss.item()  # accumulate the validation loss
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
             all_labels.extend(labels.cpu().numpy())
             all_predictions.extend(predicted.cpu().numpy())
+    
+        val_loss /= len(val_loader)  # calculate the average validation loss
+    
+        # Update the learning rate using the validation loss
+        scheduler.step(val_loss)
 
         test_accuracy = 100 * correct / total
         precision, recall, f1, _ = precision_recall_fscore_support(all_labels, all_predictions, average='weighted')
@@ -275,3 +265,109 @@ for epoch in range(num_epochs):
             break
 
         print('Epoch [{}/{}], Test Accuracy: {:.2f}%, Precision: {:.2f}, Recall: {:.2f}, F1 score: {:.2f}'.format(epoch+1, num_epochs, test_accuracy, precision, recall, f1))
+
+
+# In[19]:
+
+
+# Print the best test accuracy
+print("The final best test accuracy is: {:.2f}% at Epoch: {}".format(best_test_accuracy, epoch + 1))
+
+
+# In[88]:
+
+
+def random_clust_mask(N, P, gamma):
+    
+    # Generate random NxN matrix with values between 0 and 1
+    matrix = np.random.rand(N, N)
+    
+    # Compute 2D FFTransform
+    fft_result = np.fft.fft2(matrix)
+    
+    # 1D Frequency Vector with N bins
+    f = np.fft.fftfreq(N)
+    f[0] = 1e-6
+    
+    
+    # Create a 2D filter in frequency space that varies inversely with freq over f
+    # Gamma controls the falloff rate
+    filter_2D = 1/(np.sqrt(f[:, None]**2 + f[None, :] ** 2)) ** gamma
+    
+    # Mult the 2D elementwise by the filter
+    filtered_fft = fft_result * filter_2D
+        
+    # 2D inverse FFT of the filtered result
+    ifft_result = np.fft.ifft2(filtered_fft)
+    
+    ifft_result = np.real(ifft_result)
+    
+    # Set the threshold T equal the the max value in IFFT
+    T = ifft_result.max()
+    
+    # Init empty bool mask with same dims as ifft
+    mask = np.zeros_like(ifft_result, dtype=bool)
+    
+    decrement_step = 0.01
+    
+    # Repeat until frac of nonzero values in the mask is greather than or equal to P
+    while True:
+        mask = ifft_result > T
+        
+        current_fraction = np.count_nonzero(mask) / (N * N)
+        
+        if current_fraction >= P:
+            break
+            
+        T -= decrement_step
+
+        
+        # decrement_step = max(decrement_step * 0.99, 0.001)
+    
+    # Return tensor
+ 
+    return torch.tensor(mask, dtype=torch.int)
+
+
+def apply_mask_to_weights(layer, mask, P, gamma):
+    
+    # Get the size of the last dimension of layers weights
+    N = layer.weight.data.size(-1)
+    
+    # Generate random clustered mask using function above
+    mask = random_clust_mask(N, P, gamma)
+    
+    # Set the weights at the locations in mask to zero. 
+    layer.weight.data[mask] = 0
+
+        
+# Testing
+N = model.layer1.weight.data.size(-1)
+
+# Create a 2x3 grid of subplots
+fig, axs = plt.subplots(3, 3, figsize=(10, 6))
+
+# Generate masks with different values for P
+P_values = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.5, 0.75, 1]
+gamma_values = [1e-3, 0.01, 0.1, 0.5, 0.75, 0.99, 1, 1.5, 2]
+
+# Loop over subplots and generate mask for each value of P
+for i, ax in enumerate(axs.flatten()):
+    P = P_values[i]
+    G = gamma_values[i]
+    mask = random_clust_mask(64, P, G)
+    ax.imshow(mask, cmap='gray')
+    ax.set_title("Probability = {}, Gamma = {}".format(P, G))
+
+# Adjust spacing between subplots
+fig.tight_layout()
+
+# Display the figure
+plt.show()
+
+
+# In[ ]:
+
+
+
+
