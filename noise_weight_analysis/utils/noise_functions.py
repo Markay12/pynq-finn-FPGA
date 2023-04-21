@@ -1,3 +1,8 @@
+## Imports
+import numpy as np
+import torch
+import random
+
 """
 This file contains functions for adding noise to different models. The functions included are:
 
@@ -9,6 +14,7 @@ This file contains functions for adding noise to different models. The functions
 
 These functions can be imported and used in other Python scripts as needed.
 """
+
 
 ## Noise Mask Section
 
