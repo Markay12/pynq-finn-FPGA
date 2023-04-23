@@ -2,6 +2,7 @@
 import numpy as np
 import torch
 import random
+from copy import deepcopy
 
 """
 This file contains functions for adding noise to different models. The functions included are:
@@ -28,56 +29,55 @@ result, and the threshold T is decreased iteratively until the fraction of nonze
 to the target density P. The function returns the boolean mask as a PyTorch tensor.
 """
 
-def random_clust_mask(N, P, gamma):
-    
+def random_clust_mask(weight_shape, P, gamma):
+
     # Generate random NxN matrix with values between 0 and 1
+    N = weight_shape[-1]
     matrix = np.random.rand(N, N)
-    
-    # Compute 2D FFTransform
+
+    # Compute 2D FFT
     fft_result = np.fft.fft2(matrix)
-    
+
     # 1D Frequency Vector with N bins
-    f = np.fft.fftfreq(N)
-    f[0] = 1e-6
-    
-    
+    f = np.fft.fftfreq(N, d=1.0/weight_shape[-1])
+    f_x, f_y = np.meshgrid(f, f)
+    f_x[0, 0] = 1e-6
+    f_y[0, 0] = 1e-6
+
     # Create a 2D filter in frequency space that varies inversely with freq over f
     # Gamma controls the falloff rate
-    filter_2D = 1/(np.sqrt(f[:, None]**2 + f[None, :] ** 2)) ** gamma
-    
+    filter_2D = 1/(np.sqrt(f_x**2 + f_y**2))**gamma
+
     # Mult the 2D elementwise by the filter
     filtered_fft = fft_result * filter_2D
-        
+
     # 2D inverse FFT of the filtered result
     ifft_result = np.fft.ifft2(filtered_fft)
-    
     ifft_result = np.real(ifft_result)
-    
+
     # Set the threshold T equal the the max value in IFFT
     T = ifft_result.max()
-    
+
     # Init empty bool mask with same dims as ifft
     mask = np.zeros_like(ifft_result, dtype=bool)
-    
+
     decrement_step = 0.01
-    
-    # Repeat until frac of nonzero values in the mask is greather than or equal to P
+
+    # Repeat until frac of nonzero values in the mask is greater than or equal to P
     while True:
         mask = ifft_result > T
-        
+
         current_fraction = np.count_nonzero(mask) / (N * N)
-        
+
         if current_fraction >= P:
             break
-            
+
         T -= decrement_step
 
-        
-        # decrement_step = max(decrement_step * 0.99, 0.001)
-    
-    # Return tensor
- 
-    return torch.tensor(mask, dtype=torch.int)
+    # Return tensor with the same shape as the input tensor
+    mask = np.tile(mask, (weight_shape[0], weight_shape[1], 1, 1))
+    return torch.tensor(mask, dtype=torch.float)
+
 
 
 """
@@ -87,16 +87,46 @@ function, and then sets the weights at the locations in the mask to zero, effect
 the layer's weights.
 """
 
-def add_mask_to_weights_brevitas(layer, mask, P, gamma):
-    
-    # Get the size of the last dimension of layers weights
-    N = layer.weight.data.size(-1)
-    
-    # Generate random clustered mask using function above
-    mask = random_clust_mask(N, P, gamma)
-    
-    # Set the weights at the locations in mask to zero. 
-    layer.weight.data[mask] = 0
+def add_mask_to_model_brevitas(model, layer_names, p, gamma, num_perturbations):
+
+    modified_models = []
+
+    for _ in range(num_perturbations):
+
+        modified_model = deepcopy(model)
+
+        for layer_name in layer_names:
+
+            layer = getattr(modified_model, layer_name)
+
+            with torch.no_grad():
+
+                # get weights and biases of the tensors
+                weight = layer.weight.cpu().detach().numpy()
+                bias = layer.bias.cpu().detach().numpy() if layer.bias is not None else None
+
+                # get number of output channels of layer
+                out_channels = layer.out_channels
+
+                # generate mask with correct shape
+                mask = random_clust_mask(weight.shape, p, gamma)
+
+                # convert weight tensor to PyTorch tensor
+                weight_tensor = torch.tensor(weight, dtype=torch.float)
+
+                # apply mask to the whole weight tensor
+                weight_tensor *= torch.tensor(mask, dtype=torch.float)
+
+                # create new weight parameter and assign to layer
+                noised_weight = torch.nn.Parameter(weight_tensor, requires_grad=False)
+                layer.weight = noised_weight
+
+        modified_models.append(modified_model)
+
+    return modified_models
+
+
+
 
 
 ## Digital Noise Section
@@ -244,3 +274,28 @@ def add_gaussian_noise_to_model_pytorch(model, layers, sigma, num_perturbations)
         
     return modified_models
 
+
+
+"""
+The function sets the model to evaluation mode, disables gradient computation, 
+and iterates through the test data loader, passing each batch of images through the 
+model to get predicted labels. It then compares the predicted labels to the true labels 
+and calculates the percentage of correct predictions (accuracy) over the entire test 
+dataset. Finally, the function returns the accuracy value as a float.
+"""
+
+def test(model, test_loader):
+    # testing phase
+    model.eval()
+    with torch.no_grad():
+        correct = 0
+        total = 0
+        for images, labels in test_loader:
+            images = images.to(device)
+            labels = labels.to(device)
+            outputs = model(images)
+            _, predicted = torch.max(outputs.data, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+    accuracy = 100 * correct / total
+    return accuracy
