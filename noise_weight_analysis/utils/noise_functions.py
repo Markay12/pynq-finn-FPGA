@@ -160,7 +160,7 @@ The points in the plot are colored based on the corresponding test accuracy, wit
 the mapping between color and test accuracy.
 """
 
-def mask_noise_plots_brevitas(num_perturbations, layer_names, p_vals, gamma_vals, model, device):
+def mask_noise_plots_brevitas(num_perturbations, layer_names, p_values, gamma_values, model, device):
     if not os.path.exists("noise_plots_brevitas/mask/"):
         os.makedirs("noise_plots_brevitas/mask")
         
