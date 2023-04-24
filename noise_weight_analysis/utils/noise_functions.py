@@ -211,8 +211,8 @@ def mask_noise_plots_brevitas(num_perturbations, layer_names, p_vals, gamma_vals
                    extent=(p_values[0], p_values[-1], gamma_values[0], gamma_values[-1]),
                    aspect='auto')
         plt.colorbar(label='Test Accuracy')
-        plt.xlabel('p value')
-        plt.ylabel('gamma value')
+        plt.xlabel('P value')
+        plt.ylabel('Gamma value')
         plt.title(f'Effect of Mask on Test Accuracy for {layer}')
         plt.savefig(f"noise_plots_brevitas/mask/{layer}.png")
         plt.clf()
@@ -443,8 +443,8 @@ def add_gaussian_noise_to_model_brevitas(model, layer_names, sigma, num_perturba
             layer = getattr(modified_model, layer_name)
             with torch.no_grad():
                 # Get the weight and bias tensors
-                weight = layer.weight.detach().numpy()
-                bias = layer.bias.detach().numpy() if layer.bias is not None else None
+                weight = layer.weight.cpu().detach().numpy()
+                bias = layer.bias.cpu().detach().numpy() if layer.bias is not None else None
                 # Add noise to the weight and bias tensors
                 noised_weight = add_noise(weight, sigma)
                 if bias is not None:
@@ -501,6 +501,87 @@ def add_gaussian_noise_to_model_pytorch(model, layers, sigma, num_perturbations)
 
         
     return modified_models
+
+
+"""
+This function gaussian_noise_plots_brevitas adds Gaussian noise to a given model for each layer and creates plots to visualize the effect of noise on test accuracy.
+
+The function takes in the following parameters:
+
+    num_perturbations: The number of times to perturb the model for each value of standard deviation.
+    layer_names: A list of layer names to add noise to.
+    sigma_vector: A list of standard deviation values to add noise with.
+    model: The model to perturb.
+    device: The device to use for computation.
+
+The function first creates a folder to store the noise plots, if it does not already exist. Then, for each layer in layer_names, 
+it loops over each value of standard deviation in sigma_vector and adds Gaussian noise to the model for the current layer only. 
+It then tests the accuracy of each noisy model and appends the result to a list of test accuracies.
+
+After testing for all standard deviation values, the function plots the test accuracy as a function of the standard deviation 
+for the current layer and saves the plot to a file. It then computes the average test accuracy across all layers for each 
+standard deviation value and plots the averaged test accuracies as a function of the standard deviation.
+
+Finally, the function saves the average test accuracy plot to a file and displays it.
+"""
+
+def gaussian_noise_plots_brevitas(num_perturbations, layer_names, sigma_vector, model, device):
+    
+    if not os.path.exists("noise_plots_brevitas"):
+        os.makedirs("noise_plots_brevitas")
+    
+    plt.style.use('default')
+    
+    
+    # Create a list to store the test accuracies for all layers
+    all_test_accs = []
+    
+    # Loop over each layer and plot the test accuracy as a function of the standard deviation for that layer
+    for layer in layer_names:
+        # Initialize a list to store the test accuracies for this layer
+        test_accs = []
+        # Iterate over the standard deviation values and add noise to the model for this layer only
+        for sigma in sigma_vector:
+            # Add noise to the model for the defined layer only
+            noisy_models = add_noise_to_model(
+                model, [layer], sigma, num_perturbations)
+            accuracies = []
+            # Test the accuracy of each noisy model and append the result to the accuracies list
+            for noisy_model in noisy_models:
+                # Move the model back to the target device
+                noisy_model.to(device)
+                accuracies.append(test(noisy_model, test_quantized_loader))
+            # Calculate the average accuracy and print the result
+            avg_accuracy = sum(accuracies) / len(accuracies)
+            # Append the average accuracy to the test_accs list
+            test_accs.append(avg_accuracy)
+            print("Sigma Value: {}, Average Accuracy: {}%".format(
+                sigma, avg_accuracy))
+        # Store the test accuracies for this layer in the all_test_accs list
+        all_test_accs.append(test_accs)
+        # Plot the test accuracies as a function of the standard deviation for this layer
+        plt.plot(sigma_vector, test_accs,
+                 label='{} Accuracy at Different Perturbation Levels'.format(layer))
+        plt.xlabel('Standard Deviation')
+        plt.ylabel('Test Accuracy')
+        plt.title('Effect of Noise on Test Accuracy')
+        plt.legend()
+        plt.savefig("noise_plots_brevitas/{}.png".format(layer))
+        plt.clf()
+        print('Done with Plot {}'.format(layer))
+    # Compute the average test accuracy across all layers for each standard deviation value
+    avg_test_accs = [sum(x) / len(x) for x in zip(*all_test_accs)]
+    # Plot the averaged test accuracies as a function of the standard deviation
+    plt.plot(sigma_vector, avg_test_accs, label='Average',
+             linewidth=3, linestyle='--', color="black")
+    plt.xlabel('Standard Deviation')
+    plt.ylabel('Test Accuracy')
+    plt.title('Effect of Noise on Test Accuracy (Average)')
+    plt.legend()
+    plt.savefig("noise_plots_brevitas/average.png")
+    plt.show()
+    plt.clf()
+    
 
 
 
