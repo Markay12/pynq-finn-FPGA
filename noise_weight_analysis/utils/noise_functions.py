@@ -103,10 +103,6 @@ def add_mask_to_model_brevitas(model, layer_names, p, gamma, num_perturbations):
 
                 # get weights and biases of the tensors
                 weight = layer.weight.cpu().detach().numpy()
-                bias = layer.bias.cpu().detach().numpy() if layer.bias is not None else None
-
-                # get number of output channels of layer
-                out_channels = layer.out_channels
 
                 # generate mask with correct shape
                 mask = random_clust_mask(weight.shape, p, gamma)
@@ -163,21 +159,30 @@ to the weight tensor using the add_digital_noise function. The noisy weight tens
 PyTorch tensor and is used to update the layer's weight tensor.
 """
 
-def add_digital_noise_to_brevitas_layer(layer, ber):
-    # Get the layer's weight tensor
-    weight = layer.weight
 
-    # Convert the weight tensor to a numpy array
-    weight_np = weight.detach().numpy()
-
-    # add digital noise to the weight tensor using the `add_digital_noise` function
-    noisy_weight_np = add_digital_noise(weight_np, ber)
-
-    # Convert the noisy weight tensor back to a PyTorch tensor
-    noisy_weight = torch.from_numpy(noisy_weight_np)
-
-    # Update the layer's weight tensor with the noisy weight tensor
-    layer.weight = torch.nn.Parameter(noisy_weight)
+def add_digital_noise_to_model_brevitas(model, layer_names, ber, num_perturbations):
+    
+    modified_models = []
+    
+    for _ in range(num_perturbations):
+        
+        modified_model = deepcopy(model)
+        
+        for layer_name in layer_names:
+            
+            layer = getattr(modified_model, layer_name)
+            
+            with torch.no_grad():
+                
+                weight = layer.weight.cpu().detach().numpy()
+                noisy_weight = add_digital_noise(weight, ber)
+                
+                
+                layer.weight = torch.nn.Parameter(torch.tensor(noisy_weight, dtype=torch.float))
+                
+        modified_models.append(modified_model)
+        
+    return modified_models
 
 
 
@@ -284,7 +289,7 @@ and calculates the percentage of correct predictions (accuracy) over the entire 
 dataset. Finally, the function returns the accuracy value as a float.
 """
 
-def test(model, test_loader):
+def test(model, test_loader, device):
     # testing phase
     model.eval()
     with torch.no_grad():
