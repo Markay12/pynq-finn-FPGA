@@ -114,7 +114,8 @@ def add_mask_to_model_brevitas(model, layer_names, p, gamma, num_perturbations):
                 weight_tensor = torch.tensor(weight, dtype=torch.float)
 
                 # apply mask to the whole weight tensor
-                weight_tensor *= torch.tensor(mask, dtype=torch.float)
+                mask_tensor = torch.tensor(mask, dtype=torch.float).clone().detach()  # Change this line
+                weight_tensor *= mask_tensor  # Change this line
 
                 # create new weight parameter and assign to layer
                 noised_weight = torch.nn.Parameter(weight_tensor, requires_grad=False)
@@ -268,6 +269,29 @@ def mask_noise_plots_brevitas(num_perturbations, layer_names, p_values, gamma_va
     # Save and show the plot
     plt.savefig("noise_plots_brevitas/mask/scatter_plot.png")
     plt.show()
+
+    # Create a plot with Y-axis: Accuracy on test following perturbation
+    # X-axis: P
+    # Multiple line series where each line series is given the gamma/clustering param
+    plt.figure()
+    for i, gamma in enumerate(gamma_values):
+        # Extract the average test accuracy for each p value at the current gamma value
+        avg_test_accs_gamma = avg_test_accs_matrix[:, i]
+
+        # Plot the line series for the current gamma value
+        plt.plot(p_values, avg_test_accs_gamma, label=f"Gamma = {gamma}")
+
+    # Customize the plot
+    plt.xlabel('P value')
+    plt.ylabel('Accuracy on test following perturbation')
+    plt.title('Effect of Mask on Test Accuracy (Gamma-wise)')
+    plt.legend()
+
+    # Save and show the plot
+    plt.savefig("noise_plots_brevitas/mask/gamma_wise_plot.png")
+    plt.show()
+
+
 
 ## Digital Noise Section
 
