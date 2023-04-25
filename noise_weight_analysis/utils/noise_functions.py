@@ -374,7 +374,7 @@ test accuracy at different BER values and saves it in the directory.
 """
 
 
-def ber_noise_plot_brevitas(num_perturbations, layer_names, ber_vector, model, device):
+def ber_noise_plot_brevitas(num_perturbations, layer_names, ber_vector, model, device, test_quantized_loader):
     
     if not os.path.exists("noise_plots_brevitas/ber_noise/"):
         os.makedirs("noise_plots_brevitas/ber_noise/")
