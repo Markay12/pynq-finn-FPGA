@@ -161,7 +161,7 @@ The points in the plot are colored based on the corresponding test accuracy, wit
 the mapping between color and test accuracy.
 """
 
-def mask_noise_plots_brevitas(num_perturbations, layer_names, p_values, gamma_values, model, device):
+def mask_noise_plots_brevitas(num_perturbations, layer_names, p_values, gamma_values, model, device, test_quantized_loader):
     if not os.path.exists("noise_plots_brevitas/mask/"):
         os.makedirs("noise_plots_brevitas/mask")
         
@@ -549,7 +549,7 @@ standard deviation value and plots the averaged test accuracies as a function of
 Finally, the function saves the average test accuracy plot to a file and displays it.
 """
 
-def gaussian_noise_plots_brevitas(num_perturbations, layer_names, sigma_vector, model, device):
+def gaussian_noise_plots_brevitas(num_perturbations, layer_names, sigma_vector, model, device, test_quantized_loader):
     
     if not os.path.exists("noise_plots_brevitas/gaussian_noise/"):
         os.makedirs("noise_plots_brevitas/gaussian_noise/")
