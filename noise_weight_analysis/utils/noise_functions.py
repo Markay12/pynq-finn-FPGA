@@ -441,9 +441,23 @@ the standard deviation of the noise distribution. The function returns the origi
 matrix with added noise.
 """
 
-def add_gaussian_noise(matrix, sigma):
-    noised_weight = np.random.normal(loc=matrix, scale=sigma)
-    return noised_weight
+def add_gaussian_noise_independent(matrix, sigma):
+    noised_matrix = matrix + np.random.normal(0, scale=sigma)
+    return noised_matrix
+
+def add_gaussian_noise_proportional(matrix, sigma):
+    noised_matrix = matrix * np.random.normal(1, scale=sigma)
+    return noised_matrix
+
+
+def return_noisy_matrix(independent, dim_matrix, sigma):
+    
+    if (independent):
+        noised_matrix = torch.randn(dim_matrix) * sigma
+    else:
+        noised_matrix = torch.randn(dim_matrix) * sigma + 1
+
+    return noised_matrix
 
 
 """
@@ -458,7 +472,7 @@ weight and bias tensors.
 After each perturbation, the modified model is added to a list, which is then returned once all perturbations have been applied.
 """
 
-def add_gaussian_noise_to_model_brevitas(model, layer_names, sigma, num_perturbations):
+def add_gaussian_noise_to_model_brevitas(model, layer_names, sigma, num_perturbations, analog_noise_type):
     modified_models = []
     for _ in range(num_perturbations):
         modified_model = deepcopy(model)
@@ -470,15 +484,27 @@ def add_gaussian_noise_to_model_brevitas(model, layer_names, sigma, num_perturba
                 weight = layer.weight.cpu().detach().numpy()
                 bias = layer.bias.cpu().detach().numpy() if layer.bias is not None else None
                 # Add noise to the weight and bias tensors
-                noised_weight = add_gaussian_noise(weight, sigma)
-                if bias is not None:
-                    noised_bias = add_gaussian_noise(bias, sigma)
-                # Update the layer's weight and bias tensors with the noised values
-                layer.weight = torch.nn.Parameter(
-                    torch.tensor(noised_weight, dtype=torch.float))
-                if bias is not None:
-                    layer.bias = torch.nn.Parameter(
-                        torch.tensor(noised_bias, dtype=torch.float))
+                if (analog_noise_type):
+                    noised_weight = add_gaussian_noise_independent(weight, sigma)
+                    if bias is not None:
+                        noised_bias = add_gaussian_noise_independent(bias, sigma)
+                    # Update the layer's weight and bias tensors with the noised values
+                    layer.weight = torch.nn.Parameter(
+                        torch.tensor(noised_weight, dtype=torch.float))
+                    if bias is not None:
+                        layer.bias = torch.nn.Parameter(
+                            torch.tensor(noised_bias, dtype=torch.float))
+                else:
+                    noised_weight = add_gaussian_noise_proportional(weight, sigma)
+                    if bias is not None:
+                        noised_bias = add_gaussian_noise_proportional(bias, sigma)
+                    # Update the layer's weight and bias tensors with the noised values
+                    layer.weight = torch.nn.Parameter(
+                        torch.tensor(noised_weight, dtype=torch.float))
+                    if bias is not None:
+                        layer.bias = torch.nn.Parameter(
+                            torch.tensor(noised_bias, dtype=torch.float))
+                    
 
         modified_models.append(modified_model)
 
