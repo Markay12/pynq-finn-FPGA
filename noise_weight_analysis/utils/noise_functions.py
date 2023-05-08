@@ -575,7 +575,7 @@ standard deviation value and plots the averaged test accuracies as a function of
 Finally, the function saves the average test accuracy plot to a file and displays it.
 """
 
-def gaussian_noise_plots_brevitas(num_perturbations, layer_names, sigma_vector, model, device, test_quantized_loader):
+def gaussian_noise_plots_brevitas(num_perturbations, layer_names, sigma_vector, model, device, test_quantized_loader, analog_noise_type):
     
     if not os.path.exists("noise_plots_brevitas/gaussian_noise/"):
         os.makedirs("noise_plots_brevitas/gaussian_noise/")
@@ -594,7 +594,7 @@ def gaussian_noise_plots_brevitas(num_perturbations, layer_names, sigma_vector, 
         for sigma in sigma_vector:
             # Add noise to the model for the defined layer only
             noisy_models = add_gaussian_noise_to_model_brevitas(
-                model, [layer], sigma, num_perturbations)
+                model, [layer], sigma, num_perturbations, analog_noise_type)
             accuracies = []
             # Test the accuracy of each noisy model and append the result to the accuracies list
             for noisy_model in noisy_models:
@@ -605,8 +605,14 @@ def gaussian_noise_plots_brevitas(num_perturbations, layer_names, sigma_vector, 
             avg_accuracy = sum(accuracies) / len(accuracies)
             # Append the average accuracy to the test_accs list
             test_accs.append(avg_accuracy)
-            print("Sigma Value: {}, Average Accuracy: {}%".format(
-                sigma, avg_accuracy))
+            
+            if (analog_noise_type):
+                print("Independent: Sigma Value: {}, Average Accuracy: {}%".format(
+                    sigma, avg_accuracy))
+            else:
+                print("Proportional: Sigma Value: {}, Average Accuracy: {}%".format(
+                    sigma, avg_accuracy))
+                
         # Store the test accuracies for this layer in the all_test_accs list
         all_test_accs.append(test_accs)
         # Plot the test accuracies as a function of the standard deviation for this layer
@@ -616,7 +622,12 @@ def gaussian_noise_plots_brevitas(num_perturbations, layer_names, sigma_vector, 
         plt.ylabel('Test Accuracy')
         plt.title('Effect of Noise on Test Accuracy')
         plt.legend()
-        plt.savefig("noise_plots_brevitas/gaussian_noise/{}.png".format(layer))
+        
+        if (analog_noise_type):
+            plt.savefig("noise_plots_brevitas/gaussian_noise/{}_independent.png".format(layer))
+        else:
+            plt.savefig("noise_plots_brevitas/gaussian_noise/{}_proportional.png".format(layer))
+
         plt.clf()
         print('Done with Plot {}'.format(layer))
     # Compute the average test accuracy across all layers for each standard deviation value
