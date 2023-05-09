@@ -35,7 +35,6 @@ from torch.utils.data import random_split
 
 ## Imports from utils file for my defined noise functions
 import sys
-sys.path.append('C:/Users/ashin/source/repos/Cifar10_Pytorch_NoiseAnalysis/Cifar10_Pytorch_NoiseAnalysis/pynq-finn-FPGA/noise_weight_analysis/utils/')
 
 from noise_functions import mask_noise_plots_brevitas, mask_noise_plots_brevitas_multiple_layers, ber_noise_plot_brevitas, ber_noise_plot_brevitas_multiple_layers
 
@@ -67,14 +66,6 @@ val_set =torchvision.datasets.CIFAR10(root='../data', train=False, download=True
 train_loader = torch.utils.data.DataLoader(train_set, batch_size=128, shuffle=True, num_workers=4)
 val_loader = torch.utils.data.DataLoader(val_set, batch_size=128, shuffle=False, num_workers=4)
 
-
-a = next(iter(train_loader))
-print(a[0].size())
-print(len(train_set))
-
-print("Samples in each set: train = %d, test = %s" % (len(train_set), len(train_loader))) 
-print("Shape of one input sample: " +  str(train_set[0][0].shape))
-
 ## Data Loader
 #
 # Using PyTorch dataloader we can create a convenient iterator over the dataset that returns batches of data, rather than requiring manual batch creation.
@@ -85,16 +76,6 @@ batch_size = 1000
 # Create a DataLoader for a training dataset with a batch size of 1000
 train_quantized_loader = DataLoader(train_set, batch_size=batch_size)
 test_quantized_loader = DataLoader(val_set, batch_size=batch_size)
-
-count = 0
-
-print("\nDataset Shape:\n-------------------------")
-for x, y in train_loader:
-    print("Input shape for 1 batch: " + str(x.shape))
-    print("Label shape for 1 batch: " + str(y.shape))
-    count += 1
-    if count == 1:
-        break
 
 
 class CIFAR10CNN(nn.Module):
@@ -163,8 +144,12 @@ model = CIFAR10CNN().to(device)
 
 model_name = input("Name of the Model to Test: ")
 
+
+
 # Load the saved state dictionary from file
-state_dict = torch.load(model_name)
+model_path = os.path.join(os.getcwd(), 'pynq-finn-FPGA\noise_weight_analysis\Cifar10\Brevitas\test\model1.pth')
+state_dict = torch.load('C:\\Users\\ashin\\source\\repos\\Cifar10_Pytorch_NoiseAnalysis\\Cifar10_Pytorch_NoiseAnalysis\\pynq-finn-FPGA\\noise_weight_analysis\\Cifar10\\Brevitas\\test\\model1.pth', map_location=device)
+
 
 # Load the state dictionary into the model
 model.load_state_dict(state_dict)
@@ -180,7 +165,7 @@ print(model.fc1.weight.shape)
 
 random.seed(42)
 
-perturbations = 15 # Value does not change between tests
+perturbations = 1 # Value does not change between tests
 
 layer_names = ['layer1', 'layer2', 'layer3', 'layer4', 'layer5']
 layer_combinations = [['layer1', 'layer2', 'layer3', 'layer4', 'layer5']]
@@ -191,12 +176,12 @@ gamma_values = np.linspace(0.001, 0.1, 5)
 sigma = np.linspace(0.0, 0.2, 10)
 
 # Test independently with Independent and Proportional
-mask_noise_plots_brevitas(perturbations, layer_names, p_values, gamma_values, model, device, sigma, 1)
-mask_noise_plots_brevitas(perturbations, layer_names, p_values, gamma_values, model, device, sigma, 0)
+mask_noise_plots_brevitas(perturbations, layer_names, p_values, gamma_values, model, device, sigma, 1, test_quantized_loader)
+mask_noise_plots_brevitas(perturbations, layer_names, p_values, gamma_values, model, device, sigma, 0, test_quantized_loader)
 
 # Test all layers together with independent and proportional
-mask_noise_plots_brevitas_multiple_layers(perturbations, layer_combinations, p_values, gamma_values, model, device, sigma, 1)
-mask_noise_plots_brevitas_multiple_layers(perturbations, layer_combinations, p_values, gamma_values, model, device, sigma, 0)
+mask_noise_plots_brevitas_multiple_layers(perturbations, layer_combinations, p_values, gamma_values, model, device, sigma, 1, test_quantized_loader)
+mask_noise_plots_brevitas_multiple_layers(perturbations, layer_combinations, p_values, gamma_values, model, device, sigma, 0, test_quantized_loader)
 
 
 ## BER Noise Testing

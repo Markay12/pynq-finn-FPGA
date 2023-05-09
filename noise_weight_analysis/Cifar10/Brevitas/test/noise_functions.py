@@ -32,20 +32,35 @@ result, and the threshold T is decreased iteratively until the fraction of nonze
 to the target density P. The function returns the boolean mask as a PyTorch tensor.
 """
 
-def random_clust_mask(weight_shape, P, gamma):
+def random_clust_mask(weight, P, gamma):
 
     # Generate random NxN matrix with values between 0 and 1
-    N = weight_shape[-1]
-    matrix = np.random.rand(N, N)
-
+    N = weight.shape[0]
+    M = weight.shape[1]
+    
+    weight_numpy = weight.cpu().numpy()
+    
+    if (N  > M):
+        
+        matrix = np.random.rand(N, N)
+        L = N
+        
+    else:
+        
+        matrix = np.random.rand(M, M)
+        L = M
+    
+            
+    matrix_tensor = torch.tensor(matrix)
+    
     # Compute 2D FFT
     fft_result = np.fft.fft2(matrix)
 
     # 1D Frequency Vector with N bins
-    f = np.fft.fftfreq(N, d=1.0/weight_shape[-1])
+    f = np.fft.fftfreq(L, d=1.0/L)
     f_x, f_y = np.meshgrid(f, f)
-    f_x[0, 0] = 1e-6
-    f_y[0, 0] = 1e-6
+    f_x[0] = 1e-6
+    f_y[0] = 1e-6
 
     # Create a 2D filter in frequency space that varies inversely with freq over f
     # Gamma controls the falloff rate
@@ -78,8 +93,37 @@ def random_clust_mask(weight_shape, P, gamma):
         T -= decrement_step
 
     # Return tensor with the same shape as the input tensor
-    mask = np.tile(mask, (weight_shape[0], weight_shape[1], 1, 1))
-    return torch.tensor(mask, dtype=torch.float)
+    # mask = np.tile(mask, (weight_shape[0], weight_shape[1], 1, 1))
+    
+    if (N > M):
+        
+        mask = mask[:,:M]
+        
+    else:
+        
+        mask = mask[:N,:]
+        
+    mask_final = np.zeros_like(weight_numpy)
+    #print(mask_final.shape)
+    #print(mask.shape)
+    
+    mask_tensor = torch.tensor(mask, dtype=torch.bool, device=weight.device)
+    mask_final = torch.zeros_like(weight)
+    # Create a temporary tensor that repeats the mask tensor along the 3rd dimension
+    temp_mask = mask_tensor.unsqueeze(2).repeat(1, 1, weight.shape[2])
+
+    # Copy the temporary mask tensor along the 4th dimension (axis=3) of the mask_final tensor
+    for i in range(mask_final.shape[3]):
+        mask_final[:, :, :, i] = temp_mask
+        
+    mask_logical = torch.zeros(weight.shape, dtype=torch.bool,device=weight.device)
+    mask_logical = (mask_final==1)
+    mask_numeric = mask_final
+    
+    #mask tensor is 2D and float type
+    #mask numeric/final is 4D and float like
+    #mask logical is 4D and bool type
+    return mask_tensor, mask_numeric, mask_logical
 
 
 
@@ -90,7 +134,7 @@ function, and then sets the weights at the locations in the mask to zero, effect
 the layer's weights.
 """
 
-def add_mask_to_model_brevitas(model, layer_names, p, gamma, num_perturbations):
+def add_mask_to_model_brevitas(model, device, layer_names, p, gamma, num_perturbations, sigma, independent_type, print_weights=False):
 
     modified_models = []
 
@@ -104,21 +148,56 @@ def add_mask_to_model_brevitas(model, layer_names, p, gamma, num_perturbations):
 
             with torch.no_grad():
 
-                # get weights and biases of the tensors
-                weight = layer.weight.cpu().detach().numpy()
-
+                # get weights of the tensors
+                weight_tensor = layer.weight.clone().detach()
+                
+                #print(weight_tensor.shape)
+                
                 # generate mask with correct shape
-                mask = random_clust_mask(weight.shape, p, gamma)
+                mask_graph, mask_numeric, mask_logical = random_clust_mask(weight_tensor, p, gamma)
+                
 
-                # convert weight tensor to PyTorch tensor
-                weight_tensor = torch.tensor(weight, dtype=torch.float)
+                if print_weights:
+                    print("Weights before masking:")
+                    print(weight_tensor)
+                    
+                #plt.imshow(weight_tensor.cpu().numpy(), cmap='viridis', aspect = 'auto')
+                #plt.colorbar()
+                #plt.show()
+                #plt.clf()
 
                 # apply mask to the whole weight tensor
-                mask_tensor = torch.tensor(mask, dtype=torch.float).clone().detach()  # Change this line
-                weight_tensor *= mask_tensor  # Change this line
+                #print("mask logical = ",mask_logical)
+                #print("mask numeric = ",mask_numeric)
+                
+                #height, width = mask_graph.shape
+                #                
+                #plt.imshow(mask_graph.cpu().numpy(), cmap='viridis', aspect='auto', extent=[0, width - 1, 0, height - 1])
+                #plt.colorbar()
+                #plt.title("Mask Graph")
+                #plt.show()
+                #plt.clf()
+                
+                if (independent_type):
+                    weight_tensor += mask_numeric * return_noisy_matrix(independent_type, weight_tensor.shape, sigma, device)
+                else:
+                    noisy_mat = return_noisy_matrix(independent_type, weight_tensor.shape, sigma, device)
+                    noisy_mat[~mask_logical] =  1
+                    weight_tensor *= noisy_mat
+                
+                if print_weights:
+                    print("Weights after masking:")
+                    print(weight_tensor)
+                    
+                #plt.imshow(weight_tensor.cpu().numpy(), cmap='viridis', aspect = 'auto')
+                #plt.colorbar()
+                #plt.show()
+                #plt.clf()
 
                 # create new weight parameter and assign to layer
                 noised_weight = torch.nn.Parameter(weight_tensor, requires_grad=False)
+                
+                
                 layer.weight = noised_weight
 
         modified_models.append(modified_model)
@@ -161,135 +240,108 @@ The points in the plot are colored based on the corresponding test accuracy, wit
 the mapping between color and test accuracy.
 """
 
-def mask_noise_plots_brevitas(num_perturbations, layer_names, p_values, gamma_values, model, device, test_quantized_loader):
-    if not os.path.exists("noise_plots_brevitas/mask/"):
-        os.makedirs("noise_plots_brevitas/mask")
-        
-    plt.style.use('default')
+def mask_noise_plots_brevitas(num_perturbations, layer_names, p_values, gamma_values, model, device, sigma_values, independent_type, test_quantized_loader):
     
-    # Create a list to store the test accuracies for all layers
-    all_test_accs = []
-    
-    # Loop over each layer
+    # Check if output directory exists, if not, create it
+    if (independent_type):
+        if not os.path.exists("noise_plots_brevitas/mask/line_plot/independent"):
+            os.makedirs("noise_plots_brevitas/mask/line_plot/independent")
+            
+        output_dir = "noise_plots_brevitas/mask/line_plot/independent"
+    else:
+        if not os.path.exists("noise_plots_brevitas/mask/line_plot/proportional"):
+            os.makedirs("noise_plots_brevitas/mask/line_plot/proportional")
+            
+        output_dir = "noise_plots_brevitas/mask/line_plot/proportional"
+
     for layer in layer_names:
-        # Initialize a list to store the test accuracies for this layer
-        test_accs = []
-        
-        # Iterate over p_values and gamma_values
-        for p in p_values:
-            for gamma in gamma_values:
-                
-                # Add noise to the model for the defined layer only
-                noisy_models = add_mask_to_model_brevitas(
-                    model, [layer], p, gamma, num_perturbations)
-                accuracies = []
-                
-                # Test the accuracy of each noisy model and append the result to the accuracies list
-                for noisy_model in noisy_models:
-                    # Move the model back to the target device
-                    noisy_model.to(device)
-                    accuracies.append(test(noisy_model, test_quantized_loader, device))
-                
-                # Calculate the average accuracy and print the result
-                avg_accuracy = sum(accuracies) / len(accuracies)
-                test_accs.append(avg_accuracy)
-                print("Layer: {}, p: {}, gamma: {}, Average Accuracy: {}%".format(
-                    layer, p, gamma, avg_accuracy))
-        
-        # Store the test accuracies for this layer in the all_test_accs list
-        all_test_accs.append(test_accs)
-    
-    # Define the grid for p_values and gamma_values
-    p_grid, gamma_grid = np.meshgrid(p_values, gamma_values)
-    
-    for i, layer in enumerate(layer_names):
-        # Reshape test_accs list into a matrix
-        test_accs_matrix = np.reshape(all_test_accs[i], (len(p_values), len(gamma_values)))
-    
-        # Create heatmap for the current layer
-        plt.figure()
-        plt.imshow(test_accs_matrix, cmap='viridis', origin='lower',
-                   extent=(p_values[0], p_values[-1], gamma_values[0], gamma_values[-1]),
-                   aspect='auto')
-        plt.colorbar(label='Test Accuracy')
-        plt.xlabel('P value')
-        plt.ylabel('Gamma value')
-        plt.title(f'Effect of Mask on Test Accuracy for {layer}')
-        plt.savefig(f"noise_plots_brevitas/mask/{layer}.png")
-        plt.clf()
-    
-    # Compute the average test accuracy across all layers for each p and gamma value
-    avg_test_accs = np.mean(all_test_accs, axis=0)
-    avg_test_accs_matrix = np.reshape(avg_test_accs, (len(p_values), len(gamma_values)))
-    
-    # Create heatmap for the average test accuracy
-    plt.figure()
-    plt.imshow(avg_test_accs_matrix, cmap='viridis', origin='lower',
-               extent=(p_values[0], p_values[-1], gamma_values[0], gamma_values[-1]),
-               aspect='auto')
-    plt.colorbar(label='Test Accuracy')
-    plt.xlabel('P value')
-    plt.ylabel('Gamma Value')
-    plt.title('Effect of Mask on Test Accuracy (Average)')
-    plt.savefig("noise_plots_brevitas/mask/average.png")
-    plt.show()
-    plt.clf()
-    
-    
-    # Begin Scatter Plot
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    
-    # Define the grid for p_values and gamma_values
-    p_grid, gamma_grid = np.meshgrid(p_values, gamma_values)
-    
-    for i, layer in enumerate(layer_names):
-        # Reshape test_accs list into a matrix
-        test_accs_matrix = np.reshape(all_test_accs[i], (len(p_values), len(gamma_values)))
-        
-        # Flatten the matrices
-        pvals_mesh = p_grid.flatten()
-        gammavals_mesh = gamma_grid.flatten()
-        layer_indices_mesh = np.full_like(pvals_mesh, i)  # create an array of layer indices
-        
-        # Scatter plot with layer indices, pvals, gammavals, and corresponding test accuracies
-        c_array = np.array(test_accs_matrix).flatten()
-        scatter = ax.scatter(layer_indices_mesh, pvals_mesh, gammavals_mesh, c=c_array, cmap='viridis', marker='o', s=60)
-    
-    # Customize the plot
-    ax.set_xlabel('Layer index')
-    ax.set_ylabel('P value')
-    ax.set_zlabel('Gamma value')
-    ax.set_xticks(np.arange(len(layer_names)))
-    ax.set_xticklabels(layer_names)
-    
-    # Add color bar to the plot
-    cbar = fig.colorbar(scatter, ax=ax, label='Test Accuracy')
-    
-    # Save and show the plot
-    plt.savefig("noise_plots_brevitas/mask/scatter_plot.png")
-    plt.show()
+        # Initialize a 3D array to store average accuracies for each combination of p, gamma, and sigma values
+        avg_accuracies = np.zeros((len(p_values), len(gamma_values), len(sigma_values)))
 
-    # Create a plot with Y-axis: Accuracy on test following perturbation
-    # X-axis: P
-    # Multiple line series where each line series is given the gamma/clustering param
-    plt.figure()
-    for i, gamma in enumerate(gamma_values):
-        # Extract the average test accuracy for each p value at the current gamma value
-        avg_test_accs_gamma = avg_test_accs_matrix[:, i]
+        for p in range(len(p_values)):
+            for g in range(len(gamma_values)):
+                for s in range(len(sigma_values)):
+                    noisy_models = add_mask_to_model_brevitas(model, device, [layer], p_values[p], gamma_values[g], num_perturbations, sigma_values[s], independent_type)
 
-        # Plot the line series for the current gamma value
-        plt.plot(p_values, avg_test_accs_gamma, label=f"Gamma = {gamma}")
+                    accuracies = []
 
-    # Customize the plot
-    plt.xlabel('P value')
-    plt.ylabel('Accuracy on test following perturbation')
-    plt.title('Effect of Mask on Test Accuracy (Gamma-wise)')
-    plt.legend()
+                    for noisy_model in noisy_models:
+                        noisy_model.to(device)
+                        accuracies.append(test(noisy_model, test_quantized_loader, device))
 
-    # Save and show the plot
-    plt.savefig("noise_plots_brevitas/mask/gamma_wise_plot.png")
-    plt.show()
+                    avg_accuracy = sum(accuracies) / len(accuracies)
+                    avg_accuracies[p, g, s] = avg_accuracy
+                    print("Layer: {}\tP Value: {}\t Gamma Value: {}\t Sigma Value: {}\t Average Accuracy: {}%".format(layer, p_values[p], gamma_values[g], sigma_values[s], avg_accuracy))
+
+        for p in range(len(p_values)):
+            plt.figure()
+        
+            # Use different colors for each gamma value
+            color_map = plt.get_cmap('viridis')
+            colors = color_map(np.linspace(0, 1, len(gamma_values)))
+        
+            for g in range(len(gamma_values)):
+                avg_accuracy_gamma = avg_accuracies[p, g, :]
+                gamma_truncated = round(gamma_values[g], 3)
+                plt.plot(sigma_values, avg_accuracy_gamma, color=colors[g], label=f'Gamma: {gamma_truncated}')
+
+            plt.xlabel('Sigma Value')
+            plt.ylabel('Average Accuracy')
+            plt.title(f'Line Plot for P Value: {p_values[p]}')
+            plt.legend(title='Gamma Values')
+            plt.savefig(os.path.join(output_dir, f'line_plot_p_{p_values[p]}_{layer}.png'))
+            plt.clf()
+
+
+def mask_noise_plots_brevitas_multiple_layers(num_perturbations, layer_names_list, p_values, gamma_values, model, device, sigma_values, independent_type, test_quantized_loader):
+    if (independent_type):
+        if not os.path.exists("noise_plots_brevitas/mask/line_plot/independent"):
+            os.makedirs("noise_plots_brevitas/mask/line_plot/independent")
+            
+        output_dir = "noise_plots_brevitas/mask/line_plot/independent"
+    else:
+        if not os.path.exists("noise_plots_brevitas/mask/line_plot/proportional"):
+            os.makedirs("noise_plots_brevitas/mask/line_plot/proportional")
+            
+        output_dir = "noise_plots_brevitas/mask/line_plot/proportional"
+
+    for layer_names in layer_names_list:
+        layer_combo_name = '_'.join(layer_names)
+        avg_accuracies = np.zeros((len(p_values), len(gamma_values), len(sigma_values)))
+
+        for p in range(len(p_values)):
+            for g in range(len(gamma_values)):
+                for s in range(len(sigma_values)):
+                    noisy_models = add_mask_to_model_brevitas(model, device, layer_names, p_values[p], gamma_values[g], num_perturbations, sigma_values[s], independent_type)
+
+                    accuracies = []
+
+                    for noisy_model in noisy_models:
+                        noisy_model.to(device)
+                        accuracies.append(test(noisy_model, test_quantized_loader, device))
+
+                    avg_accuracy = sum(accuracies) / len(accuracies)
+                    avg_accuracies[p, g, s] = avg_accuracy
+                    print("Layers: {}\tP Value: {}\t Gamma Value: {}\t Sigma Value: {}\t Average Accuracy: {}%".format(layer_combo_name, p_values[p], gamma_values[g], sigma_values[s], avg_accuracy))
+
+        for p in range(len(p_values)):
+            plt.figure()
+        
+            color_map = plt.get_cmap('viridis')
+            colors = color_map(np.linspace(0, 1, len(gamma_values)))
+        
+            for g in range(len(gamma_values)):
+                avg_accuracy_gamma = avg_accuracies[p, g, :]
+                gamma_truncated = round(gamma_values[g], 3)
+                plt.plot(sigma_values, avg_accuracy_gamma, color=colors[g], label=f'Gamma: {gamma_truncated}')
+
+            plt.xlabel('Sigma Value')
+            plt.ylabel('Average Accuracy')
+            plt.title(f'Line Plot for P Value: {p_values[p]}')
+            plt.legend(title='Gamma Values')
+            plt.savefig(os.path.join(output_dir, f'line_plot_p_{p_values[p]}_{layer_combo_name}.png'))
+            plt.clf()
+
 
 
 
@@ -406,31 +458,55 @@ def ber_noise_plot_brevitas(num_perturbations, layer_names, ber_vector, model, d
         
         plt.plot(ber_vector, test_accs,
                  label='{} Accuracy at Different Perturbation Levels'.format(layer))
-        
-        plt.xlabel('Standard Deviation')
-        plt.ylabel('Test Accuracy')
-        plt.title('Effect of Noise on Test Accuracy')
-        plt.legend()
-        plt.savefig("noise_plots_brevitas/ber_noise/{}.png".format(layer))
-        plt.clf()
-        print('Done with Plot {}'.format(layer))
-        
+
     avg_test_accs = [sum(x) / len(x) for x in zip(*all_test_accs)]
-    
+
     plt.plot(ber_vector, avg_test_accs, label='Average',
              linewidth=3, linestyle='--', color="black")
-    
-    plt.xlabel('BER Value')
-    
-    plt.ylabel('Test Accuracy')
-    
-    plt.title('Effect of BER Noise on Test Accuracy (Average)')
-    
-    plt.legend()
-    plt.savefig("noise_plots_brevitas/ber_noise/average.png")
-    plt.clf()
-    
 
+    plt.xlabel('BER Value')
+    plt.ylabel('Test Accuracy')
+    plt.title('Effect of BER Noise on Test Accuracy (Individual Layers and Average)')
+    plt.legend(title='Layers')
+    plt.savefig("noise_plots_brevitas/ber_noise/individual_and_average.png")
+    plt.show()
+    plt.clf()
+
+    
+def ber_noise_plot_brevitas_multiple_layers(num_perturbations, layer_names, ber_vector, model, device, test_quantized_loader):
+    
+    if not os.path.exists("noise_plots_brevitas/ber_noise/"):
+        os.makedirs("noise_plots_brevitas/ber_noise/")
+    
+    plt.style.use('default')
+    
+    test_accs = []
+
+    for ber in ber_vector:
+        noisy_models = add_digital_noise_to_model_brevitas(model, layer_names, ber, num_perturbations)
+        
+        accuracies = []
+        
+        for noisy_model in noisy_models:
+            
+            noisy_model.to(device)
+            accuracies.append(test(noisy_model, test_quantized_loader, device))
+            
+        avg_accuracy = sum(accuracies) / len(accuracies)
+        
+        test_accs.append(avg_accuracy)
+        
+        print("BER Value: {}\tAverage Accuracy: {}".format(ber, avg_accuracy))
+            
+    plt.plot(ber_vector, test_accs, label='Accuracy at Different Perturbation Levels')
+
+    plt.xlabel('BER Value')
+    plt.ylabel('Test Accuracy')
+    plt.title('Effect of BER Noise on Test Accuracy (All Layers)')
+    plt.legend(title='Layers')
+    plt.savefig("noise_plots_brevitas/ber_noise/all_layers.png")
+    plt.show()
+    plt.clf()
 
 
 ## Gaussian Noise Section
@@ -450,14 +526,14 @@ def add_gaussian_noise_proportional(matrix, sigma):
     return noised_matrix
 
 
-def return_noisy_matrix(independent, dim_matrix, sigma):
+def return_noisy_matrix(independent, dim_matrix, sigma, device):
     
     if (independent):
         noised_matrix = torch.randn(dim_matrix) * sigma
     else:
         noised_matrix = torch.randn(dim_matrix) * sigma + 1
 
-    return noised_matrix
+    return noised_matrix.to(device)
 
 
 """
@@ -582,7 +658,6 @@ def gaussian_noise_plots_brevitas(num_perturbations, layer_names, sigma_vector, 
     
     plt.style.use('default')
     
-    
     # Create a list to store the test accuracies for all layers
     all_test_accs = []
     
@@ -618,28 +693,24 @@ def gaussian_noise_plots_brevitas(num_perturbations, layer_names, sigma_vector, 
         # Plot the test accuracies as a function of the standard deviation for this layer
         plt.plot(sigma_vector, test_accs,
                  label='{} Accuracy at Different Perturbation Levels'.format(layer))
-        plt.xlabel('Standard Deviation')
-        plt.ylabel('Test Accuracy')
-        plt.title('Effect of Noise on Test Accuracy')
-        plt.legend()
-        
-        if (analog_noise_type):
-            plt.savefig("noise_plots_brevitas/gaussian_noise/{}_independent.png".format(layer))
-        else:
-            plt.savefig("noise_plots_brevitas/gaussian_noise/{}_proportional.png".format(layer))
 
-        plt.clf()
-        print('Done with Plot {}'.format(layer))
     # Compute the average test accuracy across all layers for each standard deviation value
     avg_test_accs = [sum(x) / len(x) for x in zip(*all_test_accs)]
+
     # Plot the averaged test accuracies as a function of the standard deviation
     plt.plot(sigma_vector, avg_test_accs, label='Average',
              linewidth=3, linestyle='--', color="black")
+
     plt.xlabel('Standard Deviation')
     plt.ylabel('Test Accuracy')
-    plt.title('Effect of Noise on Test Accuracy (Average)')
+    plt.title('Effect of Noise on Test Accuracy (Individual Layers and Average)')
     plt.legend()
-    plt.savefig("noise_plots_brevitas/gaussian_noise/average.png")
+
+    if (analog_noise_type):
+        plt.savefig("noise_plots_brevitas/gaussian_noise/individual_and_average_independent.png")
+    else:
+        plt.savefig("noise_plots_brevitas/gaussian_noise/individual_and_average_proportional.png")
+
     plt.show()
     plt.clf()
 
