@@ -37,8 +37,7 @@ from torch.utils.data import random_split
 import sys
 sys.path.append('C:/Users/ashin/source/repos/Cifar10_Pytorch_NoiseAnalysis/Cifar10_Pytorch_NoiseAnalysis/pynq-finn-FPGA/noise_weight_analysis/utils/')
 
-from noise_functions import random_clust_mask, add_mask_to_model_brevitas, mask_noise_plots_brevitas, add_digital_noise, add_digital_noise_to_model_brevitas, ber_noise_plot_brevitas, add_gaussian_noise_to_model_brevitas, gaussian_noise_plots_brevitas, test
-from noise_functions import add_gaussian_noise_independent, add_gaussian_noise_proportional
+from noise_functions import mask_noise_plots_brevitas, mask_noise_plots_brevitas_multiple_layers, ber_noise_plot_brevitas, ber_noise_plot_brevitas_multiple_layers
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Target device: " + str(device))
@@ -162,13 +161,58 @@ no_improvement_counter = 0
 # Create an instance of your neural network model
 model = CIFAR10CNN().to(device)
 
+model_name = input("Name of the Model to Test: ")
+
 # Load the saved state dictionary from file
-state_dict = torch.load('best_model.pth')
+state_dict = torch.load(model_name)
 
 # Load the state dictionary into the model
 model.load_state_dict(state_dict)
 
-
+# Test shapes
 print(model.layer1.weight.shape)
 print(model.layer2.weight.shape)
 print(model.fc1.weight.shape)
+
+## Testing Models
+
+# Begin with Mask
+
+random.seed(42)
+
+perturbations = 15 # Value does not change between tests
+
+layer_names = ['layer1', 'layer2', 'layer3', 'layer4', 'layer5']
+layer_combinations = [['layer1', 'layer2', 'layer3', 'layer4', 'layer5']]
+
+
+p_values = [1, 0.5, 0.25]
+gamma_values = np.linspace(0.001, 0.1, 5)
+sigma = np.linspace(0.0, 0.2, 10)
+
+# Test independently with Independent and Proportional
+mask_noise_plots_brevitas(perturbations, layer_names, p_values, gamma_values, model, device, sigma, 1)
+mask_noise_plots_brevitas(perturbations, layer_names, p_values, gamma_values, model, device, sigma, 0)
+
+# Test all layers together with independent and proportional
+mask_noise_plots_brevitas_multiple_layers(perturbations, layer_combinations, p_values, gamma_values, model, device, sigma, 1)
+mask_noise_plots_brevitas_multiple_layers(perturbations, layer_combinations, p_values, gamma_values, model, device, sigma, 0)
+
+
+## BER Noise Testing
+
+layer_names.append('fc1', 'fc2')
+layer_combinations = [['layer1', 'layer2', 'layer3', 'layer4', 'layer5', 'fc1', 'fc2']]
+
+ber_vals = np.linspace(1e-5, 0.01, 15)
+
+ber_noise_plot_brevitas(perturbations, layer_names, ber_vals, model, device, test_quantized_loader)
+ber_noise_plot_brevitas_multiple_layers(perturbations, layer_combinations, ber_vals, model, device, test_quantized_loader)
+
+## Gaussian Noise Testing
+
+## Gaussian Noise
+sigma_vector = np.linspace(0, 0.05, 15)
+
+gaussian_noise_plots_brevitas(perturbations, layer_names, sigma_vector, model, device, test_quantized_loader, 0)
+gaussian_noise_plots_brevitas(perturbations, layer_names, sigma_vector, model, device, test_quantized_loader, 1)
