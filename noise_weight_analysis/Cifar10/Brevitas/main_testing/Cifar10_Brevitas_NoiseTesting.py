@@ -35,7 +35,7 @@ from torch.utils.data import random_split
 
 ## Imports from utils file for my defined noise functions
 import sys
-from noise_functions import mask_noise_plots_brevitas, mask_noise_plots_brevitas_multiple_layers, ber_noise_plot_brevitas, ber_noise_plot_brevitas_multiple_layers, gaussian_noise_plots_brevitas
+from noise_functions import mask_noise_plots_brevitas, mask_noise_plots_brevitas_multiple_layers, ber_noise_plot_brevitas, ber_noise_plot_brevitas_multiple_layers, gaussian_noise_plots_brevitas, gaussian_noise_plots_brevitas_all
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Target device: " + str(device))
@@ -144,7 +144,7 @@ model = CIFAR10CNN().to(device)
 model_name = input("Name of the Model to Test: ")
 
 # Load the saved state dictionary from file
-state_dict = torch.load(f'C:\\Users\\ashin\\source\\repos\\Cifar10_Pytorch_NoiseAnalysis\\Cifar10_Pytorch_NoiseAnalysis\\pynq-finn-FPGA\\noise_weight_analysis\\Cifar10\\Brevitas\\test\\models\\{model_name}.pth', map_location=device)
+state_dict = torch.load(f'C:\\Users\\ashin\\source\\repos\\Cifar10_Pytorch_NoiseAnalysis\\Cifar10_Pytorch_NoiseAnalysis\\pynq-finn-FPGA\\noise_weight_analysis\\Cifar10\\Brevitas\\main_testing\\models\\{model_name}.pth', map_location=device)
 
 
 # Load the state dictionary into the model
@@ -161,22 +161,22 @@ print(model.fc1.weight.shape)
 
 random.seed(42)
 
-perturbations = 1 # Value does not change between tests
+perturbations = 15 # Value does not change between tests
 
 layer_names = ['layer1', 'layer2', 'layer3', 'layer4', 'layer5']
 layer_combinations = [['layer1', 'layer2', 'layer3', 'layer4', 'layer5']]
 
 
 p_values = [1, 0.5, 0.25]
-gamma_values = np.linspace(0.001, 0.1, 5)
-sigma = np.linspace(0.0, 0.2, 10)
+gamma_values = np.linspace(0.001, 0.1, 2)
+sigma = np.linspace(0.0, 0.2, 2)
 
 # Test independently with Independent and Proportional
 mask_noise_plots_brevitas(perturbations, layer_names, p_values, gamma_values, model, device, sigma, 1, test_quantized_loader, model_name)
-#mask_noise_plots_brevitas(perturbations, layer_names, p_values, gamma_values, model, device, sigma, 0, test_quantized_loader, model_name)
+mask_noise_plots_brevitas(perturbations, layer_names, p_values, gamma_values, model, device, sigma, 0, test_quantized_loader, model_name)
 
 # Test all layers together with independent and proportional
-#mask_noise_plots_brevitas_multiple_layers(perturbations, layer_combinations, p_values, gamma_values, model, device, sigma, 1, test_quantized_loader, model_name)
+mask_noise_plots_brevitas_multiple_layers(perturbations, layer_combinations, p_values, gamma_values, model, device, sigma, 1, test_quantized_loader, model_name)
 mask_noise_plots_brevitas_multiple_layers(perturbations, layer_combinations, p_values, gamma_values, model, device, sigma, 0, test_quantized_loader, model_name)
 
 
@@ -195,3 +195,5 @@ sigma_vector = np.linspace(0, 0.05, 15)
 
 gaussian_noise_plots_brevitas(perturbations, layer_names, sigma_vector, model, device, test_quantized_loader, 0, model_name)
 gaussian_noise_plots_brevitas(perturbations, layer_names, sigma_vector, model, device, test_quantized_loader, 1, model_name)
+gaussian_noise_plots_brevitas_all(perturbations, layer_names, sigma_vector, model, device, test_quantized_loader, 0, model_name)
+gaussian_noise_plots_brevitas_all(perturbations, layer_names, sigma_vector, model, device, test_quantized_loader, 1, model_name)

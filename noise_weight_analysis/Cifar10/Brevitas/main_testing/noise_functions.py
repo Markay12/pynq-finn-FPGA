@@ -6,6 +6,7 @@ from copy import deepcopy
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
+import csv
 
 """
 This file contains functions for adding noise to different models. The functions included are:
@@ -241,107 +242,151 @@ the mapping between color and test accuracy.
 """
 
 def mask_noise_plots_brevitas(num_perturbations, layer_names, p_values, gamma_values, model, device, sigma_values, independent_type, test_quantized_loader, model_name):
-    
+
     # Check if output directory exists, if not, create it
-    if (independent_type):
+    if independent_type:
         if not os.path.exists(f"noise_plots_brevitas/mask/{model_name}/line_plot/independent"):
             os.makedirs(f"noise_plots_brevitas/mask/{model_name}/line_plot/independent")
             
         output_dir = f"noise_plots_brevitas/mask/{model_name}/line_plot/independent"
+
+        if not os.path.exists(f"noise_plots_brevitas/mask/{model_name}/data"):
+            os.makedirs(f"noise_plots_brevitas/mask/{model_name}/data")
+
+        csv_file_path = os.path.join(f"noise_plots_brevitas/mask/{model_name}/data", "raw_data_independent.csv")
+
     else:
         if not os.path.exists(f"noise_plots_brevitas/mask/{model_name}/line_plot/proportional"):
             os.makedirs(f"noise_plots_brevitas/mask/{model_name}/line_plot/proportional")
-            
         output_dir = f"noise_plots_brevitas/mask/{model_name}/line_plot/proportional"
 
-    for layer in layer_names:
-        # Initialize a 3D array to store average accuracies for each combination of p, gamma, and sigma values
-        avg_accuracies = np.zeros((len(p_values), len(gamma_values), len(sigma_values)))
+        if not os.path.exists(f"noise_plots_brevitas/mask/{model_name}/data"):
+            os.makedirs(f"noise_plots_brevitas/mask/{model_name}/data")
 
-        for p in range(len(p_values)):
-            for g in range(len(gamma_values)):
-                for s in range(len(sigma_values)):
-                    noisy_models = add_mask_to_model_brevitas(model, device, [layer], p_values[p], gamma_values[g], num_perturbations, sigma_values[s], independent_type)
+        csv_file_path = os.path.join(f"noise_plots_brevitas/mask/{model_name}/data", "raw_data_proportional.csv")
 
-                    accuracies = []
 
-                    for noisy_model in noisy_models:
-                        noisy_model.to(device)
-                        accuracies.append(test(noisy_model, test_quantized_loader, device))
+    # Create a CSV file to store the raw data
 
-                    avg_accuracy = sum(accuracies) / len(accuracies)
-                    avg_accuracies[p, g, s] = avg_accuracy
-                    print("Layer: {}\tP Value: {}\t Gamma Value: {}\t Sigma Value: {}\t Average Accuracy: {}%".format(layer, p_values[p], gamma_values[g], sigma_values[s], avg_accuracy))
+    with open(csv_file_path, mode='w', newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(["Layer", "P Value", "Gamma Value", "Sigma Value", "Average Accuracy"])
 
-        for p in range(len(p_values)):
-            plt.figure()
-        
-            # Use different colors for each gamma value
-            color_map = plt.get_cmap('viridis')
-            colors = color_map(np.linspace(0, 1, len(gamma_values)))
-        
-            for g in range(len(gamma_values)):
-                avg_accuracy_gamma = avg_accuracies[p, g, :]
-                gamma_truncated = round(gamma_values[g], 3)
-                plt.plot(sigma_values, avg_accuracy_gamma, color=colors[g], label=f'Gamma: {gamma_truncated}')
+        for layer in layer_names:
+            # Initialize a 3D array to store average accuracies for each combination of p, gamma, and sigma values
+            avg_accuracies = np.zeros((len(p_values), len(gamma_values), len(sigma_values)))
 
-            plt.xlabel('Sigma Value')
-            plt.ylabel('Average Accuracy')
-            plt.title(f'Line Plot for P Value: {p_values[p]}')
-            plt.legend(title='Gamma Values')
-            plt.savefig(os.path.join(output_dir, f'line_plot_p_{p_values[p]}_{layer}.png'))
-            plt.clf()
+            for p in range(len(p_values)):
+                for g in range(len(gamma_values)):
+                    for s in range(len(sigma_values)):
+                        noisy_models = add_mask_to_model_brevitas(model, device, [layer], p_values[p], gamma_values[g], num_perturbations, sigma_values[s], independent_type)
+
+                        accuracies = []
+
+                        for noisy_model in noisy_models:
+                            noisy_model.to(device)
+                            accuracies.append(test(noisy_model, test_quantized_loader, device))
+
+                        avg_accuracy = sum(accuracies) / len(accuracies)
+                        avg_accuracies[p, g, s] = avg_accuracy
+
+                        # Write the raw data to the CSV file
+                        writer.writerow([layer, p_values[p], gamma_values[g], sigma_values[s], avg_accuracy])
+
+                        print("Layer: {}\tP Value: {}\t Gamma Value: {}\t Sigma Value: {}\t Average Accuracy: {}%".format(layer, p_values[p], gamma_values[g], sigma_values[s], avg_accuracy))
+
+            for p in range(len(p_values)):
+                plt.figure()
+
+                # Use different colors for each gamma value
+                color_map = plt.get_cmap('viridis')
+                colors = color_map(np.linspace(0, 1, len(gamma_values)))
+
+                for g in range(len(gamma_values)):
+                    avg_accuracy_gamma = avg_accuracies[p, g, :]
+                    gamma_truncated = round(gamma_values[g], 3)
+                    plt.plot(sigma_values, avg_accuracy_gamma, color=colors[g], label=f'Gamma: {gamma_truncated}')
+
+                plt.xlabel('Sigma Value')
+                plt.ylabel('Average Accuracy')
+                plt.title(f'Line Plot for P Value: {p_values[p]}')
+                plt.legend(title='Gamma Values')
+                plt.savefig(os.path.join(output_dir, f'line_plot_p_{p_values[p]}_{layer}.png'))
+                plt.clf()
 
 
 def mask_noise_plots_brevitas_multiple_layers(num_perturbations, layer_names_list, p_values, gamma_values, model, device, sigma_values, independent_type, test_quantized_loader, model_name):
 
-    if (independent_type):
+    # Check if output directory exists, if not, create it
+    if independent_type:
         if not os.path.exists(f"noise_plots_brevitas/mask/{model_name}/line_plot/independent"):
             os.makedirs(f"noise_plots_brevitas/mask/{model_name}/line_plot/independent")
             
         output_dir = f"noise_plots_brevitas/mask/{model_name}/line_plot/independent"
+
+        if not os.path.exists(f"noise_plots_brevitas/mask/{model_name}/data/all_layers"):
+            os.makedirs(f"noise_plots_brevitas/mask/{model_name}/data/all_layers")
+
+        csv_file_path = os.path.join(f"noise_plots_brevitas/mask/{model_name}/data/all_layers", "raw_data_independent_all.csv")
+
     else:
         if not os.path.exists(f"noise_plots_brevitas/mask/{model_name}/line_plot/proportional"):
             os.makedirs(f"noise_plots_brevitas/mask/{model_name}/line_plot/proportional")
-            
         output_dir = f"noise_plots_brevitas/mask/{model_name}/line_plot/proportional"
 
-    for layer_names in layer_names_list:
-        layer_combo_name = '_'.join(layer_names)
-        avg_accuracies = np.zeros((len(p_values), len(gamma_values), len(sigma_values)))
+        if not os.path.exists(f"noise_plots_brevitas/mask/{model_name}/data/all_layers"):
+            os.makedirs(f"noise_plots_brevitas/mask/{model_name}/data/all_layers")
 
-        for p in range(len(p_values)):
-            for g in range(len(gamma_values)):
-                for s in range(len(sigma_values)):
-                    noisy_models = add_mask_to_model_brevitas(model, device, layer_names, p_values[p], gamma_values[g], num_perturbations, sigma_values[s], independent_type)
+        csv_file_path = os.path.join(f"noise_plots_brevitas/mask/{model_name}/data/all_layers", "raw_data_proportional_all.csv")
 
-                    accuracies = []
+    # Create a CSV file to store the raw data
+    csv_file_path = os.path.join(output_dir, "raw_data_all_layers.csv")
 
-                    for noisy_model in noisy_models:
-                        noisy_model.to(device)
-                        accuracies.append(test(noisy_model, test_quantized_loader, device))
+    with open(csv_file_path, mode='w', newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(["Layers", "P Value", "Gamma Value", "Sigma Value", "Average Accuracy"])
 
-                    avg_accuracy = sum(accuracies) / len(accuracies)
-                    avg_accuracies[p, g, s] = avg_accuracy
-                    print("Layers: {}\tP Value: {}\t Gamma Value: {}\t Sigma Value: {}\t Average Accuracy: {}%".format(layer_combo_name, p_values[p], gamma_values[g], sigma_values[s], avg_accuracy))
+        for layer_names in layer_names_list:
+            layer_combo_name = '_'.join(layer_names)
+            avg_accuracies = np.zeros((len(p_values), len(gamma_values), len(sigma_values)))
 
-        for p in range(len(p_values)):
-            plt.figure()
-        
-            color_map = plt.get_cmap('viridis')
-            colors = color_map(np.linspace(0, 1, len(gamma_values)))
-        
-            for g in range(len(gamma_values)):
-                avg_accuracy_gamma = avg_accuracies[p, g, :]
-                gamma_truncated = round(gamma_values[g], 3)
-                plt.plot(sigma_values, avg_accuracy_gamma, color=colors[g], label=f'Gamma: {gamma_truncated}')
+            for p in range(len(p_values)):
+                for g in range(len(gamma_values)):
+                    for s in range(len(sigma_values)):
+                        noisy_models = add_mask_to_model_brevitas(model, device, layer_names, p_values[p], gamma_values[g], num_perturbations, sigma_values[s], independent_type)
 
-            plt.xlabel('Sigma Value')
-            plt.ylabel('Average Accuracy')
-            plt.title(f'Line Plot for P Value: {p_values[p]}')
-            plt.legend(title='Gamma Values')
-            plt.savefig(os.path.join(output_dir, f'line_plot_p_{p_values[p]}_{layer_combo_name}.png'))
-            plt.clf()
+                        accuracies = []
+
+                        for noisy_model in noisy_models:
+                            noisy_model.to(device)
+                            accuracies.append(test(noisy_model, test_quantized_loader, device))
+
+                        avg_accuracy = sum(accuracies) / len(accuracies)
+                        avg_accuracies[p, g, s] = avg_accuracy
+
+                        # Write the raw data to the CSV file
+                        writer.writerow([layer_combo_name, p_values[p], gamma_values[g], sigma_values[s], avg_accuracy])
+
+                        print("Layers: {}\tP Value: {}\t Gamma Value: {}\t Sigma Value: {}\t Average Accuracy: {}%".format(layer_combo_name, p_values[p], gamma_values[g], sigma_values[s], avg_accuracy))
+
+            for p in range(len(p_values)):
+                plt.figure()
+
+                color_map = plt.get_cmap('viridis')
+                colors = color_map(np.linspace(0, 1, len(gamma_values)))
+
+                for g in range(len(gamma_values)):
+                    avg_accuracy_gamma = avg_accuracies[p, g, :]
+                    gamma_truncated = round(gamma_values[g], 3)
+                    plt.plot(sigma_values, avg_accuracy_gamma, color=colors[g], label=f'Gamma: {gamma_truncated}')
+
+                plt.xlabel('Sigma Value')
+                plt.ylabel('Average Accuracy')
+                plt.title(f'Line Plot for P Value: {p_values[p]}')
+                plt.legend(title='Gamma Values')
+                plt.savefig(os.path.join(output_dir, f'line_plot_p_{p_values[p]}_{layer_combo_name}.png'))
+                plt.clf()
+
 
 
 
@@ -428,7 +473,7 @@ test accuracy at different BER values and saves it in the directory.
 
 
 def ber_noise_plot_brevitas(num_perturbations, layer_names, ber_vector, model, device, test_quantized_loader, model_name):
-    
+
     if not os.path.exists(f"noise_plots_brevitas/ber_noise/{model_name}"):
         os.makedirs(f"noise_plots_brevitas/ber_noise/{model_name}")
     
@@ -436,34 +481,39 @@ def ber_noise_plot_brevitas(num_perturbations, layer_names, ber_vector, model, d
     
     all_test_accs = []
 
-    for layer in layer_names:
-        test_accs = []
-        
-        for ber in ber_vector:
-            noisy_models = add_digital_noise_to_model_brevitas(model, [layer], ber, num_perturbations)
+    # Create a CSV file to store the raw data
+    csv_file_path = os.path.join(f"noise_plots_brevitas/ber_noise/{model_name}", "raw_data.csv")
+    with open(csv_file_path, mode='w', newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(["Layer", "BER Value", "Average Accuracy"])
+
+        for layer in layer_names:
+            test_accs = []
             
-            accuracies = []
-            
-            for noisy_model in noisy_models:
+            for ber in ber_vector:
+                noisy_models = add_digital_noise_to_model_brevitas(model, [layer], ber, num_perturbations)
                 
-                noisy_model.to(device)
-                accuracies.append(test(noisy_model, test_quantized_loader, device))
+                accuracies = []
                 
-            avg_accuracy = sum(accuracies) / len(accuracies)
+                for noisy_model in noisy_models:
+                    noisy_model.to(device)
+                    accuracies.append(test(noisy_model, test_quantized_loader, device))
+                
+                avg_accuracy = sum(accuracies) / len(accuracies)
+                test_accs.append(avg_accuracy)
+
+                # Write the raw data to the CSV file
+                writer.writerow([layer, ber, avg_accuracy])
+
+                print("Layer: {}\tBER Value: {}\tAverage Accuracy: {}".format(layer, ber, avg_accuracy))
             
-            test_accs.append(avg_accuracy)
+            all_test_accs.append(test_accs)
             
-            print("BER Value: {}\tAverage Accuracy: {}".format(ber, avg_accuracy))
-            
-        all_test_accs.append(test_accs)
-        
-        plt.plot(ber_vector, test_accs,
-                 label='{} Accuracy at Different Perturbation Levels'.format(layer))
+            plt.plot(ber_vector, test_accs, label='{} Accuracy at Different Perturbation Levels'.format(layer))
 
     avg_test_accs = [sum(x) / len(x) for x in zip(*all_test_accs)]
 
-    plt.plot(ber_vector, avg_test_accs, label='Average',
-             linewidth=3, linestyle='--', color="black")
+    plt.plot(ber_vector, avg_test_accs, label='Average', linewidth=3, linestyle='--', color="black")
 
     plt.xlabel('BER Value')
     plt.ylabel('Test Accuracy')
@@ -475,30 +525,37 @@ def ber_noise_plot_brevitas(num_perturbations, layer_names, ber_vector, model, d
 
     
 def ber_noise_plot_brevitas_multiple_layers(num_perturbations, layer_names, ber_vector, model, device, test_quantized_loader, model_name):
-    
+
     if not os.path.exists(f"noise_plots_brevitas/ber_noise/{model_name}"):
         os.makedirs(f"noise_plots_brevitas/ber_noise/{model_name}")
-    
+
     plt.style.use('default')
-    
+
     test_accs = []
 
-    for ber in ber_vector:
-        noisy_models = add_digital_noise_to_model_brevitas(model, layer_names, ber, num_perturbations)
-        
-        accuracies = []
-        
-        for noisy_model in noisy_models:
-            
-            noisy_model.to(device)
-            accuracies.append(test(noisy_model, test_quantized_loader, device))
-            
-        avg_accuracy = sum(accuracies) / len(accuracies)
-        
-        test_accs.append(avg_accuracy)
-        
-        print("BER Value: {}\tAverage Accuracy: {}".format(ber, avg_accuracy))
-            
+    # Create a CSV file to store the raw data
+    csv_file_path = os.path.join(f"noise_plots_brevitas/ber_noise/{model_name}", "raw_data_all_layers.csv")
+    with open(csv_file_path, mode='w', newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(["BER Value", "Average Accuracy"])
+
+        for ber in ber_vector:
+            noisy_models = add_digital_noise_to_model_brevitas(model, layer_names, ber, num_perturbations)
+
+            accuracies = []
+
+            for noisy_model in noisy_models:
+                noisy_model.to(device)
+                accuracies.append(test(noisy_model, test_quantized_loader, device))
+
+            avg_accuracy = sum(accuracies) / len(accuracies)
+            test_accs.append(avg_accuracy)
+
+            # Write the raw data to the CSV file
+            writer.writerow([ber, avg_accuracy])
+
+            print("BER Value: {}\tAverage Accuracy: {}".format(ber, avg_accuracy))
+
     plt.plot(ber_vector, test_accs, label='Accuracy at Different Perturbation Levels for all Layers')
 
     plt.xlabel('BER Value')
@@ -653,67 +710,144 @@ Finally, the function saves the average test accuracy plot to a file and display
 """
 
 def gaussian_noise_plots_brevitas(num_perturbations, layer_names, sigma_vector, model, device, test_quantized_loader, analog_noise_type, model_name):
-    
+
     if not os.path.exists(f"noise_plots_brevitas/gaussian_noise/{model_name}"):
         os.makedirs(f"noise_plots_brevitas/gaussian_noise/{model_name}")
-    
+
     plt.style.use('default')
-    
+
     # Create a list to store the test accuracies for all layers
     all_test_accs = []
-    
-    # Loop over each layer and plot the test accuracy as a function of the standard deviation for that layer
-    for layer in layer_names:
-        # Initialize a list to store the test accuracies for this layer
-        test_accs = []
-        # Iterate over the standard deviation values and add noise to the model for this layer only
-        for sigma in sigma_vector:
-            # Add noise to the model for the defined layer only
-            noisy_models = add_gaussian_noise_to_model_brevitas(
-                model, [layer], sigma, num_perturbations, analog_noise_type)
-            accuracies = []
-            # Test the accuracy of each noisy model and append the result to the accuracies list
-            for noisy_model in noisy_models:
-                # Move the model back to the target device
-                noisy_model.to(device)
-                accuracies.append(test(noisy_model, test_quantized_loader, device))
-            # Calculate the average accuracy and print the result
-            avg_accuracy = sum(accuracies) / len(accuracies)
-            # Append the average accuracy to the test_accs list
-            test_accs.append(avg_accuracy)
-            
-            if (analog_noise_type):
-                print("Independent: Sigma Value: {}, Average Accuracy: {}%".format(
-                    sigma, avg_accuracy))
-            else:
-                print("Proportional: Sigma Value: {}, Average Accuracy: {}%".format(
-                    sigma, avg_accuracy))
-                
-        # Store the test accuracies for this layer in the all_test_accs list
-        all_test_accs.append(test_accs)
-        # Plot the test accuracies as a function of the standard deviation for this layer
-        plt.plot(sigma_vector, test_accs,
-                 label='{} Accuracy at Different Perturbation Levels'.format(layer))
-
-    # Compute the average test accuracy across all layers for each standard deviation value
-    avg_test_accs = [sum(x) / len(x) for x in zip(*all_test_accs)]
-
-    # Plot the averaged test accuracies as a function of the standard deviation
-    plt.plot(sigma_vector, avg_test_accs, label='Average',
-             linewidth=3, linestyle='--', color="black")
-
-    plt.xlabel('Standard Deviation')
-    plt.ylabel('Test Accuracy')
-    plt.title('Effect of Noise on Test Accuracy (Individual Layers and Average)')
-    plt.legend()
 
     if (analog_noise_type):
-        plt.savefig(f"noise_plots_brevitas/gaussian_noise/{model_name}/individual_and_average_independent.png")
+        csv_file_path = os.path.join(f"noise_plots_brevitas/gaussian_noise/{model_name}", "raw_data_independent.csv")
     else:
-        plt.savefig(f"noise_plots_brevitas/gaussian_noise/{model_name}/individual_and_average_proportional.png")
+        csv_file_path = os.path.join(f"noise_plots_brevitas/gaussian_noise/{model_name}", "raw_data_proportional.csv")
 
-    plt.show()
-    plt.clf()
+
+
+    # Create a CSV file to store the raw data
+    with open(csv_file_path, mode='w', newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(["Layer", "Sigma Value", "Average Accuracy"])
+
+        # Loop over each layer and plot the test accuracy as a function of the standard deviation for that layer
+        for layer in layer_names:
+            # Initialize a list to store the test accuracies for this layer
+            test_accs = []
+
+            # Iterate over the standard deviation values and add noise to the model for this layer only
+            for sigma in sigma_vector:
+                # Add noise to the model for the defined layer only
+                noisy_models = add_gaussian_noise_to_model_brevitas(
+                    model, [layer], sigma, num_perturbations, analog_noise_type)
+                accuracies = []
+
+                # Test the accuracy of each noisy model and append the result to the accuracies list
+                for noisy_model in noisy_models:
+                    # Move the model back to the target device
+                    noisy_model.to(device)
+                    accuracies.append(test(noisy_model, test_quantized_loader, device))
+
+                # Calculate the average accuracy and print the result
+                avg_accuracy = sum(accuracies) / len(accuracies)
+                # Append the average accuracy to the test_accs list
+                test_accs.append(avg_accuracy)
+
+                # Write the raw data to the CSV file
+                writer.writerow([layer, sigma, avg_accuracy])
+
+                if analog_noise_type:
+                    print("Independent: Layer: {}, Sigma Value: {}, Average Accuracy: {}%".format(
+                        layer, sigma, avg_accuracy))
+                else:
+                    print("Proportional: Layer: {}, Sigma Value: {}, Average Accuracy: {}%".format(
+                        layer, sigma, avg_accuracy))
+
+            # Store the test accuracies for this layer in the all_test_accs list
+            all_test_accs.append(test_accs)
+            # Plot the test accuracies as a function of the standard deviation for this layer
+            plt.plot(sigma_vector, test_accs,
+                     label='{} Accuracy at Different Perturbation Levels'.format(layer))
+
+        # Compute the average test accuracy across all layers for each standard deviation value
+        avg_test_accs = [sum(x) / len(x) for x in zip(*all_test_accs)]
+
+        # Plot the averaged test accuracies as a function of the standard deviation
+        plt.plot(sigma_vector, avg_test_accs, label='Average',
+                 linewidth=3, linestyle='--', color="black")
+
+        plt.xlabel('Standard Deviation')
+        plt.ylabel('Test Accuracy')
+        plt.title('Effect of Noise on Test Accuracy (Individual Layers and Average)')
+        plt.legend()
+
+        if analog_noise_type:
+            plt.savefig(f"noise_plots_brevitas/gaussian_noise/{model_name}/individual_and_average_independent.png")
+        else:
+            plt.savefig(f"noise_plots_brevitas/gaussian_noise/{model_name}/individual_and_average_proportional.png")
+
+        plt.show()
+        plt.clf()
+
+
+def gaussian_noise_plots_brevitas_all(num_perturbations, layer_names, sigma_vector, model, device, test_quantized_loader, analog_noise_type, model_name):
+
+    if not os.path.exists(f"noise_plots_brevitas/gaussian_noise/{model_name}"):
+        os.makedirs(f"noise_plots_brevitas/gaussian_noise/{model_name}")
+
+    plt.style.use('default')
+
+    # Create a CSV file to store the raw data
+    if (analog_noise_type):
+        csv_file_path = os.path.join(f"noise_plots_brevitas/gaussian_noise/{model_name}", "raw_data_independent_all_layers.csv")
+    else:
+        csv_file_path = os.path.join(f"noise_plots_brevitas/gaussian_noise/{model_name}", "raw_data_proportional_all_layers.csv")
+
+    with open(csv_file_path, mode='w', newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(["Sigma Value", "Average Accuracy"])
+
+        # Create a list to store the test accuracies for all layers
+        all_test_accs = []
+
+        for sigma in sigma_vector:
+            # Add noise to the model for all layers
+            noisy_models = add_gaussian_noise_to_model_brevitas(
+                model, layer_names, sigma, num_perturbations, analog_noise_type)
+            accuracies = []
+
+            for noisy_model in noisy_models:
+                noisy_model.to(device)
+                accuracies.append(test(noisy_model, test_quantized_loader, device))
+
+            avg_accuracy = sum(accuracies) / len(accuracies)
+            all_test_accs.append(avg_accuracy)
+
+            # Write the raw data to the CSV file
+            writer.writerow([sigma, avg_accuracy])
+
+            if analog_noise_type:
+                print("Independent: Sigma Value: {}, Average Accuracy: {}%".format(sigma, avg_accuracy))
+            else:
+                print("Proportional: Sigma Value: {}, Average Accuracy: {}%".format(sigma, avg_accuracy))
+
+        # Plot the test accuracies as a function of the standard deviation for all layers
+        plt.plot(sigma_vector, all_test_accs, label='Average Accuracy at Different Perturbation Levels')
+
+        plt.xlabel('Standard Deviation')
+        plt.ylabel('Test Accuracy')
+        plt.title('Effect of Noise on Test Accuracy (All Layers)')
+        plt.legend()
+
+        if analog_noise_type:
+            plt.savefig(f"noise_plots_brevitas/gaussian_noise/{model_name}/all_layers_independent.png")
+        else:
+            plt.savefig(f"noise_plots_brevitas/gaussian_noise/{model_name}/all_layers_proportional.png")
+
+        plt.show()
+        plt.clf()
+
 
 
 """
