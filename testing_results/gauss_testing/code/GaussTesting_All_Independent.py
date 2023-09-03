@@ -14,10 +14,15 @@ Date: 15 August 2023
 
 ## Import Statements
 
+## Imports from utils file for my defined noise functions
+import sys
+
 # import from the model functions file
 from model_functions import CommonUintActQuant, CommonIntWeightPerTensorQuant, ConvBlock, CIFAR100CNN_4Blocks, CIFAR100CNN_5Blocks
 from gauss_functions import gaussian_noise_plots_brevitas, gaussian_noise_plots_brevitas_all, add_gaussian_noise_independent, add_gaussian_noise_proportional, add_gaussian_noise_to_model_brevitas
 
+importlib.reload(sys.modules['model_functions'])
+importlib.reload(sys.modules['gauss_functions'])
 
 from copy import deepcopy
 import os
@@ -41,8 +46,6 @@ from datetime import datetime
 import time
 import random
 
-import sys
-
 # Brevitas imports
 import brevitas.nn as qnn
 from brevitas.core.quant import QuantType
@@ -55,11 +58,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import random_split
 
 import importlib
-## Imports from utils file for my defined noise functions
-import sys
 
-importlib.reload(sys.modules['model_functions'])
-importlib.reload(sys.modules['gauss_functions'])
 
 
 ## Extra imports
