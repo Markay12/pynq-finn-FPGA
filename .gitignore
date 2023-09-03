@@ -1,2 +1,9 @@
 
 *.icloud
+noise_weight_analysis/data/FashionMNIST/processed/.test.pt.icloud
+original_notebook_tests/cifar10_exploration/Brevitas/.TrainedBrevitas.pth.icloud
+original_notebook_tests/cifar10_exploration/Brevitas/.PynqInHouse2.jpg.icloud
+noise_weight_analysis/data/FashionMNIST/raw/.train-images-idx3-ubyte.gz.icloud
+noise_weight_analysis/data/FashionMNIST/raw/.t10k-images-idx3-ubyte.gz.icloud
+noise_weight_analysis/data/FashionMNIST/processed/.training.pt.icloud
+noise_weight_analysis/data/FashionMNIST/processed/.test.pt.icloud
