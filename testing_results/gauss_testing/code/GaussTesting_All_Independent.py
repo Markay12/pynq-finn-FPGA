@@ -138,7 +138,7 @@ for x, y in train_loader:
 # Get model name
 model_name = input("Name for the model: ")
 
-state_dict = torch.load(f'//home//mashinhu//Desktop//Cifar100Testing//tested_models//{model_name}.pth', map_location=device)
+state_dict = torch.load(f'..//tested_models//{model_name}.pth', map_location=device)
 
 print("\nState Dict Loaded\n")
 
