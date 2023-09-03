@@ -127,7 +127,7 @@ class ConvBlock(nn.Module):
 
 class CIFAR100CNN_4Blocks(nn.Module):
     def __init__(self,layer_one_bw=16,layer_two_bw=16,layer_three_bw=16,layer_four_bw=16,fcn_bw=16,act_bits=16,num_classes=100,normalization_func='batch',dropout=0.1):
-        super(CIFAR100CNN_4Blocks, self).__init__()
+        super().__init__()
 
         # Block 1
         self.conv1 = ConvBlock(3,64,3,weight_bit_width=layer_one_bw, act_bit_width=act_bits,stride = 1, padding=1, normalization_func=normalization_func, dropout=dropout)
@@ -188,7 +188,7 @@ class CIFAR100CNN_4Blocks(nn.Module):
 
 class CIFAR100CNN_5Blocks(nn.Module):
     def __init__(self,layer_one_bw=16,layer_two_bw=16,layer_three_bw=16,layer_four_bw=16,layer_five_bw=16,fcn_bw=16,act_bits=16,num_classes=100,normalization_func='batch',dropout=0.1):
-        super(CIFAR100CNN_5Blocks, self).__init__()
+        super().__init__()
 
         # Block 1
         self.conv1 = ConvBlock(3,64,3,weight_bit_width=layer_one_bw,act_bit_width=act_bits, stride = 1, padding=1, normalization_func=normalization_func, dropout=dropout)
