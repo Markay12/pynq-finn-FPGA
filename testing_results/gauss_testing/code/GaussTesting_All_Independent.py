@@ -16,6 +16,7 @@ Date: 15 August 2023
 
 ## Imports from utils file for my defined noise functions
 import sys
+import importlib
 
 # import from the model functions file
 from model_functions import CommonUintActQuant, CommonIntWeightPerTensorQuant, ConvBlock, CIFAR100CNN_4Blocks, CIFAR100CNN_5Blocks
@@ -56,9 +57,6 @@ import torch.nn.functional as F
 # For adaptive learning rate import
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import random_split
-
-import importlib
-
 
 
 ## Extra imports

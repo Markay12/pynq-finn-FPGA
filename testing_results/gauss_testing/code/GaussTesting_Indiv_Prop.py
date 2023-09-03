@@ -16,6 +16,7 @@ Date: 15 August 2023
 
 ## Imports from utils file for my defined noise functions
 import sys
+import importlib
 
 # import from the model functions file
 from model_functions import CommonUintActQuant, CommonIntWeightPerTensorQuant, ConvBlock, CIFAR100CNN_4Blocks, CIFAR100CNN_5Blocks
@@ -45,7 +46,6 @@ from datetime import datetime
 import time
 import random
 
-
 # Brevitas imports
 import brevitas.nn as qnn
 from brevitas.core.quant import QuantType
@@ -57,15 +57,7 @@ import torch.nn.functional as F
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import random_split
 
-import importlib
-## Imports from utils file for my defined noise functions
-import sys
-from noise_functions import mask_noise_plots_brevitas, mask_noise_plots_brevitas_multiple_layers, ber_noise_plot_brevitas, ber_noise_plot_brevitas_multiple_layers, gaussian_noise_plots_brevitas, gaussian_noise_plots_brevitas_all
-
-importlib.reload(sys.modules['noise_functions'])
-
 ## Extra imports
-import numpy as np
 import torch
 import random
 from copy import deepcopy
