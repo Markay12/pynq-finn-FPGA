@@ -51,7 +51,7 @@ from mask_functions import mask_noise_plots_brevitas, mask_noise_plots_brevitas_
 from model_functions import CommonUintActQuant, CommonIntWeightPerTensorQuant, ConvBlock, CIFAR100CNN_4Blocks, CIFAR100CNN_5Blocks
 
 
-importlib.reload(sys.modules['noise_functions'])
+importlib.reload(sys.modules['mask_functions'])
 importlib.reload(sys.modules['model_functions'])
 
 ## Extra imports
