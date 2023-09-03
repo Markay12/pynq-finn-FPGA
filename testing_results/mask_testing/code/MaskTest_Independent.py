@@ -47,7 +47,7 @@ import importlib
 import sys
 
 # Helper file imports
-from mask_functions import mask_noise_plots_brevitas, mask_noise_plots_brevitas_multiple_layers, ber_noise_plot_brevitas, ber_noise_plot_brevitas_multiple_layers, gaussian_noise_plots_brevitas, gaussian_noise_plots_brevitas_all
+from mask_functions import mask_noise_plots_brevitas, mask_noise_plots_brevitas_multiple_layers, add_mask_to_model_brevitas, apply_mask_and_noise_to_conv_weights, apply_mask_and_noise_to_linear_weights, apply_mask_and_noise_to_weights, random_clust_mask
 from model_functions import CommonUintActQuant, CommonIntWeightPerTensorQuant, ConvBlock, CIFAR100CNN_4Blocks, CIFAR100CNN_5Blocks
 
 
