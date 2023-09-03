@@ -57,138 +57,81 @@ to the target density P. The function returns the boolean mask as a PyTorch tens
 """
 
 def random_clust_mask(weight, P, gamma):
+    """
+    Generates a random clustered mask based on the input weight tensor.
+    
+    Args:
+        weight (torch.Tensor): Input weight tensor.
+        P (float): The target fraction of non-zero values in the mask.
+        gamma (float): Controls the falloff rate of the 2D filter in frequency space.
 
+    Returns:
+        torch.Tensor: A mask tensor of the same shape as the input weight tensor.
+    """
+    
+    # Seed the RNG
     random.seed(datetime.now().timestamp())
     
     weight_shape = weight.shape
-
-    #print(weight_numpy.shape)
-
-    if len(weight_shape) == 4:
-        N = weight.shape[2]
-        M = weight.shape[3]
-        #print(N)
-        #print(M)
-
-    elif len(weight_shape) == 2:
-        N = weight.shape[0]
-        M = weight.shape[1]
-        #print(N)
-        #print(M)
-    else:
-        raise ValueError("Unexpected weight dimesions")
     
-    if (N  > M):
-        
-        matrix = torch.rand((N, N), device = weight.device)
-        L = N
-        
+    # Check the shape of the weight tensor
+    if len(weight_shape) == 4:
+        N, M = weight.shape[2], weight.shape[3]
+    elif len(weight_shape) == 2:
+        N, M = weight.shape[0], weight.shape[1]
     else:
-        
-        matrix = torch.rand((M, M), device = weight.device)
+        raise ValueError("Unexpected weight dimensions")
+    
+    # Create an initial matrix based on the larger of N and M
+    if N > M:
+        matrix = torch.rand((N, N), device=weight.device)
+        L = N
+    else:
+        matrix = torch.rand((M, M), device=weight.device)
         L = M
     
-    
-    # Compute 2D FFT
+    # Compute the 2D FFT of the matrix
     fft_result = torch.fft.fft2(matrix)
-
-    # 1D Frequency Vector with N bins
+    
+    # Generate a 2D frequency filter
     f = torch.fft.fftfreq(L, d=1.0/L)
     f_x, f_y = torch.meshgrid(f, f)
-    f_x[0] = 1e-6
-    f_y[0] = 1e-6
-
-    # Create a 2D filter in frequency space that varies inversely with freq over f
-    # Gamma controls the falloff rate
+    f_x[0], f_y[0] = 1e-6, 1e-6
     filter_2D = 1 / (torch.sqrt(f_x**2 + f_y**2))**gamma
-
-    # Mult the 2D elementwise by the filter
-    filtered_fft = fft_result * filter_2D
-
-    # 2D inverse FFT of the filtered result
-    ifft_result = torch.fft.ifft2(filtered_fft).real
-
-    print("Sample IFFT result values:", ifft_result[:5, :5])
-
-    # Set the threshold T equal the the max value in IFFT
-    #T = torch.quantile(ifft_result, 0.95)
-    T = ifft_result.max().item()
     
-    # Trying softmax
-    softmax_values = torch.nn.functional.softmax(ifft_result.view(-1), dim = 0).view(ifft_result.shape)
+    # Apply the filter and perform inverse FFT
+    ifft_result = torch.fft.ifft2(fft_result * filter_2D).real
     
-    # Init empty bool mask with same dims as ifft
-    mask = (ifft_result > T).float()
-           
-
-    decrement_step = (ifft_result.max() - ifft_result.min()) / 100.0
-
-    # Repeat until frac of nonzero values in the mask is greater than or equal to P
-    timeout = 20   # [seconds]
-    timeout_start = time.time()
-
-    print("Initial T:", T)
-
-
-    while time.time() < (timeout_start + timeout):
-        
+    # Binary search approach to determine threshold T
+    low, high = ifft_result.min().item(), ifft_result.max().item()
+    while high - low > 1e-5:
+        T = (low + high) / 2
         mask = (ifft_result > T).float()
-
         current_fraction = mask.sum().item() / (L * L)
+        
+        if current_fraction > P:
+            low = T
+        else:
+            high = T
 
-        #print("Mask at T =", T, ":\n", mask)
+    converged_T = T
 
-        if current_fraction >= P:
-            break
-
-        T -= decrement_step
-
-    
-    
-     
-
-    print("Final T:", T)
-
-    print("Took"+ str(time.time()-timeout_start)+ "to converge")
-    # Return tensor with the same shape as the input tensor
-    # mask = np.tile(mask, (weight_shape[0], weight_shape[1], 1, 1))
-
-    print("Range of IFFT result values:", ifft_result.max().item() - ifft_result.min().item())
-
-
+    # Adjust mask dimensions to match the input weight tensor
     if N > M:
         mask = mask[:, :M]
     else:
         mask = mask[:N, :]
     
-    # Adjust mask shape
     if len(weight_shape) == 4:
         mask = mask.unsqueeze(0).unsqueeze(0)
         mask_final = mask.expand(weight_shape[0], weight_shape[1], -1, -1)
-
     elif len(weight_shape) == 2:
         mask_final = mask
-
+    
     mask_logical = (mask_final == 1).float()
     
-    print("Printing final shapes:")
-    print(f"Matrix Shape: {matrix.shape}")
-    print(f"FFT result shape: {fft_result.shape}")
-    print(f"Filtered FFT shape: {filtered_fft.shape}")
-    print(f"IFFT result shape: {ifft_result.shape}")
-    print(f"Mask shape after thresholding: {mask.shape}")
-    print(f"Final mask shape: {mask_final.shape}")
-    print(f"Logical mask shape: {mask_logical.shape}")
-
-    print(f"Fraction of ones in mask: {mask_final.sum().item() / mask_final.numel()}")
-
-    """
-    plt.imshow(ifft_result.cpu().numpy(), cmap="gray")
-    plt.colorbar()
-    plt.show()
-    """
-
     return mask_final, mask_logical
+
 
 
 """
