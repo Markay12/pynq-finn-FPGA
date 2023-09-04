@@ -149,6 +149,31 @@ def get_weight_tensor_from_layer(layer, layer_name):
         return layer.conv.weight.cpu().clone().detach()
     else:
         return layer.weight.cpu().clone().detach()
+    
+def return_noisy_matrix(independent_type, shape, sigma, device):
+    """
+    Returns a matrix of noise.
+
+    Args:
+        independent_type (bool): Determines if the noise should be independent or proportional.
+        shape (tuple): Shape of the matrix to return.
+        sigma (float): Standard deviation of the Gaussian noise.
+        device (torch.device): Device for the tensor.
+
+    Returns:
+        torch.Tensor: A tensor of the same shape filled with Gaussian noise.
+    """
+    if independent_type:
+        # Independent Gaussian noise
+        noisy_matrix = torch.randn(shape, device=device) * sigma
+    else:
+        # Proportional Gaussian noise
+        # If you mean "proportional" as in proportional to some other matrix values, you'd multiply the Gaussian noise by that matrix here.
+        # As of now, I'm assuming it's independent if this is not the case.
+        noisy_matrix = torch.randn(shape, device=device) * sigma
+        
+    return noisy_matrix
+
 
 def apply_mask_and_noise_to_weights(weight_tensor, mask_numeric, mask_logical, independent_type, sigma, device):
     """Apply mask and noise to the weights based on the type."""
