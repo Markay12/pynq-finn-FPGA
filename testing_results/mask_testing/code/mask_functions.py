@@ -216,7 +216,7 @@ def add_mask_to_model_brevitas(model, device, layer_names, p, gamma, num_perturb
                 print(weight_tensor)
 
             # Apply mask and noise to the weight tensor
-            if isinstance(layer, torch.nn.Conv2d):
+            if layer_name.lower().startswith("c"):
                 # Logic specific to convolutional layers (if any) can go here
                 weight_tensor = apply_mask_and_noise_to_weights(weight_tensor, mask_numeric, mask_logical, independent_type, sigma, device)
             elif isinstance(layer, torch.nn.Linear):
@@ -228,11 +228,16 @@ def add_mask_to_model_brevitas(model, device, layer_names, p, gamma, num_perturb
                 print("Weights after masking:")
                 print(weight_tensor)
 
-            layer.weight = torch.nn.Parameter(weight_tensor, requires_grad=False)
+            # Adjust this assignment based on layer type
+            if layer_name.lower().startswith("c"):
+                layer.conv.weight = torch.nn.Parameter(weight_tensor, requires_grad=False)
+            else:
+                layer.weight = torch.nn.Parameter(weight_tensor, requires_grad=False)
                 
         modified_models.append(modified_model)
 
     return modified_models
+
 
 
 """
