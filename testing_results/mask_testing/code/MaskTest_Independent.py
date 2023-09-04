@@ -168,15 +168,14 @@ print("\nBeginning to test perturbations\n")
 perturbations = 20 # Value does not change between tests
 
 
-#layer_names = ['conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'conv6', 'conv7', 'conv8', 'fc1', 'fc2']
-layer_names = ['conv1', 'fc2']
+layer_names = ['conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'conv6', 'conv7', 'conv8', 'fc1', 'fc2']
 #layer_combinations = [['conv1.conv', 'conv2.conv', 'conv3.conv', 'conv4.conv', 'conv5.conv', 'conv6.conv', 'conv7.conv', 'conv8.conv', 'fc1', 'fc2']]
 layer_combinations = [['conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'conv6', 'conv7', 'conv8', 'fc1', 'fc2']]
 
 
 p_values = [1, 0.5, 0.25]
 gamma_values = np.linspace(0.001, 0.1, 2)
-sigma = np.linspace(0.4, 0.45, 2)
+sigma = np.linspace(0.0, 0.2, 3)
 
 # Test independently with Independent and Proportional
 mask_noise_plots_brevitas(perturbations, layer_names, p_values, gamma_values, model, device, sigma, 1, val_quantized_loader, model_name)
