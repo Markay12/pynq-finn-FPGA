@@ -125,7 +125,8 @@ for x, y in train_loader:
 
 # Load the saved state dictionary from file
 
-state_dict = torch.load(f'//home//mashinhu//Desktop//Cifar100Testing//tested_models//best_model__7.0_7.0_.pth', map_location=device)
+model_name = input("Name for the model: ")
+state_dict = torch.load(f'..//tested_models//{model_name}.pth', map_location=device)
 
 print("\nState Dict Loaded\n")
 
@@ -151,7 +152,6 @@ model.load_state_dict(state_dict)
 
 print(model.state_dict().keys())
 
-model_name = input("Name for the model: ")
 
 # Test shapes
 print(model.conv1.conv.weight.shape)
