@@ -57,81 +57,100 @@ to the target density P. The function returns the boolean mask as a PyTorch tens
 """
 
 def random_clust_mask(weight, P, gamma):
-    """
-    Generates a random clustered mask based on the input weight tensor.
-    
-    Args:
-        weight (torch.Tensor): Input weight tensor.
-        P (float): The target fraction of non-zero values in the mask.
-        gamma (float): Controls the falloff rate of the 2D filter in frequency space.
 
-    Returns:
-        torch.Tensor: A mask tensor of the same shape as the input weight tensor.
-    """
+    # Generate random NxN matrix with values between 0 and 1
+    N = weight.shape[0]
+    M = weight.shape[1]
     
-    # Seed the RNG
-    random.seed(datetime.now().timestamp())
+    weight_numpy = weight.cpu().numpy()
     
-    weight_shape = weight.shape
-    
-    # Check the shape of the weight tensor
-    if len(weight_shape) == 4:
-        N, M = weight.shape[2], weight.shape[3]
-    elif len(weight_shape) == 2:
-        N, M = weight.shape[0], weight.shape[1]
-    else:
-        raise ValueError("Unexpected weight dimensions")
-    
-    # Create an initial matrix based on the larger of N and M
-    if N > M:
-        matrix = torch.rand((N, N), device=weight.device)
+    if (N  > M):
+        
+        matrix = np.random.rand(N, N)
         L = N
+        
     else:
-        matrix = torch.rand((M, M), device=weight.device)
+        
+        matrix = np.random.rand(M, M)
         L = M
     
-    # Compute the 2D FFT of the matrix
-    fft_result = torch.fft.fft2(matrix)
+            
+    matrix_tensor = torch.tensor(matrix)
     
-    # Generate a 2D frequency filter
-    f = torch.fft.fftfreq(L, d=1.0/L)
-    f_x, f_y = torch.meshgrid(f, f)
-    f_x[0], f_y[0] = 1e-6, 1e-6
-    filter_2D = 1 / (torch.sqrt(f_x**2 + f_y**2))**gamma
+    # Compute 2D FFT
+    fft_result = np.fft.fft2(matrix)
+
+    # 1D Frequency Vector with N bins
+    f = np.fft.fftfreq(L, d=1.0/L)
+    f_x, f_y = np.meshgrid(f, f)
+    f_x[0] = 1e-6
+    f_y[0] = 1e-6
+
+    # Create a 2D filter in frequency space that varies inversely with freq over f
+    # Gamma controls the falloff rate
+    filter_2D = 1/(np.sqrt(f_x**2 + f_y**2))**gamma
+
+    # Mult the 2D elementwise by the filter
+    filtered_fft = fft_result * filter_2D
+
+    # 2D inverse FFT of the filtered result
+    ifft_result = np.fft.ifft2(filtered_fft)
+    ifft_result = np.real(ifft_result)
+
+    # Set the threshold T equal the the max value in IFFT
+    T = ifft_result.max()
+
+    # Init empty bool mask with same dims as ifft
+    mask = np.zeros_like(ifft_result, dtype=bool)
+
+    decrement_step = 0.01
+
+    # Repeat until frac of nonzero values in the mask is greater than or equal to P
+    timeout = 20   # [seconds]
+    timeout_start = time.time()
+    while time.time() < (timeout_start + timeout):
+        mask = ifft_result > T
+
+        current_fraction = np.count_nonzero(mask) / (N * N)
+
+        if current_fraction >= P:
+            break
+
+        T -= decrement_step
+
+    print("Took"+ str(time.time()-timeout_start)+ "to converge")
+    # Return tensor with the same shape as the input tensor
+    # mask = np.tile(mask, (weight_shape[0], weight_shape[1], 1, 1))
     
-    # Apply the filter and perform inverse FFT
-    ifft_result = torch.fft.ifft2(fft_result * filter_2D).real
-    
-    # Binary search approach to determine threshold T
-    low, high = ifft_result.min().item(), ifft_result.max().item()
-    while high - low > 1e-5:
-        T = (low + high) / 2
-        mask = (ifft_result > T).float()
-        current_fraction = mask.sum().item() / (L * L)
+    if (N > M):
         
-        if current_fraction > P:
-            low = T
-        else:
-            high = T
-
-    converged_T = T
-
-    # Adjust mask dimensions to match the input weight tensor
-    if N > M:
-        mask = mask[:, :M]
+        mask = mask[:,:M]
+        
     else:
-        mask = mask[:N, :]
+        
+        mask = mask[:N,:]
+        
+    mask_final = np.zeros_like(weight_numpy)
+    #print(mask_final.shape)
+    #print(mask.shape)
     
-    if len(weight_shape) == 4:
-        mask = mask.unsqueeze(0).unsqueeze(0)
-        mask_final = mask.expand(weight_shape[0], weight_shape[1], -1, -1)
-    elif len(weight_shape) == 2:
-        mask_final = mask
-    
-    mask_logical = (mask_final == 1).float()
-    
-    return mask_final, mask_logical
+    mask_tensor = torch.tensor(mask, dtype=torch.bool, device=weight.device)
+    mask_final = torch.zeros_like(weight)
+    # Create a temporary tensor that repeats the mask tensor along the 3rd dimension
+    temp_mask = mask_tensor.unsqueeze(2).repeat(1, 1, weight.shape[2])
 
+    # Copy the temporary mask tensor along the 4th dimension (axis=3) of the mask_final tensor
+    for i in range(mask_final.shape[3]):
+        mask_final[:, :, :, i] = temp_mask
+        
+    mask_logical = torch.zeros(weight.shape, dtype=torch.bool,device=weight.device)
+    mask_logical = (mask_final==1)
+    mask_numeric = mask_final
+    
+    #mask tensor is 2D and float type
+    #mask numeric/final is 4D and float like
+    #mask logical is 4D and bool type
+    return mask_numeric, mask_logical
 
 
 """
