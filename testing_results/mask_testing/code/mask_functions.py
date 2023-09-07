@@ -58,6 +58,9 @@ to the target density P. The function returns the boolean mask as a PyTorch tens
 
 def random_clust_mask(weight, P, gamma):
 
+    random.seed(datetime.now().timestamp())
+    print("Random seed generated")
+
     # Generate random NxN matrix with values between 0 and 1
     N = weight.shape[0]
     M = weight.shape[1]
@@ -344,7 +347,7 @@ def mask_noise_plots_brevitas(num_perturbations, layer_names, p_values, gamma_va
 
     # Create a CSV file to store the raw data
 
-    random.seed(datetime.now().timestamp())
+    
 
     with open(csv_file_path, mode='w', newline='') as csv_file:
         writer = csv.writer(csv_file)
