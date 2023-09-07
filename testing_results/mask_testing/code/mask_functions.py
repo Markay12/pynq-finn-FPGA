@@ -136,12 +136,17 @@ def random_clust_mask(weight, P, gamma):
     
     mask_tensor = torch.tensor(mask, dtype=torch.bool, device=weight.device)
     mask_final = torch.zeros_like(weight)
-    # Create a temporary tensor that repeats the mask tensor along the 3rd dimension
-    temp_mask = mask_tensor.unsqueeze(2).repeat(1, 1, weight.shape[2])
 
-    # Copy the temporary mask tensor along the 4th dimension (axis=3) of the mask_final tensor
-    for i in range(mask_final.shape[3]):
-        mask_final[:, :, :, i] = temp_mask
+    if len(weight.shape) == 4:
+        # Create a temporary tensor that repeats the mask tensor along the 3rd dimension
+        temp_mask = mask_tensor.unsqueeze(2).repeat(1, 1, weight.shape[2])
+
+        # Copy the temporary mask tensor along the 4th dimension (axis=3) of the mask_final tensor
+        for i in range(mask_final.shape[3]):
+            mask_final[:, :, :, i] = temp_mask
+
+    elif len(weight.shape) == 2:
+        mask_final = torch.tensor(mask, device = weight.device)
         
     mask_logical = torch.zeros(weight.shape, dtype=torch.bool,device=weight.device)
     mask_logical = (mask_final==1)
