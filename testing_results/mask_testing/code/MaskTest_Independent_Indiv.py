@@ -173,9 +173,9 @@ layer_names = ['conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'conv6', 'conv7', 'c
 layer_combinations = [['conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'conv6', 'conv7', 'conv8', 'fc1', 'fc2']]
 
 
-p_values = [1, 0.5, 0.25]
-gamma_values = np.linspace(0.001, 0.1, 2)
-sigma = np.linspace(0.0, 0.075, 10)
+p_values = np.linspace(0.5, 1, 5)
+gamma_values = np.linspace(0.001, 0.2, 5)
+sigma = np.linspace(0.0, 0.075, 5)
 
 # Test independently with Independent and Proportional
 mask_noise_plots_brevitas(perturbations, layer_names, p_values, gamma_values, model, device, sigma, 1, val_quantized_loader, model_name)
