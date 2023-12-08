@@ -85,26 +85,26 @@ to the weight tensor using the add_digital_noise function. The noisy weight tens
 PyTorch tensor and is used to update the layer's weight tensor.
 """
 
-def add_digital_noise_to_model_brevitas(model, layer_names, ber, num_perturbations):
+def add_digital_noise_to_model_brevitas( model, layer_names, ber, num_perturbations ):
     
     modified_models = []
     
-    for _ in range(num_perturbations):
+    for _ in range( num_perturbations ):
         
-        modified_model = deepcopy(model)
+        modified_model = deepcopy( model )
         
         for layer_name in layer_names:
             
-            layer = getattr(modified_model, layer_name)
+            layer = getattr( modified_model, layer_name )
             
             with torch.no_grad():
                 
                 weight = layer.weight.cpu().detach().numpy()
-                noisy_weight = add_digital_noise_to_model_brevitas(weight, ber)
+                noisy_weight = add_digital_noise_to_model_brevitas( weight, ber )
                 
-                layer.weight = torch.nn.Parameter(torch.tensor(noisy_weight, dtype=torch.float))
+                layer.weight = torch.nn.Parameter(torch.tensor( noisy_weight, dtype=torch.float ) ) 
                 
-        modified_models.append(modified_model)
+        modified_models.append( modified_model )
         
     return modified_models
 

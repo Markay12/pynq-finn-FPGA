@@ -66,7 +66,6 @@ train_loader = torch.utils.data.DataLoader(train_set, batch_size=128, shuffle=Tr
 val_loader = torch.utils.data.DataLoader(val_set, batch_size=128, shuffle=False, num_workers=4)
 
 ## Data Loader
-#
 # Using PyTorch dataloader we can create a convenient iterator over the dataset that returns batches of data, rather than requiring manual batch creation.
 
 # set batch size
