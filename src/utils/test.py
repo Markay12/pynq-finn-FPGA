@@ -3,13 +3,13 @@ Test Utility
 -------------------------
 
 Description:
-    
+    The test utility file here defines how the models and neural networks will be tested. This function is in its own file due
+    to it being used in countless other situations throughout the other utility files and within the main script.
+    This test function is one of the last used functions in the process of this neural network analysis and is what 
+    allows for testing results.
 
 Functions:
     test()
-
-Usage:
-    
 
 Notes:
     
