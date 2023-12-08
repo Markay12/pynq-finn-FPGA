@@ -32,7 +32,7 @@ Notes:
     
 Author(s):
     Mark Ashinhust
-    Chris Bennett
+    Christopher Bennett
 
 Created on:
     05 December 2024
@@ -43,6 +43,13 @@ Last Modified:
 """
 
 ## IMPORT STATEMENTS
+from copy import deepcopy
+import csv
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+from test_noise import test
+import torch
 
 """
 Function Name: add_digital_noise_to_model_brevitas()
@@ -93,8 +100,7 @@ def add_digital_noise_to_model_brevitas(model, layer_names, ber, num_perturbatio
             with torch.no_grad():
                 
                 weight = layer.weight.cpu().detach().numpy()
-                noisy_weight = add_digital_noise(weight, ber)
-                
+                noisy_weight = add_digital_noise_to_model_brevitas(weight, ber)
                 
                 layer.weight = torch.nn.Parameter(torch.tensor(noisy_weight, dtype=torch.float))
                 
@@ -196,39 +202,52 @@ After each perturbation, the modified model is added to a list, which is then re
 """
 
 def add_gaussian_noise_to_model_brevitas(model, layer_names, sigma, num_perturbations, analog_noise_type):
+
     modified_models = []
+
     for _ in range(num_perturbations):
+
         modified_model = deepcopy(model)
+
         # add noise to the modified model
         for layer_name in layer_names:
+
             layer = getattr(modified_model, layer_name)
+
             with torch.no_grad():
+
                 # Get the weight and bias tensors
                 weight = layer.weight.cpu().detach().numpy()
                 bias = layer.bias.cpu().detach().numpy() if layer.bias is not None else None
+
                 # Add noise to the weight and bias tensors
                 if (analog_noise_type):
                     noised_weight = add_gaussian_noise_independent(weight, sigma)
+
                     if bias is not None:
                         noised_bias = add_gaussian_noise_independent(bias, sigma)
+
                     # Update the layer's weight and bias tensors with the noised values
                     layer.weight = torch.nn.Parameter(
                         torch.tensor(noised_weight, dtype=torch.float))
+                    
                     if bias is not None:
                         layer.bias = torch.nn.Parameter(
                             torch.tensor(noised_bias, dtype=torch.float))
                 else:
                     noised_weight = add_gaussian_noise_proportional(weight, sigma)
+
                     if bias is not None:
                         noised_bias = add_gaussian_noise_proportional(bias, sigma)
+
                     # Update the layer's weight and bias tensors with the noised values
                     layer.weight = torch.nn.Parameter(
                         torch.tensor(noised_weight, dtype=torch.float))
+                    
                     if bias is not None:
                         layer.bias = torch.nn.Parameter(
                             torch.tensor(noised_bias, dtype=torch.float))
                     
-
         modified_models.append(modified_model)
 
     return modified_models
@@ -286,8 +305,8 @@ def add_gaussian_noise_to_model_pytorch(model, layers, sigma, num_perturbations)
     
         
             # add noise to the weight and bias
-            noise_w = add_noise(weight_temp, sigma)
-            noise_b = add_noise(bias_temp, sigma)
+            noise_w = add_gaussian_noise_to_model_pytorch(weight_temp, sigma)
+            noise_b = add_gaussian_noise_to_model_pytorch(bias_temp, sigma)
 
             # place values back into the modified model for analysis
             layer[0].weight.data = torch.from_numpy(noise_w).float()
@@ -296,10 +315,7 @@ def add_gaussian_noise_to_model_pytorch(model, layers, sigma, num_perturbations)
         # append this modified model to the list
         modified_models.append(modified_model)
 
-        
     return modified_models
-
-
 
 """
 Function Name: ber_noise_plot_brevitas()
@@ -579,10 +595,9 @@ def gaussian_noise_plots_brevitas(num_perturbations, layer_names, sigma_vector, 
     else:
         csv_file_path = os.path.join(f"noise_plots_brevitas/gaussian_noise/{model_name}", "raw_data_proportional.csv")
 
-
-
     # Create a CSV file to store the raw data
     with open(csv_file_path, mode='w', newline='') as csv_file:
+
         writer = csv.writer(csv_file)
         writer.writerow(["Layer", "Sigma Value", "Average Accuracy"])
 
@@ -751,8 +766,6 @@ def gaussian_noise_plots_brevitas_all(num_perturbations, layer_names, sigma_vect
         plt.show()
         plt.clf()
 
-
-
 """
 Function Name: return_noisy_matrix()
 
@@ -778,7 +791,6 @@ Parameters:
         Type:           PyTorch device object.
         Details:        Ensures the generated noisy matrix is allocated on the specified device 
                         (e.g., for compatibility with the rest of a PyTorch model).
-
 """
 
 def return_noisy_matrix(independent, dim_matrix, sigma, device):
@@ -789,4 +801,3 @@ def return_noisy_matrix(independent, dim_matrix, sigma, device):
         noised_matrix = torch.randn(dim_matrix) * sigma + 1
 
     return noised_matrix.to(device)
-

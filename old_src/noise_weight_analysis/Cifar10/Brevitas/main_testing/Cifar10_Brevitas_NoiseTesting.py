@@ -156,7 +156,6 @@ print(model.layer2.weight.shape)
 print(model.fc1.weight.shape)
 
 ## Testing Models
-
 # Begin with Mask
 
 random.seed(42)

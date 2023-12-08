@@ -3,7 +3,9 @@ Noise Mask Utilities
 -------------------------
 
 Description:
-    
+    This file includes the noise mask utilities script which allows for testing the neural network performance under a mask
+    rather than noise. These functions are used in the same manner as the noise_injection_brevitas_funcs, however, they are
+    testing a mask rather than independent and / or proportional noise.
 
 Functions:
     add_mask_to_model_brevitas()
@@ -22,7 +24,7 @@ Notes:
     
 Author(s):
     Mark Ashinhust
-    Chris Bennett
+    Christopher Bennett
 
 Created on:
     05 December 2024
@@ -31,7 +33,11 @@ Last Modified:
     07 December 2024
 
 """
-
+## IMPORT STATEMENTS
+from copy import deepcopy
+import numpy as np
+from noise_injection_brevitas_funcs import return_noisy_matrix
+import torch
 
 """
 Function Name: add_mask_to_model_brevitas()
@@ -111,8 +117,7 @@ def add_mask_to_model_brevitas(model, device, layer_names, P, gamma, num_perturb
                 #print(weight_tensor.shape)
                 
                 # generate mask with correct shape
-                mask_graph, mask_numeric, mask_logical = random_clust_mask(weight_tensor, P, gamma)
-                
+                mask_graph, mask_numeric, mask_logical = random_clust_mask_brevitas(weight_tensor, P, gamma)
 
                 if print_weights:
                     print("Weights before masking:")
@@ -154,13 +159,11 @@ def add_mask_to_model_brevitas(model, device, layer_names, P, gamma, num_perturb
                 # create new weight parameter and assign to layer
                 noised_weight = torch.nn.Parameter(weight_tensor, requires_grad=False)
                 
-                
                 layer.weight = noised_weight
 
         modified_models.append(modified_model)
 
     return modified_models
-
 
 """
 Function: random_clust_mask_brevitas()
@@ -214,7 +217,6 @@ def random_clust_mask_brevitas(weight, P, gamma):
         matrix = np.random.rand(M, M)
         L = M
     
-            
     matrix_tensor = torch.tensor(matrix)
     
     # Compute 2D FFT
