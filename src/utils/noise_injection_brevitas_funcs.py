@@ -44,12 +44,73 @@ Last Modified:
 
 ## IMPORT STATEMENTS
 from copy import deepcopy
+import datetime
 import csv
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 from test_noise import test
 import torch
+
+"""
+Function Name: add_digital_noise()
+
+Parameters:
+    1. matrix
+        Description:    The matrix to which noise will be added.
+        Type:           numpy.ndarray.
+        Details:        This matrix represents the data (such as weights of a neural network layer) 
+                        to which digital noise is to be applied.
+
+    2. ber
+        Description:    Bit Error Rate, determining the probability of each element in the 
+                        matrix being affected by noise.
+        Type:           Float.
+        Details:        BER controls the amount of noise that will be added to the matrix. 
+                        It represents the likelihood of any given element in the matrix to be 
+                        modified by noise.
+
+Function Process:
+    - A new random seed is generated for each invocation of the function, based on the 
+      current datetime. This seed ensures that the noise pattern is different each time 
+      the function is called.
+    - A boolean mask is created, the same shape as the input matrix, where each element is 
+      'True' with a probability defined by the BER. This mask determines which elements of 
+      the matrix will be affected by noise.
+    - A noise matrix, with random values between -1 and 1, is generated and applied to the 
+      original matrix wherever the mask is 'True'.
+    - The resulting matrix, now with added noise, is then clipped to ensure all values 
+      remain within the range of [-1, 1].
+
+Return:
+    - numpy.ndarray: The input matrix after adding digital noise and clipping its values 
+                     to the range of [-1, 1].
+ 
+"""
+
+def add_digital_noise( matrix, ber ):
+
+    # Generate a new seed each time to add noise to the model.
+    # This creates more accurate randomess and noise generation.
+    current_time = datetime.datetime.now()
+    seed = int( current_time.timestamp() )
+
+    # Set the seed 
+    random.seed( seed );
+    print( "New seed has been generated." );
+
+    # Generate a boolean mask with the same shape as the matrix where each element is True with probability `ber`
+    mask = np.random.rand( *matrix.shape ) < ber
+    
+    # Generate a matrix of random values between -1 and 1 with the same shape as the input matrix
+    noise = np.random.uniform( -1, 1, size=matrix.shape )
+    
+    # Add the noise to the input matrix only where the mask is True
+    noisy_matrix = matrix + mask * noise
+    
+    # Clip the noisy matrix to the range [-1, 1] to ensure that all elements are within this range
+    return np.clip( noisy_matrix, -1, 1 )
 
 """
 Function Name: add_digital_noise_to_model_brevitas()
@@ -100,7 +161,7 @@ def add_digital_noise_to_model_brevitas( model, layer_names, ber, num_perturbati
             with torch.no_grad():
                 
                 weight = layer.weight.cpu().detach().numpy()
-                noisy_weight = add_digital_noise_to_model_brevitas( weight, ber )
+                noisy_weight = add_digital_noise( weight, ber )
                 
                 layer.weight = torch.nn.Parameter(torch.tensor( noisy_weight, dtype=torch.float ) ) 
                 
@@ -129,8 +190,18 @@ the standard deviation of the noise distribution. The function returns the origi
 matrix with added noise.
 """
 
-def add_gaussian_noise_independent(matrix, sigma):
-    noised_matrix = matrix + np.random.normal(0, scale=sigma)
+def add_gaussian_noise_independent( matrix, sigma ):
+
+    # Generate a new seed each time to add noise to the model.
+    # This creates more accurate randomess and noise generation.
+    current_time = datetime.datetime.now()
+    seed = int( current_time.timestamp() )
+
+    # Set the seed 
+    random.seed( seed );
+    print( "New seed has been generated." );
+
+    noised_matrix = matrix + np.random.normal( 0, scale=sigma )
     return noised_matrix
 
 """
@@ -150,8 +221,18 @@ Parameters:
                         Unlike the independent noise addition, this affects the matrix elements in a multiplicative manner.
 """
 
-def add_gaussian_noise_proportional(matrix, sigma):
-    noised_matrix = matrix * np.random.normal(1, scale=sigma)
+def add_gaussian_noise_proportional( matrix, sigma ):
+
+    # Generate a new seed each time to add noise to the model.
+    # This creates more accurate randomess and noise generation.
+    current_time = datetime.datetime.now()
+    seed = int( current_time.timestamp() )
+
+    # Set the seed 
+    random.seed( seed );
+    print( "New seed has been generated." );
+
+    noised_matrix = matrix * np.random.normal( 1, scale=sigma )
     return noised_matrix
 
 """
@@ -201,18 +282,18 @@ weight and bias tensors.
 After each perturbation, the modified model is added to a list, which is then returned once all perturbations have been applied.
 """
 
-def add_gaussian_noise_to_model_brevitas(model, layer_names, sigma, num_perturbations, analog_noise_type):
+def add_gaussian_noise_to_model_brevitas( model, layer_names, sigma, num_perturbations, analog_noise_type ):
 
     modified_models = []
 
-    for _ in range(num_perturbations):
+    for _ in range( num_perturbations ):
 
-        modified_model = deepcopy(model)
+        modified_model = deepcopy( model )
 
         # add noise to the modified model
         for layer_name in layer_names:
 
-            layer = getattr(modified_model, layer_name)
+            layer = getattr( modified_model, layer_name )
 
             with torch.no_grad():
 
@@ -220,35 +301,37 @@ def add_gaussian_noise_to_model_brevitas(model, layer_names, sigma, num_perturba
                 weight = layer.weight.cpu().detach().numpy()
                 bias = layer.bias.cpu().detach().numpy() if layer.bias is not None else None
 
+                print( "Adding noise for the model at Layer: ", layer_name, " and Perturbation: ", _ );
+
                 # Add noise to the weight and bias tensors
-                if (analog_noise_type):
-                    noised_weight = add_gaussian_noise_independent(weight, sigma)
+                if ( analog_noise_type ):
+                    noised_weight = add_gaussian_noise_independent( weight, sigma )
 
                     if bias is not None:
-                        noised_bias = add_gaussian_noise_independent(bias, sigma)
+                        noised_bias = add_gaussian_noise_independent( bias, sigma )
 
                     # Update the layer's weight and bias tensors with the noised values
                     layer.weight = torch.nn.Parameter(
-                        torch.tensor(noised_weight, dtype=torch.float))
+                        torch.tensor( noised_weight, dtype=torch.float ) )
                     
                     if bias is not None:
                         layer.bias = torch.nn.Parameter(
-                            torch.tensor(noised_bias, dtype=torch.float))
+                            torch.tensor( noised_bias, dtype=torch.float ) )
                 else:
-                    noised_weight = add_gaussian_noise_proportional(weight, sigma)
+                    noised_weight = add_gaussian_noise_proportional( weight, sigma )
 
                     if bias is not None:
-                        noised_bias = add_gaussian_noise_proportional(bias, sigma)
+                        noised_bias = add_gaussian_noise_proportional( bias, sigma )
 
                     # Update the layer's weight and bias tensors with the noised values
                     layer.weight = torch.nn.Parameter(
-                        torch.tensor(noised_weight, dtype=torch.float))
+                        torch.tensor( noised_weight, dtype=torch.float ) )
                     
                     if bias is not None:
                         layer.bias = torch.nn.Parameter(
-                            torch.tensor(noised_bias, dtype=torch.float))
+                            torch.tensor( noised_bias, dtype=torch.float ) )
                     
-        modified_models.append(modified_model)
+        modified_models.append( modified_model )
 
     return modified_models
 
@@ -285,28 +368,28 @@ The layers to be perturbed are specified by a list of layers, where each layer i
 The function returns a list of the modified models.
 """
 
-def add_gaussian_noise_to_model_pytorch(model, layers, sigma, num_perturbations):
+def add_gaussian_noise_to_model_pytorch( model, layers, sigma, num_perturbations ):
     
     # keep all modified models accuracy so we can get a correct average
     modified_models = []
 
-    for _ in range(num_perturbations):    
+    for _ in range( num_perturbations ):    
 
         # create individual modified model
-        modified_model = deepcopy(model)
+        modified_model = deepcopy( model )
 
-        for i in range(len(layers)): 
+        for i in range( len( layers ) ): 
             layer_name = f'layer{i + 1}'
-            layer = getattr(modified_model, layer_name)
+            layer = getattr( modified_model, layer_name )
     
             # get weight and bias for layer
             weight_temp = layer[0].weight.data.cpu().detach().numpy()
             bias_temp = layer[0].bias.data.cpu().detach().numpy()
     
-        
             # add noise to the weight and bias
-            noise_w = add_gaussian_noise_to_model_pytorch(weight_temp, sigma)
-            noise_b = add_gaussian_noise_to_model_pytorch(bias_temp, sigma)
+            # need to work on this to add independent vs. proportional noise
+            noise_w = ( weight_temp, sigma )
+            noise_b = ( bias_temp, sigma )
 
             # place values back into the modified model for analysis
             layer[0].weight.data = torch.from_numpy(noise_w).float()
@@ -392,16 +475,18 @@ def ber_noise_plot_brevitas(num_perturbations, layer_names, ber_vector, model, d
     all_test_accs = []
 
     # Create a CSV file to store the raw data
-    csv_file_path = os.path.join(f"noise_plots_brevitas/ber_noise/{model_name}", "raw_data.csv")
-    with open(csv_file_path, mode='w', newline='') as csv_file:
-        writer = csv.writer(csv_file)
-        writer.writerow(["Layer", "BER Value", "Average Accuracy"])
+    csv_file_path = os.path.join( f"noise_plots_brevitas/ber_noise/{model_name}", "raw_data.csv" )
+
+    with open( csv_file_path, mode='w', newline='' ) as csv_file:
+
+        writer = csv.writer( csv_file )
+        writer.writerow( [ "Layer", "BER Value", "Average Accuracy" ] )
 
         for layer in layer_names:
             test_accs = []
             
             for ber in ber_vector:
-                noisy_models = add_digital_noise_to_model_brevitas(model, [layer], ber, num_perturbations)
+                noisy_models = add_digital_noise_to_model_brevitas( model, [layer], ber, num_perturbations )
                 
                 accuracies = []
                 
