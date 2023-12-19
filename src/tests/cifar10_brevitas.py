@@ -18,6 +18,11 @@ Last Modified:
     08 December 2024
 
 """
+
+print("-----------------------------------------------------")
+print("---------- Importing Modules and Functions ----------")
+print("-----------------------------------------------------")
+
 ## Import statements
 import brevitas.nn as qnn
 from brevitas.quant import Int32Bias
@@ -45,10 +50,18 @@ sys.path.append( str( parent_directory ) )
 # Now, you can import from the parent directory
 from utils import noise_injection_brevitas_funcs as noise_funcs
 
+print("-----------------------------------------------------")
+print("-------------- Locating Targeted Device -------------")
+print("-----------------------------------------------------")
+
 # Locate the device that can be used for noise analysis and testing
 # Target this device 
 device = torch.device( "cuda" if torch.cuda.is_available() else "cpu" )
 print( "Target device: " + str (device ) )
+
+print("-----------------------------------------------------")
+print("------- Defining Data Augmentation Transforms -------")
+print("-----------------------------------------------------")
 
 # Define data augmentation transforms
 train_transform = transforms.Compose([
@@ -63,11 +76,19 @@ val_transform = transforms.Compose([
     transforms.Normalize( mean=[ 0.5, 0.5, 0.5 ], std=[ 0.5, 0.5, 0.5 ] )
 ])
 
+print("-----------------------------------------------------")
+print("------------ Applying Data Augmentation -------------")
+print("-----------------------------------------------------")
+
 # Apply data augmentation to the training dataset
 train_set = torchvision.datasets.CIFAR10( root='../data', train=True, download=True, transform=train_transform )
 
 # Use the validation transform for the validation dataset
 val_set = torchvision.datasets.CIFAR10( root='../data', train=False, download=True, transform=val_transform )
+
+print("-----------------------------------------------------")
+print("--------------- Creating Data Loaders ---------------")
+print("-----------------------------------------------------")
 
 # Create the data loaders
 train_loader = torch.utils.data.DataLoader( train_set, batch_size=128, shuffle=True, num_workers=4 )
@@ -132,6 +153,10 @@ class CIFAR10CNN(nn.Module):
         x = self.fc2( x )
 
         return x
+
+print("-----------------------------------------------------")
+print("---- Model, Optimizer and Criteria Initialized ------")
+print("-----------------------------------------------------")
     
 # Initialize the model, optimizer, and criterion
 model = CIFAR10CNN().to( device )
@@ -154,10 +179,18 @@ state_dict = torch.load( f'C:\\Users\\ashin\\source\\repos\\Cifar10_Pytorch_Nois
 # Load the state dictionary into the model
 model.load_state_dict( state_dict )
 
+print("-----------------------------------------------------")
+print("------------- Printing Layer Shape Sizes ------------")
+print("-----------------------------------------------------")
+
 # Test shapes
 print(  model.layer1.weight.shape )
 print(  model.layer2.weight.shape )
 print(  model.fc1.weight.shape )
+
+print("-----------------------------------------------------")
+print("--------------- Generating Random Seed --------------")
+print("-----------------------------------------------------")
 
 ## Testing Models
 # Generate a seed based on the current date and time
@@ -176,11 +209,19 @@ p_values = [ 1, 0.5, 0.25 ]
 gamma_values = np.linspace( 0.001, 0.1, 2 )
 sigma = np.linspace( 0.0, 0.2, 2 )
 
+print("-----------------------------------------------------")
+print("---------- Beginning Bit Error Rate Testing ---------")
+print("-----------------------------------------------------")
+
 ## BER Noise Testing
 ber_vals = np.linspace( 1e-5, 0.01, 15 )
 
 noise_funcs.ber_noise_plot_brevitas( perturbations, layer_names, ber_vals, model, device, test_quantized_loader, model_name )
 noise_funcs.ber_noise_plot_brevitas_multiple_layers( perturbations, layer_names, ber_vals, model, device, test_quantized_loader, model_name )
+
+print("-----------------------------------------------------")
+print("---------- Beginning Gaussian Noise Testing ---------")
+print("-----------------------------------------------------")
 
 ## Gaussian Noise Testing
 # Gaussian sigma vector. Retains most values from BER but changes the sigma_vector.
