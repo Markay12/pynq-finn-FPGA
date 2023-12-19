@@ -49,9 +49,24 @@ import csv
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+from pathlib import Path
 import random
-from test_noise import test
+import sys
 import torch
+
+# Current script path
+current_path = Path(__file__).parent
+
+# Get parent directory
+parent_directory = current_path
+
+print(parent_directory)
+
+# Add parent to the Python path
+sys.path.append( str( parent_directory ) )
+
+from test_noise import test
+
 
 """
 Function Name: add_digital_noise()

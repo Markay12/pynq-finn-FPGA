@@ -45,7 +45,6 @@ sys.path.append( str( parent_directory ) )
 # Now, you can import from the parent directory
 from utils import noise_injection_brevitas_funcs as noise_funcs
 
-
 # Locate the device that can be used for noise analysis and testing
 # Target this device 
 device = torch.device( "cuda" if torch.cuda.is_available() else "cpu" )
