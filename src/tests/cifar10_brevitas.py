@@ -27,6 +27,7 @@ print("-----------------------------------------------------")
 import brevitas.nn as qnn
 from brevitas.quant import Int32Bias
 import datetime
+import os
 import numpy as np
 import random
 from pathlib import Path
@@ -154,6 +155,8 @@ class CIFAR10CNN(nn.Module):
 
         return x
 
+
+
 print("-----------------------------------------------------")
 print("---- Model, Optimizer and Criteria Initialized ------")
 print("-----------------------------------------------------")
@@ -174,7 +177,12 @@ model = CIFAR10CNN().to( device )
 model_name = input( "Name of the Model to Test: " )
 
 # Load the saved state dictionary from file
-state_dict = torch.load( f'C:\\Users\\ashin\\source\\repos\\Cifar10_Pytorch_NoiseAnalysis\\Cifar10_Pytorch_NoiseAnalysis\\pynq-finn-FPGA\\noise_weight_analysis\\Cifar10\\Brevitas\\main_testing\\models\\{model_name}.pth', map_location=device )
+# state_dict = torch.load( f'C:\\Users\\ashin\\source\\repos\\Cifar10_Pytorch_NoiseAnalysis\\Cifar10_Pytorch_NoiseAnalysis\\pynq-finn-FPGA\\noise_weight_analysis\\Cifar10\\Brevitas\\main_testing\\models\\{model_name}.pth', map_location=device )
+
+print("PWD: ", os.getcwd())
+
+state_dict = torch.load( f'{os.getcwd()}/trained_models/{model_name}.pth', map_location=device )
+
 
 # Load the state dictionary into the model
 model.load_state_dict( state_dict )
