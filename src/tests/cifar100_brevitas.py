@@ -170,7 +170,7 @@ seed = int( current_time.timestamp() )
 # Set the seed for the random module
 random.seed( seed )
 
-perturbations = 15 # Value does not change between tests
+perturbations = 1 # Value does not change between tests
 
 # set the layer names, combinations, probability, gamma and sigma values for BER testing
 layer_names = [ 'conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'conv6', 'conv7', 'conv8', 'fc1', 'fc2' ]
@@ -186,7 +186,7 @@ print("-----------------------------------------------------")
 ## BER Noise Testing
 ber_vals = np.linspace( 1e-5, 0.01, 15 )
 
-noise_funcs.ber_noise_plot_brevitas( perturbations, layer_names, ber_vals, model, device, val_quantized_loader, model_name )
+#noise_funcs.ber_noise_plot_brevitas( perturbations, layer_names, ber_vals, model, device, val_quantized_loader, model_name )
 noise_funcs.ber_noise_plot_brevitas_multiple_layers( perturbations, layer_names, ber_vals, model, device, val_quantized_loader, model_name )
 
 print("-----------------------------------------------------")
