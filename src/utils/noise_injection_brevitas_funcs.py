@@ -8,6 +8,7 @@ Description:
     and performance of data processing algorithms.
 
 Functions:
+    add_digital_noise()
     add_digital_noise_to_model_brevitas()
     add_gaussian_noise_independent()
     add_gaussian_noise_proportional()
@@ -170,22 +171,33 @@ def add_digital_noise_to_model_brevitas( model, layer_names, ber, num_perturbati
     
     modified_models = []
     
-    for _ in range( num_perturbations ):
+    for _ in range(num_perturbations):
         
-        modified_model = deepcopy( model )
+        modified_model = deepcopy(model)
         
         for layer_name in layer_names:
             
-            layer = getattr( modified_model, layer_name )
-            
+            if layer_name.lower().startswith("c"):
+                layer = getattr(modified_model, layer_name)
+                weight_tensor = layer.conv.weight.cpu().clone().detach()
+            else:
+                layer = getattr(modified_model, layer_name)
+                weight_tensor = layer.weight.cpu().clone().detach()
+
+            #print(f"Original weights for {layer_name}: {weight_tensor[0,0,0,:]}")
+
             with torch.no_grad():
                 
-                weight = layer.weight.cpu().detach().numpy()
-                noisy_weight = add_digital_noise( weight, ber )
+                noisy_weight = add_digital_noise(weight_tensor.numpy(), ber)
                 
-                layer.weight = torch.nn.Parameter(torch.tensor( noisy_weight, dtype=torch.float ) ) 
+                #print(f"Noisy weights for {layer_name}: {noisy_weight[0,0,0,:]}")
+
+                if layer_name.lower().startswith("c"):
+                    layer.conv.weight = torch.nn.Parameter(torch.tensor(noisy_weight, dtype=torch.float))
+                else:
+                    layer.weight = torch.nn.Parameter(torch.tensor(noisy_weight, dtype=torch.float))
                 
-        modified_models.append( modified_model )
+        modified_models.append(modified_model)
 
     print( "Digital Noise Added to Model - SUCCESSFUL - END" )
         
