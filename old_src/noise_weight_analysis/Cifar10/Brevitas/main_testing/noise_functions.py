@@ -51,8 +51,8 @@ def random_clust_mask(weight, P, gamma):
         matrix = np.random.rand(M, M)
         L = M
     
-            
-    matrix_tensor = torch.tensor(matrix)
+    # Not currently used 
+    # matrix_tensor = torch.tensor(matrix)
     
     # Compute 2D FFT
     fft_result = np.fft.fft2(matrix)
