@@ -307,56 +307,58 @@ weight and bias tensors.
 After each perturbation, the modified model is added to a list, which is then returned once all perturbations have been applied.
 """
 
-def add_gaussian_noise_to_model_brevitas( model, layer_names, sigma, num_perturbations, analog_noise_type ):
+def add_gaussian_noise_to_model_brevitas(model, layer_names, sigma, num_perturbations, analog_noise_type):
 
+    random.seed(datetime.now().timestamp())
+    
     modified_models = []
-
-    for _ in range( num_perturbations ):
-
-        modified_model = deepcopy( model )
-
+    
+    for _ in range(num_perturbations):
+    
+        modified_model = deepcopy(model)
+        
         # add noise to the modified model
         for layer_name in layer_names:
-
-            layer = getattr( modified_model, layer_name )
-
+        
+            layer = getattr(modified_model, layer_name)
+            
             with torch.no_grad():
-
-                # Get the weight and bias tensors
-                weight = layer.weight.cpu().detach().numpy()
-                bias = layer.bias.cpu().detach().numpy() if layer.bias is not None else None
-
-                print( "Adding noise for the model at Layer: ", layer_name, " and Perturbation: ", _ );
+            
+                
+                if layer_name.lower().startswith("c"):
+                    weight = layer.conv.weight.cpu().clone().detach().numpy()
+                    bias = layer.conv.bias.cpu().detach().numpy() if layer.conv.bias is not None else None
+                else:
+                    weight = layer.weight.cpu().clone().detach().numpy()
+                    bias = layer.bias.cpu().detach().numpy() if layer.bias is not None else None
 
                 # Add noise to the weight and bias tensors
-                if ( analog_noise_type ):
-                    noised_weight = add_gaussian_noise_independent( weight, sigma )
-
+                if (analog_noise_type):
+                    noised_weight = add_gaussian_noise_independent(weight, sigma)
+                
                     if bias is not None:
-                        noised_bias = add_gaussian_noise_independent( bias, sigma )
-
-                    # Update the layer's weight and bias tensors with the noised values
-                    layer.weight = torch.nn.Parameter(
-                        torch.tensor( noised_weight, dtype=torch.float ) )
-                    
-                    if bias is not None:
-                        layer.bias = torch.nn.Parameter(
-                            torch.tensor( noised_bias, dtype=torch.float ) )
+                        noised_bias = add_gaussian_noise_independent(bias, sigma)
                 else:
-                    noised_weight = add_gaussian_noise_proportional( weight, sigma )
+                    noised_weight = add_gaussian_noise_proportional(weight, sigma)
 
                     if bias is not None:
-                        noised_bias = add_gaussian_noise_proportional( bias, sigma )
+                        noised_bias = add_gaussian_noise_proportional(bias, sigma)
 
-                    # Update the layer's weight and bias tensors with the noised values
-                    layer.weight = torch.nn.Parameter(
-                        torch.tensor( noised_weight, dtype=torch.float ) )
-                    
+
+                # Update layer weights and bias tensors with noised values
+                if layer_name.lower().startswith("c"):
+                    layer.conv.weight = torch.nn.Parameter(torch.tensor(noised_weight, dtype = torch.float))
+
                     if bias is not None:
-                        layer.bias = torch.nn.Parameter(
-                            torch.tensor( noised_bias, dtype=torch.float ) )
-                    
-        modified_models.append( modified_model )
+                        layer.conv.bias = torch.nn.Parameter(torch.tensor(noised_bias, dtype = torch.float))
+
+                else:
+                    layer.weight = torch.nn.Parameter(torch.tensor(noised_weight, dtype = torch.float))
+
+                    if bias is not None:
+                        layer.bias = torch.nn.Parameter(torch.tensor(noised_bias, dtype = torch.float))
+
+        modified_models.append(modified_model)
 
     return modified_models
 
