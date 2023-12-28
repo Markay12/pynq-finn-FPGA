@@ -173,8 +173,8 @@ random.seed( seed )
 perturbations = 15 # Value does not change between tests
 
 # set the layer names, combinations, probability, gamma and sigma values for BER testing
-layer_names = [ 'layer1', 'layer2', 'layer3', 'layer4', 'layer5', 'fc1', 'fc2' ]
-layer_combinations = [ [ 'layer1', 'layer2', 'layer3', 'layer4', 'layer5' ] ]
+layer_names = [ 'conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'conv6', 'conv7', 'conv8', 'fc1', 'fc2' ]
+layer_combinations = [ [ 'conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'conv6', 'conv7', 'conv8', 'fc1', 'fc2' ] ]
 p_values = [ 1, 0.5, 0.25 ]
 gamma_values = np.linspace( 0.001, 0.1, 2 )
 sigma = np.linspace( 0.0, 0.2, 2 )
