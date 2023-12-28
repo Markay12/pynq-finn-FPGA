@@ -103,8 +103,8 @@ val_loader = torch.utils.data.DataLoader( val_set, batch_size=128, shuffle=False
 # set batch size
 batch_size= 256
 
-train_set = torchvision.datasets.CIFAR100(root='./data/', train=True, download=False, transform=train_transform)
-val_set = torchvision.datasets.CIFAR100(root='./data/', train=False, download=False, transform=val_transform)
+train_set = torchvision.datasets.CIFAR100(root='./data/', train=True, download=True, transform=train_transform)
+val_set = torchvision.datasets.CIFAR100(root='./data/', train=False, download=True, transform=val_transform)
 
 train_quantized_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=4)
 val_quantized_loader = torch.utils.data.DataLoader(val_set, batch_size=batch_size, shuffle=False, num_workers=4)
@@ -153,9 +153,10 @@ print("------------- Printing Layer Shape Sizes ------------")
 print("-----------------------------------------------------")
 
 # Test shapes
-print(  model.layer1.weight.shape )
-print(  model.layer2.weight.shape )
-print(  model.fc1.weight.shape    )
+print( "Convolutional Layer 1 Weight Shape: ",   model.conv1.conv.weight.shape )
+print( "Convolutional Layer 1 Bias: ",           model.conv1.conv.bias )
+print( "Fully Connected Layer 1 Weight Shape: ", model.fc1.weight.shape )
+
 
 print("-----------------------------------------------------")
 print("--------------- Generating Random Seed --------------")
@@ -185,8 +186,8 @@ print("-----------------------------------------------------")
 ## BER Noise Testing
 ber_vals = np.linspace( 1e-5, 0.01, 15 )
 
-noise_funcs.ber_noise_plot_brevitas( perturbations, layer_names, ber_vals, model, device, test_quantized_loader, model_name )
-noise_funcs.ber_noise_plot_brevitas_multiple_layers( perturbations, layer_names, ber_vals, model, device, test_quantized_loader, model_name )
+noise_funcs.ber_noise_plot_brevitas( perturbations, layer_names, ber_vals, model, device, val_quantized_loader, model_name )
+noise_funcs.ber_noise_plot_brevitas_multiple_layers( perturbations, layer_names, ber_vals, model, device, val_quantized_loader, model_name )
 
 print("-----------------------------------------------------")
 print("---------- Beginning Gaussian Noise Testing ---------")
@@ -196,7 +197,7 @@ print("-----------------------------------------------------")
 # Gaussian sigma vector. Retains most values from BER but changes the sigma_vector.
 sigma_vector = np.linspace(0, 0.05, 15)
 
-noise_funcs.gaussian_noise_plots_brevitas( perturbations, layer_names, sigma_vector, model, device, test_quantized_loader, 0, model_name )
-noise_funcs.gaussian_noise_plots_brevitas( perturbations, layer_names, sigma_vector, model, device, test_quantized_loader, 1, model_name )
-noise_funcs.gaussian_noise_plots_brevitas_all( perturbations, layer_names, sigma_vector, model, device, test_quantized_loader, 0, model_name )
-noise_funcs.gaussian_noise_plots_brevitas_all( perturbations, layer_names, sigma_vector, model, device, test_quantized_loader, 1, model_name )
+noise_funcs.gaussian_noise_plots_brevitas( perturbations, layer_names, sigma_vector, model, device, val_quantized_loader, 0, model_name )
+noise_funcs.gaussian_noise_plots_brevitas( perturbations, layer_names, sigma_vector, model, device, val_quantized_loader, 1, model_name )
+noise_funcs.gaussian_noise_plots_brevitas_all( perturbations, layer_names, sigma_vector, model, device, val_quantized_loader, 0, model_name )
+noise_funcs.gaussian_noise_plots_brevitas_all( perturbations, layer_names, sigma_vector, model, device, val_quantized_loader, 1, model_name )
