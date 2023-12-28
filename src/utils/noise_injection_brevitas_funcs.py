@@ -106,16 +106,13 @@ Return:
 
 def add_digital_noise( matrix, ber ):
 
-    print( "Adding Digital Noise - START" )
-
     # Generate a new seed each time to add noise to the model.
     # This creates more accurate randomess and noise generation.
     current_time = datetime.datetime.now()
     seed = int( current_time.timestamp() )
 
     # Set the seed 
-    random.seed( seed );
-    print( "New seed has been generated." );
+    random.seed( seed )
 
     # Generate a boolean mask with the same shape as the matrix where each element is True with probability `ber`
     mask = np.random.rand( *matrix.shape ) < ber
@@ -125,8 +122,6 @@ def add_digital_noise( matrix, ber ):
     
     # Add the noise to the input matrix only where the mask is True
     noisy_matrix = matrix + mask * noise
-
-    print( "Digital Noise Added - SUCCESSFUL - END" )
     
     # Clip the noisy matrix to the range [-1, 1] to ensure that all elements are within this range
     return np.clip( noisy_matrix, -1, 1 )
@@ -166,8 +161,6 @@ PyTorch tensor and is used to update the layer's weight tensor.
 """
 
 def add_digital_noise_to_model_brevitas( model, layer_names, ber, num_perturbations ):
-
-    print( "Adding Digital Noise to Model - BREVITAS - START" )
     
     modified_models = []
     
@@ -198,8 +191,6 @@ def add_digital_noise_to_model_brevitas( model, layer_names, ber, num_perturbati
                     layer.weight = torch.nn.Parameter(torch.tensor(noisy_weight, dtype=torch.float))
                 
         modified_models.append(modified_model)
-
-    print( "Digital Noise Added to Model - SUCCESSFUL - END" )
         
     return modified_models
 
@@ -226,20 +217,15 @@ matrix with added noise.
 
 def add_gaussian_noise_independent( matrix, sigma ):
 
-    print( "Generating Independent Gaussian Noise - START" )
-
     # Generate a new seed each time to add noise to the model.
     # This creates more accurate randomess and noise generation.
     current_time = datetime.datetime.now()
     seed = int( current_time.timestamp() )
 
     # Set the seed 
-    random.seed( seed );
-    print( "New seed has been generated." );
+    random.seed( seed )
 
     noised_matrix = matrix + np.random.normal( 0, scale=sigma )
-
-    print( "Independent Gaussian Noise Matrix Generated - SUCCESSFUL - END" )
 
     return noised_matrix
 
@@ -262,20 +248,15 @@ Parameters:
 
 def add_gaussian_noise_proportional( matrix, sigma ):
 
-    print( "Generating Proportional Gaussian Noise - START" )
-
     # Generate a new seed each time to add noise to the model.
     # This creates more accurate randomess and noise generation.
     current_time = datetime.datetime.now()
     seed = int( current_time.timestamp() )
 
     # Set the seed 
-    random.seed( seed );
-    print( "New seed has been generated." );
+    random.seed( seed )
 
     noised_matrix = matrix * np.random.normal( 1, scale=sigma )
-
-    print( "Proportional Gaussian Noise Matrix Generated - SUCCESSFUL - END" )
 
     return noised_matrix
 
@@ -328,8 +309,6 @@ After each perturbation, the modified model is added to a list, which is then re
 
 def add_gaussian_noise_to_model_brevitas( model, layer_names, sigma, num_perturbations, analog_noise_type ):
 
-    print( "Adding Gaussian Noise to Model - BREVITAS - START" )
-
     modified_models = []
 
     for _ in range( num_perturbations ):
@@ -379,8 +358,6 @@ def add_gaussian_noise_to_model_brevitas( model, layer_names, sigma, num_perturb
                     
         modified_models.append( modified_model )
 
-    print( "Gaussian Noise Added to Model - BREVITAS - END" )
-
     return modified_models
 
 """
@@ -417,8 +394,6 @@ The function returns a list of the modified models.
 """
 
 def add_gaussian_noise_to_model_pytorch( model, layers, sigma, num_perturbations ):
-
-    print( "Adding Gaussian Noise to Model - PyTorch - START" )
     
     # keep all modified models accuracy so we can get a correct average
     modified_models = []
@@ -447,8 +422,6 @@ def add_gaussian_noise_to_model_pytorch( model, layers, sigma, num_perturbations
 
         # append this modified model to the list
         modified_models.append(modified_model)
-
-    print( "Gaussian Noise Added to Model - PyTorch - SUCCESSFUL - END" )
 
     return modified_models
 
@@ -519,8 +492,6 @@ test accuracy at different BER values and saves it in the directory.
 
 def ber_noise_plot_brevitas(num_perturbations, layer_names, ber_vector, model, device, test_quantized_loader, model_name):
 
-    print( "Generating Bit Error Rate Noise Plots - START" )
-
     if not os.path.exists(f"noise_plots_brevitas/ber_noise/{model_name}"):
         os.makedirs(f"noise_plots_brevitas/ber_noise/{model_name}")
     
@@ -562,8 +533,6 @@ def ber_noise_plot_brevitas(num_perturbations, layer_names, ber_vector, model, d
 
     avg_test_accs = [sum(x) / len(x) for x in zip(*all_test_accs)]
 
-    print( "Noise Plot Generated - SAVING - END" )
-
     plt.plot(ber_vector, avg_test_accs, label='Average', linewidth=3, linestyle='--', color="black")
 
     plt.xlabel('BER Value')
@@ -573,8 +542,6 @@ def ber_noise_plot_brevitas(num_perturbations, layer_names, ber_vector, model, d
     plt.savefig(f"noise_plots_brevitas/ber_noise/{model_name}/individual_and_average.png")
     plt.show()
     plt.clf()
-
-    print( "Plot Generated and Saved - END" )
 
 """
 Function Name: ber_noise_plot_multiple_layers_brevitas()
@@ -625,8 +592,6 @@ Parameters:
 
 def ber_noise_plot_multiple_layers_brevitas(num_perturbations, layer_names, ber_vector, model, device, test_quantized_loader, model_name):
 
-    print( "Generating Bit Error Rate Noise Plot for Multiple Layers - BREVITAS - START" )
-
     if not os.path.exists(f"noise_plots_brevitas/ber_noise/{model_name}"):
         os.makedirs(f"noise_plots_brevitas/ber_noise/{model_name}")
 
@@ -657,8 +622,6 @@ def ber_noise_plot_multiple_layers_brevitas(num_perturbations, layer_names, ber_
 
             print("BER Value: {}\tAverage Accuracy: {}".format(ber, avg_accuracy))
 
-    print( "Noise Plot Generated for Multiple Layers - BREVITAS - SAVING" )
-
     plt.plot(ber_vector, test_accs, label='Accuracy at Different Perturbation Levels for all Layers')
 
     plt.xlabel('BER Value')
@@ -668,8 +631,6 @@ def ber_noise_plot_multiple_layers_brevitas(num_perturbations, layer_names, ber_
     plt.savefig(f"noise_plots_brevitas/ber_noise/{model_name}/all_layers.png")
     plt.show()
     plt.clf()
-
-    print( "Plot Generated and Saved - END" )
 
 """
 Function Name: gaussian_noise_plots_brevitas()
@@ -730,8 +691,6 @@ Finally, the function saves the average test accuracy plot to a file and display
 """
 
 def gaussian_noise_plots_brevitas(num_perturbations, layer_names, sigma_vector, model, device, test_quantized_loader, analog_noise_type, model_name):
-
-    print( "Generating Gaussian Noise Plot - BREVITAS - START" )
 
     if not os.path.exists(f"noise_plots_brevitas/gaussian_noise/{model_name}"):
         os.makedirs(f"noise_plots_brevitas/gaussian_noise/{model_name}")
@@ -794,8 +753,6 @@ def gaussian_noise_plots_brevitas(num_perturbations, layer_names, sigma_vector, 
         # Compute the average test accuracy across all layers for each standard deviation value
         avg_test_accs = [sum(x) / len(x) for x in zip(*all_test_accs)]
 
-        print( "Gaussian Noise Plot Generated - BREVITAS - SAVING" )
-
         # Plot the averaged test accuracies as a function of the standard deviation
         plt.plot(sigma_vector, avg_test_accs, label='Average',
                  linewidth=3, linestyle='--', color="black")
@@ -812,8 +769,6 @@ def gaussian_noise_plots_brevitas(num_perturbations, layer_names, sigma_vector, 
 
         plt.show()
         plt.clf()
-
-        print( "Plot Generated and Saved - END")
 
 """
 Function Name: gaussian_noise_plots_brevitas_all()
@@ -866,8 +821,6 @@ Paramters:
 
 def gaussian_noise_plots_brevitas_all(num_perturbations, layer_names, sigma_vector, model, device, test_quantized_loader, analog_noise_type, model_name):
 
-    print( "Generating Gaussian Noise Plot for Multiple Layers - BREVITAS - START" )
-
     if not os.path.exists(f"noise_plots_brevitas/gaussian_noise/{model_name}"):
         os.makedirs(f"noise_plots_brevitas/gaussian_noise/{model_name}")
 
@@ -907,8 +860,6 @@ def gaussian_noise_plots_brevitas_all(num_perturbations, layer_names, sigma_vect
             else:
                 print("Proportional: Sigma Value: {}, Average Accuracy: {}%".format(sigma, avg_accuracy))
 
-        print( "Gaussian Noise Plot for Multiple Layers Generated - BREVITAS - Saving" )
-
         # Plot the test accuracies as a function of the standard deviation for all layers
         plt.plot(sigma_vector, all_test_accs, label='Average Accuracy at Different Perturbation Levels')
 
@@ -924,8 +875,6 @@ def gaussian_noise_plots_brevitas_all(num_perturbations, layer_names, sigma_vect
 
         plt.show()
         plt.clf()
-
-        print( "Plot Generated and Saved" )
 
 """
 Function Name: return_noisy_matrix()
@@ -955,14 +904,10 @@ Parameters:
 """
 
 def return_noisy_matrix(independent, dim_matrix, sigma, device):
-
-    print( "Generating Noisy Matrix - START" )
     
     if (independent):
         noised_matrix = torch.randn(dim_matrix) * sigma
     else:
         noised_matrix = torch.randn(dim_matrix) * sigma + 1
-
-    print( "Data Received - Matrix Generated - END" )
 
     return noised_matrix.to(device)
