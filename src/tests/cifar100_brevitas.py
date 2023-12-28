@@ -187,7 +187,7 @@ print("-----------------------------------------------------")
 ber_vals = np.linspace( 1e-5, 0.01, 15 )
 
 #noise_funcs.ber_noise_plot_brevitas( perturbations, layer_names, ber_vals, model, device, val_quantized_loader, model_name )
-noise_funcs.ber_noise_plot_brevitas_multiple_layers( perturbations, layer_names, ber_vals, model, device, val_quantized_loader, model_name )
+noise_funcs.ber_noise_plot_multiple_layers_brevitas( perturbations, layer_names, ber_vals, model, device, val_quantized_loader, model_name )
 
 print("-----------------------------------------------------")
 print("---------- Beginning Gaussian Noise Testing ---------")

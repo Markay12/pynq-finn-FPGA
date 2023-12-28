@@ -308,8 +308,6 @@ After each perturbation, the modified model is added to a list, which is then re
 """
 
 def add_gaussian_noise_to_model_brevitas(model, layer_names, sigma, num_perturbations, analog_noise_type):
-
-    random.seed(datetime.now().timestamp())
     
     modified_models = []
     
