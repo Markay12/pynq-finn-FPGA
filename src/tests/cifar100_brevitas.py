@@ -158,7 +158,7 @@ print( "Convolutional Layer 1 Bias: ",           model.conv1.conv.bias )
 print( "Fully Connected Layer 1 Weight Shape: ", model.fc1.weight.shape )
 
 
-print("-----------------------------------------------------")
+print("\n-----------------------------------------------------")
 print("--------------- Generating Random Seed --------------")
 print("-----------------------------------------------------")
 
@@ -170,7 +170,7 @@ seed = int( current_time.timestamp() )
 # Set the seed for the random module
 random.seed( seed )
 
-perturbations = 1 # Value does not change between tests
+perturbations = 15 # Value does not change between tests
 
 # set the layer names, combinations, probability, gamma and sigma values for BER testing
 layer_names = [ 'conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'conv6', 'conv7', 'conv8', 'fc1', 'fc2' ]
@@ -186,10 +186,19 @@ print("-----------------------------------------------------")
 ## BER Noise Testing
 ber_vals = np.linspace( 1e-5, 0.01, 15 )
 
+print( "\n-----------------------------------------------------")
+print( "------- Beginning Brevitas BER Noise Injection ------")
+print( "----------------- Individual Layers -----------------")
+print( "-----------------------------------------------------")
 #noise_funcs.ber_noise_plot_brevitas( perturbations, layer_names, ber_vals, model, device, val_quantized_loader, model_name )
+
+print( "\n\n-----------------------------------------------------")
+print( "------- Beginning Brevitas BER Noise Injection ------")
+print( "------------------ Multiple Layers ------------------")
+print( "-----------------------------------------------------")
 noise_funcs.ber_noise_plot_multiple_layers_brevitas( perturbations, layer_names, ber_vals, model, device, val_quantized_loader, model_name )
 
-print("-----------------------------------------------------")
+print("\n\n-----------------------------------------------------")
 print("---------- Beginning Gaussian Noise Testing ---------")
 print("-----------------------------------------------------")
 
@@ -197,7 +206,30 @@ print("-----------------------------------------------------")
 # Gaussian sigma vector. Retains most values from BER but changes the sigma_vector.
 sigma_vector = np.linspace(0, 0.05, 15)
 
+print( "\n-----------------------------------------------------" )
+print( "---- Beginning Brevitas Gaussian Noise Injection ----" )
+print( "----------------- Individual Layers -----------------" )
+print( "-------------------- Proportional -------------------" )
+print( "-----------------------------------------------------" )
 noise_funcs.gaussian_noise_plots_brevitas( perturbations, layer_names, sigma_vector, model, device, val_quantized_loader, 0, model_name )
+
+print( "\n\n-----------------------------------------------------" )
+print( "---- Beginning Brevitas Gaussian Noise Injection ----" )
+print( "----------------- Individual Layers -----------------" )
+print( "-------------------- Independent --------------------" )
+print( "-----------------------------------------------------" )
 noise_funcs.gaussian_noise_plots_brevitas( perturbations, layer_names, sigma_vector, model, device, val_quantized_loader, 1, model_name )
+
+print( "\n\n-----------------------------------------------------" )
+print( "---- Beginning Brevitas Gaussian Noise Injection ----" )
+print( "------------------- Multiple Layers -----------------" )
+print( "-------------------- Proportional -------------------" )
+print( "-----------------------------------------------------" )
 noise_funcs.gaussian_noise_plots_brevitas_all( perturbations, layer_names, sigma_vector, model, device, val_quantized_loader, 0, model_name )
+
+print( "\n\n-----------------------------------------------------" )
+print( "---- Beginning Brevitas Gaussian Noise Injection ----" )
+print( "------------------- Multiple Layers -----------------" )
+print( "-------------------- Independent --------------------" )
+print( "-----------------------------------------------------" )
 noise_funcs.gaussian_noise_plots_brevitas_all( perturbations, layer_names, sigma_vector, model, device, val_quantized_loader, 1, model_name )
