@@ -427,15 +427,15 @@ test accuracy at different BER values and saves it in the directory.
 
 def ber_noise_plot_brevitas(num_perturbations, layer_names, ber_vector, model, device, test_quantized_loader, model_name):
 
-    if not os.path.exists(f"noise_plots_brevitas/ber_noise/{model_name}"):
-        os.makedirs(f"noise_plots_brevitas/ber_noise/{model_name}")
+    if not os.path.exists(f"noise_plots_brevitas/ber_noise_brevitas/{model_name}"):
+        os.makedirs(f"noise_plots_brevitas/ber_noise_brevitas/{model_name}")
     
     plt.style.use('default')
     
     all_test_accs = []
 
     # Create a CSV file to store the raw data
-    csv_file_path = os.path.join( f"noise_plots_brevitas/ber_noise/{model_name}", "raw_data.csv" )
+    csv_file_path = os.path.join( f"noise_plots_brevitas/ber_noise_brevitas/{model_name}", "raw_data.csv" )
 
     with open( csv_file_path, mode='w', newline='' ) as csv_file:
 
@@ -452,7 +452,7 @@ def ber_noise_plot_brevitas(num_perturbations, layer_names, ber_vector, model, d
                 
                 for noisy_model in noisy_models:
                     noisy_model.to(device)
-                    accuracies.append(test(noisy_model, test_quantized_loader, device))
+                    accuracies.append( test( noisy_model, test_quantized_loader, device))
                 
                 avg_accuracy = sum(accuracies) / len(accuracies)
                 test_accs.append(avg_accuracy)

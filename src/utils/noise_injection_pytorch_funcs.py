@@ -35,6 +35,10 @@ Last Modified:
 """
 
 from copy import deepcopy
+import csv
+from matplotlib import pyplot as plt
+import os
+from test_noise import test
 import torch
 
 """
@@ -288,3 +292,121 @@ def add_gaussian_noise_proportional( matrix, sigma ):
     noised_matrix = matrix * np.random.normal( 1, scale=sigma )
 
     return noised_matrix
+
+"""
+Function Name: ber_noise_plot_pytorch()
+
+Paramters:
+
+    1.  num_perturbations
+        Description:        The number of perturbed models to generate for each BER value.
+        Type:               Integer.
+        Details:            This parameter dictates how many times the function will create a modified version 
+                            of the model with digital noise applied for each BER value.
+
+    2.  layer_names
+        Description:        Names of the layers within the model that will be subjected to digital noise.
+        Type:               List of strings.
+        Details:            Each string in this list should correspond to the name of a layer in the model. 
+                            The function applies digital noise to these specified layers.
+
+    3.  ber_vector
+        Description:        A list of Bit Error Rate (BER) values to apply as noise.
+        Type:               List of floats.
+        Details:            Each BER value in this vector represents a different level of noise to be applied to the model's 
+                            layers. The function iterates over these values to evaluate the effect of different noise 
+                            intensities.
+
+    4. model
+        Description:        The neural network model to be evaluated under different noise conditions.
+        Type:               Brevitas layer or similar PyTorch model object.
+        Details:            This is the base model on which the digital noise will be applied for testing its performance.
+
+    5.  device
+        Description:        The computational device (e.g., CPU, GPU) where the operation is to be performed.
+        Type:               PyTorch device object.
+        Details:            Ensures that the model and all operations are performed on the specified device.
+
+    6.  test_quantized_loader
+        Description:        DataLoader containing the test dataset for evaluating the model.
+        Type:               PyTorch DataLoader object.
+        Details:            This DataLoader is used to test the model's performance (accuracy) under various noise conditions.
+
+    7.  model_name:
+        Description:        Name of the model, used for organizing output files and plots.
+        Type:               String.
+        Details:            This name is used to create directories and name files where the results (plots and data) 
+                            will be saved. It helps in identifying and segregating the results for different models or 
+                            experimental setups.
+
+This function plots the effect of bit error rate (BER) noise on the test accuracy of a given model. 
+It takes in the number of perturbations, the layer names, a vector of BER values, the model and the 
+device as inputs.
+
+It first creates a directory to save the generated plots if it doesn't already exist. 
+It then initializes an empty list to store all the test accuracies.
+
+The function then loops over each layer in the provided layer names list and BER values in the BER vector. 
+For each combination of layer and BER value, it adds digital noise to the weights of the layer for a certain 
+number of perturbations and tests the accuracy of the noisy model on the test dataset. It then calculates 
+the average accuracy across all the noisy models generated and appends it to the test accuracies list. 
+It also generates a plot of the accuracy at different perturbation levels for each layer and saves it in 
+the previously created directory.
+
+After all the layers have been looped through, the function calculates the average test accuracy for each 
+BER value by taking the mean of the accuracies across all layers. It then generates a plot of the average 
+test accuracy at different BER values and saves it in the directory.
+"""
+
+def ber_noise_plot_pytorch(num_perturbations, layer_names, ber_vector, model, device, test_quantized_loader, model_name):
+
+    if not os.path.exists(f"noise_plots_brevitas/ber_noise_pytorch/{model_name}"):
+        os.makedirs(f"noise_plots_brevitas/ber_noise_pytorch/{model_name}")
+    
+    plt.style.use('default')
+    
+    all_test_accs = []
+
+    # Create a CSV file to store the raw data
+    csv_file_path = os.path.join( f"noise_plots_brevitas/ber_noise_pytorch/{model_name}", "raw_data.csv" )
+
+    with open( csv_file_path, mode='w', newline='' ) as csv_file:
+
+        writer = csv.writer( csv_file )
+        writer.writerow( [ "Layer", "BER Value", "Average Accuracy" ] )
+
+        for layer in layer_names:
+            test_accs = []
+            
+            for ber in ber_vector:
+                noisy_models = add_digital_noise_to_model_pytorch( model, [layer], ber, num_perturbations )
+                
+                accuracies = []
+                
+                for noisy_model in noisy_models:
+                    noisy_model.to(device)
+                    accuracies.append( test( noisy_model, test_quantized_loader, device ) )
+                
+                avg_accuracy = sum(accuracies) / len(accuracies)
+                test_accs.append(avg_accuracy)
+
+                # Write the raw data to the CSV file
+                writer.writerow([layer, ber, avg_accuracy])
+
+                print("Layer: {}\tBER Value: {}\tAverage Accuracy: {}".format(layer, ber, avg_accuracy))
+            
+            all_test_accs.append(test_accs)
+            
+            plt.plot(ber_vector, test_accs, label='{} Accuracy at Different Perturbation Levels'.format(layer))
+
+    avg_test_accs = [sum(x) / len(x) for x in zip(*all_test_accs)]
+
+    plt.plot(ber_vector, avg_test_accs, label='Average', linewidth=3, linestyle='--', color="black")
+
+    plt.xlabel('BER Value')
+    plt.ylabel('Test Accuracy')
+    plt.title('Effect of BER Noise on Test Accuracy (Individual Layers and Average)')
+    plt.legend(title='Layers')
+    plt.savefig(f"noise_plots_brevitas/ber_noise/{model_name}/individual_and_average.png")
+    plt.show()
+    plt.clf()
