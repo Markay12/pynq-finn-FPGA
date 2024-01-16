@@ -204,32 +204,33 @@ print("-----------------------------------------------------")
 
 ## Gaussian Noise Testing
 # Gaussian sigma vector. Retains most values from BER but changes the sigma_vector.
-sigma_vector = np.linspace( 0, 0.05, 5 )
+sigma_vector_prop = np.linspace( 0, 0.10, 15 )
+sigma_vector_ind = np.linspace( 0, 0.005, 15
 
 print( "\n-----------------------------------------------------" )
 print( "---- Beginning Brevitas Gaussian Noise Injection ----" )
 print( "----------------- Individual Layers -----------------" )
 print( "-------------------- Proportional -------------------" )
 print( "-----------------------------------------------------" )
-noise_funcs.gaussian_noise_plots_pytorch( perturbations, layer_names, sigma_vector, model, device, val_quantized_loader, 0, model_name )
+noise_funcs.gaussian_noise_plots_pytorch( perturbations, layer_names, sigma_vector_prop, model, device, val_quantized_loader, 0, model_name )
 
 print( "\n\n-----------------------------------------------------" )
 print( "---- Beginning Brevitas Gaussian Noise Injection ----" )
 print( "----------------- Individual Layers -----------------" )
 print( "-------------------- Independent --------------------" )
 print( "-----------------------------------------------------" )
-noise_funcs.gaussian_noise_plots_brevitas( perturbations, layer_names, sigma_vector, model, device, val_quantized_loader, 1, model_name )
+noise_funcs.gaussian_noise_plots_pytorch( perturbations, layer_names, sigma_vector_ind, model, device, val_quantized_loader, 1, model_name )
 
 print( "\n\n-----------------------------------------------------" )
 print( "---- Beginning Brevitas Gaussian Noise Injection ----" )
 print( "------------------- Multiple Layers -----------------" )
 print( "-------------------- Proportional -------------------" )
 print( "-----------------------------------------------------" )
-noise_funcs.gaussian_noise_plots_brevitas_all( perturbations, layer_names, sigma_vector, model, device, val_quantized_loader, 0, model_name )
+noise_funcs.gaussian_noise_plots_pytorch_all( perturbations, layer_names, sigma_vector_prop, model, device, val_quantized_loader, 0, model_name )
 
 print( "\n\n-----------------------------------------------------" )
 print( "---- Beginning Brevitas Gaussian Noise Injection ----" )
 print( "------------------- Multiple Layers -----------------" )
 print( "-------------------- Independent --------------------" )
 print( "-----------------------------------------------------" )
-noise_funcs.gaussian_noise_plots_brevitas_all( perturbations, layer_names, sigma_vector, model, device, val_quantized_loader, 1, model_name )
+noise_funcs.gaussian_noise_plots_pytorch_all( perturbations, layer_names, sigma_vector_ind, model, device, val_quantized_loader, 1, model_name )
