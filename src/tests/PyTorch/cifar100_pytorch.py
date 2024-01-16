@@ -40,7 +40,7 @@ from torchvision import transforms
 
 ## Import utility functions for noise testing
 # Get the directory of the current script
-current_script_path = Path(__file__).parent
+current_script_path = Path(__file__).parent.parent
 
 # Get the parent directory of the current script
 parent_directory = current_script_path.parent
@@ -170,7 +170,7 @@ seed = int( current_time.timestamp() )
 # Set the seed for the random module
 random.seed( seed )
 
-perturbations = 15 # Value does not change between tests
+perturbations = 1 # Value does not change between tests
 
 # set the layer names, combinations, probability, gamma and sigma values for BER testing
 layer_names = [ 'conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'conv6', 'conv7', 'conv8', 'fc1', 'fc2' ]
@@ -184,7 +184,7 @@ print("---------- Beginning Bit Error Rate Testing ---------")
 print("-----------------------------------------------------")
 
 ## BER Noise Testing
-ber_vals = np.linspace( 1e-5, 0.01, 15 )
+ber_vals = np.linspace( 1e-5, 0.01, 5 )
 
 print( "\n-----------------------------------------------------")
 print( "------- Beginning PyTorch BER Noise Injection ------")
@@ -204,7 +204,7 @@ print("-----------------------------------------------------")
 
 ## Gaussian Noise Testing
 # Gaussian sigma vector. Retains most values from BER but changes the sigma_vector.
-sigma_vector = np.linspace(0, 0.05, 15)
+sigma_vector = np.linspace( 0, 0.05, 15 )
 
 print( "\n-----------------------------------------------------" )
 print( "---- Beginning Brevitas Gaussian Noise Injection ----" )
@@ -232,4 +232,4 @@ print( "---- Beginning Brevitas Gaussian Noise Injection ----" )
 print( "------------------- Multiple Layers -----------------" )
 print( "-------------------- Independent --------------------" )
 print( "-----------------------------------------------------" )
-noise_funcs.gaussian_noise_plots_brevitas_all( perturbations, layer_names, sigma_vector, model, device, val_quantized_loader, 1, model_name )
+#noise_funcs.gaussian_noise_plots_brevitas_all( perturbations, layer_names, sigma_vector, model, device, val_quantized_loader, 1, model_name )
