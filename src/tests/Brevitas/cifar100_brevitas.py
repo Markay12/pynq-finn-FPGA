@@ -40,7 +40,7 @@ from torchvision import transforms
 
 ## Import utility functions for noise testing
 # Get the directory of the current script
-current_script_path = Path(__file__).parent
+current_script_path = Path(__file__).parent.parent
 
 # Get the parent directory of the current script
 parent_directory = current_script_path.parent

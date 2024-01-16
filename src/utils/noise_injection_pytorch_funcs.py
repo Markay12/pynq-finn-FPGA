@@ -36,10 +36,24 @@ Last Modified:
 
 from copy import deepcopy
 import csv
+import datetime
 from matplotlib import pyplot as plt
+import numpy as np
 import os
-from test_noise import test
+from pathlib import Path
+import sys
+import random
 import torch
+
+current_path = Path( __file__ ).parent
+
+parent_directory = current_path
+
+print( parent_directory )
+
+sys.path.append( str( parent_directory ) )
+
+from test_noise import test
 
 """
 Function Name: add_digital_noise()
@@ -79,25 +93,28 @@ Return:
 
 def add_digital_noise( matrix, ber ):
 
+    if not isinstance( matrix, torch.Tensor ):
+        raise TypeError( "The input matrix must be a PyTorch tensor." )
+
     # Generate a new seed each time to add noise to the model.
     # This creates more accurate randomess and noise generation.
     current_time = datetime.datetime.now()
     seed = int( current_time.timestamp() )
 
     # Set the seed 
-    random.seed( seed )
+    torch.manual_seed( seed )
 
     # Generate a boolean mask with the same shape as the matrix where each element is True with probability `ber`
-    mask = np.random.rand( *matrix.shape ) < ber
+    mask = torch.rand( matrix.size(), device = matrix.device ) < ber
     
     # Generate a matrix of random values between -1 and 1 with the same shape as the input matrix
-    noise = np.random.uniform( -1, 1, size=matrix.shape )
+    noise = torch.rand( matrix.size(), device = matrix.device ) * 2 - 1
     
     # Add the noise to the input matrix only where the mask is True
     noisy_matrix = matrix + mask * noise
     
     # Clip the noisy matrix to the range [-1, 1] to ensure that all elements are within this range
-    return np.clip( noisy_matrix, -1, 1 )
+    return torch.clamp( noisy_matrix, -1, 1 )
 
 """
 Function Name: add_digital_noise_to_model_pytorch()
@@ -407,6 +424,6 @@ def ber_noise_plot_pytorch(num_perturbations, layer_names, ber_vector, model, de
     plt.ylabel('Test Accuracy')
     plt.title('Effect of BER Noise on Test Accuracy (Individual Layers and Average)')
     plt.legend(title='Layers')
-    plt.savefig(f"noise_plots_brevitas/ber_noise/{model_name}/individual_and_average.png")
+    plt.savefig(f"noise_plots_brevitas/ber_noise_pytorch/{model_name}/individual_and_average.png")
     plt.show()
     plt.clf()
