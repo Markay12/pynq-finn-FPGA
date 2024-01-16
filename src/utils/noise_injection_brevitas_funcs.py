@@ -39,7 +39,7 @@ Created on:
     05 December 2024
 
 Last Modified:
-    08 December 2024
+    30 December 2024
 
 """
 
@@ -56,12 +56,12 @@ import sys
 import torch
 
 # Current script path
-current_path = Path(__file__).parent
+current_path = Path( __file__ ).parent
 
 # Get parent directory
 parent_directory = current_path
 
-print(parent_directory)
+print( parent_directory )
 
 # Add parent to the Python path
 sys.path.append( str( parent_directory ) )
@@ -164,33 +164,33 @@ def add_digital_noise_to_model_brevitas( model, layer_names, ber, num_perturbati
     
     modified_models = []
     
-    for _ in range(num_perturbations):
+    for _ in range( num_perturbations ):
         
-        modified_model = deepcopy(model)
+        modified_model = deepcopy( model )
         
         for layer_name in layer_names:
             
             if layer_name.lower().startswith("c"):
-                layer = getattr(modified_model, layer_name)
+                layer = getattr( modified_model, layer_name )
                 weight_tensor = layer.conv.weight.cpu().clone().detach()
             else:
-                layer = getattr(modified_model, layer_name)
+                layer = getattr( modified_model, layer_name )
                 weight_tensor = layer.weight.cpu().clone().detach()
 
             #print(f"Original weights for {layer_name}: {weight_tensor[0,0,0,:]}")
 
             with torch.no_grad():
                 
-                noisy_weight = add_digital_noise(weight_tensor.numpy(), ber)
+                noisy_weight = add_digital_noise( weight_tensor.numpy(), ber )
                 
                 #print(f"Noisy weights for {layer_name}: {noisy_weight[0,0,0,:]}")
 
-                if layer_name.lower().startswith("c"):
-                    layer.conv.weight = torch.nn.Parameter(torch.tensor(noisy_weight, dtype=torch.float))
+                if layer_name.lower().startswith( "c" ):
+                    layer.conv.weight = torch.nn.Parameter( torch.tensor( noisy_weight, dtype=torch.float ) )
                 else:
-                    layer.weight = torch.nn.Parameter(torch.tensor(noisy_weight, dtype=torch.float))
+                    layer.weight = torch.nn.Parameter( torch.tensor( noisy_weight, dtype=torch.float ) )
                 
-        modified_models.append(modified_model)
+        modified_models.append( modified_model )
         
     return modified_models
 
@@ -356,71 +356,6 @@ def add_gaussian_noise_to_model_brevitas(model, layer_names, sigma, num_perturba
                     if bias is not None:
                         layer.bias = torch.nn.Parameter(torch.tensor(noised_bias, dtype = torch.float))
 
-        modified_models.append(modified_model)
-
-    return modified_models
-
-"""
-Function Name: add_gaussian_noise_to_model_pytorch()
-
-Parameters:
-
-    1.  model:
-            Description:    The PyTorch model whose weights and biases are to be modified.
-            Type:           PyTorch model object.
-            Details:        This is the original model that will serve as a template for creating perturbed copies. 
-                            The function does not modify this model directly but creates deep copies of it.
-
-    2.  layers:
-            Description:    A list specifying which layers of the model are to be modified.
-            Type:           List of integers.
-            Details:        Each element in this list is an index that corresponds to a layer in the model. These layers are the targets for noise addition. The function assumes a naming convention like layer1, layer2, etc., in the model.
-
-    3.  sigma:
-            Description:    Standard deviation of the Gaussian noise to be added.
-            Type:           Float.
-            Details:        Determines the intensity of the Gaussian noise. This value controls how much the weights and biases are perturbed from their original values.
-
-    4.  num_perturbations:
-            Description:    The number of modified models to generate.
-            Type:           Integer.
-            Details:        Indicates how many copies of the original model, each with differently perturbed weights and biases, are to be created.
-
-This function takes in a PyTorch model and modifies the weights and biases of specified layers by adding 
-Gaussian noise with a given standard deviation. The function creates num_perturbations modified models, 
-each with the same architecture as the original model but with different randomly perturbed weights and biases in the specified layers. 
-The layers to be perturbed are specified by a list of layers, where each layer is identified by its index in the model's layers. 
-The function returns a list of the modified models.
-"""
-
-def add_gaussian_noise_to_model_pytorch( model, layers, sigma, num_perturbations ):
-    
-    # keep all modified models accuracy so we can get a correct average
-    modified_models = []
-
-    for _ in range( num_perturbations ):    
-
-        # create individual modified model
-        modified_model = deepcopy( model )
-
-        for i in range( len( layers ) ): 
-            layer_name = f'layer{i + 1}'
-            layer = getattr( modified_model, layer_name )
-    
-            # get weight and bias for layer
-            weight_temp = layer[0].weight.data.cpu().detach().numpy()
-            bias_temp = layer[0].bias.data.cpu().detach().numpy()
-    
-            # add noise to the weight and bias
-            # need to work on this to add independent vs. proportional noise
-            noise_w = ( weight_temp, sigma )
-            noise_b = ( bias_temp, sigma )
-
-            # place values back into the modified model for analysis
-            layer[0].weight.data = torch.from_numpy(noise_w).float()
-            layer[0].bias.data = torch.from_numpy(noise_b).float()
-
-        # append this modified model to the list
         modified_models.append(modified_model)
 
     return modified_models
