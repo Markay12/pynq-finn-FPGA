@@ -49,7 +49,7 @@ parent_directory = current_script_path.parent
 sys.path.append( str( parent_directory ) )
 
 # Now, you can import from the parent directory
-from utils import noise_injection_brevitas_funcs as noise_funcs
+from utils import noise_injection_pytorch_funcs as noise_funcs     # import pytorch functions
 from utils import models
 
 print("-----------------------------------------------------")
@@ -187,16 +187,16 @@ print("-----------------------------------------------------")
 ber_vals = np.linspace( 1e-5, 0.01, 15 )
 
 print( "\n-----------------------------------------------------")
-print( "------- Beginning Brevitas BER Noise Injection ------")
+print( "------- Beginning PyTorch BER Noise Injection ------")
 print( "----------------- Individual Layers -----------------")
 print( "-----------------------------------------------------")
-#noise_funcs.ber_noise_plot_brevitas( perturbations, layer_names, ber_vals, model, device, val_quantized_loader, model_name )
+noise_funcs.ber_noise_plot_pytorch( perturbations, layer_names, ber_vals, model, device, val_quantized_loader, model_name )
 
 print( "\n\n-----------------------------------------------------")
 print( "------- Beginning Brevitas BER Noise Injection ------")
 print( "------------------ Multiple Layers ------------------")
 print( "-----------------------------------------------------")
-noise_funcs.ber_noise_plot_multiple_layers_brevitas( perturbations, layer_names, ber_vals, model, device, val_quantized_loader, model_name )
+#noise_funcs.ber_noise_plot_multiple_layers_brevitas( perturbations, layer_names, ber_vals, model, device, val_quantized_loader, model_name )
 
 print("\n\n-----------------------------------------------------")
 print("---------- Beginning Gaussian Noise Testing ---------")
@@ -211,21 +211,21 @@ print( "---- Beginning Brevitas Gaussian Noise Injection ----" )
 print( "----------------- Individual Layers -----------------" )
 print( "-------------------- Proportional -------------------" )
 print( "-----------------------------------------------------" )
-noise_funcs.gaussian_noise_plots_brevitas( perturbations, layer_names, sigma_vector, model, device, val_quantized_loader, 0, model_name )
+#noise_funcs.gaussian_noise_plots_brevitas( perturbations, layer_names, sigma_vector, model, device, val_quantized_loader, 0, model_name )
 
 print( "\n\n-----------------------------------------------------" )
 print( "---- Beginning Brevitas Gaussian Noise Injection ----" )
 print( "----------------- Individual Layers -----------------" )
 print( "-------------------- Independent --------------------" )
 print( "-----------------------------------------------------" )
-noise_funcs.gaussian_noise_plots_brevitas( perturbations, layer_names, sigma_vector, model, device, val_quantized_loader, 1, model_name )
+#noise_funcs.gaussian_noise_plots_brevitas( perturbations, layer_names, sigma_vector, model, device, val_quantized_loader, 1, model_name )
 
 print( "\n\n-----------------------------------------------------" )
 print( "---- Beginning Brevitas Gaussian Noise Injection ----" )
 print( "------------------- Multiple Layers -----------------" )
 print( "-------------------- Proportional -------------------" )
 print( "-----------------------------------------------------" )
-noise_funcs.gaussian_noise_plots_brevitas_all( perturbations, layer_names, sigma_vector, model, device, val_quantized_loader, 0, model_name )
+#noise_funcs.gaussian_noise_plots_brevitas_all( perturbations, layer_names, sigma_vector, model, device, val_quantized_loader, 0, model_name )
 
 print( "\n\n-----------------------------------------------------" )
 print( "---- Beginning Brevitas Gaussian Noise Injection ----" )
