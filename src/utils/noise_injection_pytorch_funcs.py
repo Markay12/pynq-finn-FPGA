@@ -377,15 +377,15 @@ test accuracy at different BER values and saves it in the directory.
 
 def ber_noise_plot_pytorch(num_perturbations, layer_names, ber_vector, model, device, test_quantized_loader, model_name):
 
-    if not os.path.exists(f"noise_plots_brevitas/ber_noise_pytorch/{model_name}"):
-        os.makedirs(f"noise_plots_brevitas/ber_noise_pytorch/{model_name}")
+    if not os.path.exists(f"noise_plots_pytorch/ber_noise_pytorch/{model_name}"):
+        os.makedirs(f"noise_plots_pytorch/ber_noise_pytorch/{model_name}")
     
     plt.style.use('default')
     
     all_test_accs = []
 
     # Create a CSV file to store the raw data
-    csv_file_path = os.path.join( f"noise_plots_brevitas/ber_noise_pytorch/{model_name}", "raw_data.csv" )
+    csv_file_path = os.path.join( f"noise_plots_pytorch/ber_noise_pytorch/{model_name}", "raw_data.csv" )
 
     with open( csv_file_path, mode='w', newline='' ) as csv_file:
 
@@ -424,7 +424,7 @@ def ber_noise_plot_pytorch(num_perturbations, layer_names, ber_vector, model, de
     plt.ylabel('Test Accuracy')
     plt.title('Effect of BER Noise on Test Accuracy (Individual Layers and Average)')
     plt.legend(title='Layers')
-    plt.savefig(f"noise_plots_brevitas/ber_noise_pytorch/{model_name}/individual_and_average.png")
+    plt.savefig(f"noise_plots_pytorch/ber_noise_pytorch/{model_name}/individual_and_average.png")
     plt.show()
     plt.clf()
 
@@ -477,15 +477,15 @@ Parameters:
 
 def ber_noise_plot_multiple_layers_pytorch( num_perturbations, layer_names, ber_vector, model, device, test_quantized_loader, model_name):
 
-    if not os.path.exists(f"noise_plots_brevitas/ber_noise_pytorch/{model_name}"):
-        os.makedirs(f"noise_plots_brevitas/ber_noise_pytorch/{model_name}")
+    if not os.path.exists(f"noise_plots_pytorch/ber_noise_pytorch/{model_name}"):
+        os.makedirs(f"noise_plots_pytorch/ber_noise_pytorch/{model_name}")
 
     plt.style.use('default')
 
     test_accs = []
 
     # Create a CSV file to store the raw data
-    csv_file_path = os.path.join(f"noise_plots_brevitas/ber_noise_pytorch/{model_name}", "raw_data_all_layers.csv")
+    csv_file_path = os.path.join(f"noise_plots_pytorch/ber_noise_pytorch/{model_name}", "raw_data_all_layers.csv")
     with open(csv_file_path, mode='w', newline='') as csv_file:
         writer = csv.writer(csv_file)
         writer.writerow(["BER Value", "Average Accuracy"])
@@ -513,6 +513,144 @@ def ber_noise_plot_multiple_layers_pytorch( num_perturbations, layer_names, ber_
     plt.ylabel('Test Accuracy')
     plt.title('Effect of BER Noise on Test Accuracy (All Layers)')
     plt.legend(title='Layers')
-    plt.savefig(f"noise_plots_brevitas/ber_noise_pytorch/{model_name}/all_layers.png")
+    plt.savefig(f"noise_plots_pytorch/ber_noise_pytorch/{model_name}/all_layers.png")
     plt.show()
     plt.clf()
+
+"""
+Function Name: gaussian_noise_plots_pytorch()
+
+Parameters:
+
+    1.  num_perturbations:
+            Description:        The number of modified models to generate for each value of standard deviation.
+            Type:               Integer.
+            Details:            Determines how many times the function will create a modified version of the model with Gaussian noise applied for each sigma value.
+
+    2.  layer_names:
+            Description:        A list of layer names within the model to which Gaussian noise will be added.
+            Type:               List of strings.
+            Details:            Each string in this list should correspond to the name of a layer in the model. The function applies Gaussian noise to these specified layers.
+
+    3.  sigma_vector:
+            Description:        A list of standard deviation values for the Gaussian noise.
+            Type:               List of floats.
+            Details:            Each sigma value in this vector represents a different intensity of Gaussian noise to be applied to the model's layers.
+
+    4.  model:
+            Description:        The neural network model to be evaluated under different noise conditions.
+            Type:               Brevitas layer or similar PyTorch model object.
+            Details:            This is the base model on which the Gaussian noise will be applied for testing its performance.
+
+    5.  device:
+            Description:        The computational device (e.g., CPU, GPU) where the operation is to be performed.
+            Type:               PyTorch device object.
+            Details:            Ensures that the model and all operations are performed on the specified device.
+ 
+    6.  test_quantized_loader:
+            Description:        DataLoader containing the test dataset for evaluating the model.
+            Type:               PyTorch DataLoader object.
+            Details:            Used to test the model's performance (accuracy) under various noise conditions.
+
+    7.  analog_noise_type:
+            Description:        Flag to determine the type of Gaussian noise addition.
+            Type:               Boolean.
+            Details:            If True, independent Gaussian noise is added; if False, proportional Gaussian noise is added.
+
+    8.  model_name:
+            Description:        Name of the model, used for organizing output files and plots.
+            Type:               String.
+            Details:            Used to create directories and name files where the results (plots and data) will be saved.
+
+This function gaussian_noise_plots_pytorch adds Gaussian noise to a given model for each layer and creates plots to visualize the effect of noise on test accuracy.
+
+The function first creates a folder to store the noise plots, if it does not already exist. Then, for each layer in layer_names, 
+it loops over each value of standard deviation in sigma_vector and adds Gaussian noise to the model for the current layer only. 
+It then tests the accuracy of each noisy model and appends the result to a list of test accuracies.
+
+After testing for all standard deviation values, the function plots the test accuracy as a function of the standard deviation 
+for the current layer and saves the plot to a file. It then computes the average test accuracy across all layers for each 
+standard deviation value and plots the averaged test accuracies as a function of the standard deviation.
+
+Finally, the function saves the average test accuracy plot to a file and displays it.
+"""
+
+def gaussian_noise_plots_pytorch(num_perturbations, layer_names, sigma_vector, model, device, test_quantized_loader, analog_noise_type, model_name):
+
+    if not os.path.exists(f"noise_plots_pytorch/gaussian_noise_pytorch/{model_name}"):
+        os.makedirs(f"noise_plots_pytorch/gaussian_noise_pytorch/{model_name}")
+
+    plt.style.use('default')
+
+    # Create a list to store the test accuracies for all layers
+    all_test_accs = []
+
+    if (analog_noise_type):
+        csv_file_path = os.path.join(f"noise_plots_pytorch/gaussian_noise_pytorch/{model_name}", "raw_data_independent.csv")
+    else:
+        csv_file_path = os.path.join(f"noise_plots_pytorch/gaussian_noise_pytorch/{model_name}", "raw_data_proportional.csv")
+
+    # Create a CSV file to store the raw data
+    with open(csv_file_path, mode='w', newline='') as csv_file:
+
+        writer = csv.writer(csv_file)
+        writer.writerow(["Layer", "Sigma Value", "Average Accuracy"])
+
+        # Loop over each layer and plot the test accuracy as a function of the standard deviation for that layer
+        for layer in layer_names:
+            # Initialize a list to store the test accuracies for this layer
+            test_accs = []
+
+            # Iterate over the standard deviation values and add noise to the model for this layer only
+            for sigma in sigma_vector:
+                # Add noise to the model for the defined layer only
+                noisy_models = add_gaussian_noise_to_model_pytorch(
+                    model, [layer], sigma, num_perturbations, analog_noise_type)
+                accuracies = []
+
+                # Test the accuracy of each noisy model and append the result to the accuracies list
+                for noisy_model in noisy_models:
+                    # Move the model back to the target device
+                    noisy_model.to(device)
+                    accuracies.append(test(noisy_model, test_quantized_loader, device))
+
+                # Calculate the average accuracy and print the result
+                avg_accuracy = sum(accuracies) / len(accuracies)
+                # Append the average accuracy to the test_accs list
+                test_accs.append(avg_accuracy)
+
+                # Write the raw data to the CSV file
+                writer.writerow([layer, sigma, avg_accuracy])
+
+                if analog_noise_type:
+                    print("Independent: Layer: {}, Sigma Value: {}, Average Accuracy: {}%".format(
+                        layer, sigma, avg_accuracy))
+                else:
+                    print("Proportional: Layer: {}, Sigma Value: {}, Average Accuracy: {}%".format(
+                        layer, sigma, avg_accuracy))
+
+            # Store the test accuracies for this layer in the all_test_accs list
+            all_test_accs.append(test_accs)
+            # Plot the test accuracies as a function of the standard deviation for this layer
+            plt.plot(sigma_vector, test_accs,
+                     label='{} Accuracy at Different Perturbation Levels'.format(layer))
+
+        # Compute the average test accuracy across all layers for each standard deviation value
+        avg_test_accs = [sum(x) / len(x) for x in zip(*all_test_accs)]
+
+        # Plot the averaged test accuracies as a function of the standard deviation
+        plt.plot(sigma_vector, avg_test_accs, label='Average',
+                 linewidth=3, linestyle='--', color="black")
+
+        plt.xlabel('Standard Deviation')
+        plt.ylabel('Test Accuracy')
+        plt.title('Effect of Noise on Test Accuracy (Individual Layers and Average)')
+        plt.legend()
+
+        if analog_noise_type:
+            plt.savefig(f"noise_plots_pytorch/gaussian_noise_pytorch/{model_name}/individual_and_average_independent.png")
+        else:
+            plt.savefig(f"noise_plots_pytorch/gaussian_noise_pytorch/{model_name}/individual_and_average_proportional.png")
+
+        plt.show()
+        plt.clf()
