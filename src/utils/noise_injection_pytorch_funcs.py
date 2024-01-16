@@ -182,65 +182,100 @@ def add_digital_noise_to_model_pytorch( model, layer_names, ber, num_perturbatio
 """
 Function Name: add_gaussian_noise_to_model_pytorch()
 
-Parameters:
+Paramters:
 
     1.  model:
-            Description:    The PyTorch model whose weights and biases are to be modified.
-            Type:           PyTorch model object.
-            Details:        This is the original model that will serve as a template for creating perturbed copies. 
-                            The function does not modify this model directly but creates deep copies of it.
+            Description:        The neural network model to which Gaussian noise will be added.
+            Type:               Brevitas layer or similar PyTorch model object.
+            Details:            This is the primary object of the function, where Gaussian noise will be applied to 
+                                specified layers.
 
-    2.  layers:
-            Description:    A list specifying which layers of the model are to be modified.
-            Type:           List of integers.
-            Details:        Each element in this list is an index that corresponds to a layer in the model. These layers are the targets for noise addition. The function assumes a naming convention like layer1, layer2, etc., in the model.
+    2.  layer_names:
+            Description:        Names of the layers within the model that will receive the Gaussian noise.
+            Type:               List of strings.
+            Details:            Each string in this list should correspond to the name of a layer in the model. 
+                                The function applies Gaussian noise to the weights (and biases, if applicable) of these layers.
 
     3.  sigma:
-            Description:    Standard deviation of the Gaussian noise to be added.
-            Type:           Float.
-            Details:        Determines the intensity of the Gaussian noise. This value controls how much the weights and biases are perturbed from their original values.
+            Description:        Standard deviation of the Gaussian noise distribution.
+            Type:               Float.
+            Details:            This parameter controls the intensity of the noise. A higher sigma value results in more variation in the noise added to the weights and biases of the layers.
 
     4.  num_perturbations:
-            Description:    The number of modified models to generate.
-            Type:           Integer.
-            Details:        Indicates how many copies of the original model, each with differently perturbed weights and biases, are to be created.
+            Description:        The number of perturbed models to generate.
+            Type:               Integer.
+            Details:            Specifies how many times the function will create a modified version of the model with 
+                                Gaussian noise applied.
 
-This function takes in a PyTorch model and modifies the weights and biases of specified layers by adding 
-Gaussian noise with a given standard deviation. The function creates num_perturbations modified models, 
-each with the same architecture as the original model but with different randomly perturbed weights and biases in the specified layers. 
-The layers to be perturbed are specified by a list of layers, where each layer is identified by its index in the model's layers. 
-The function returns a list of the modified models.
+    5.  analog_noise_type:
+            Description:        Flag to determine the type of Gaussian noise addition.
+            Type:               Boolean.
+            Details:            If True, independent Gaussian noise is added; if False, proportional Gaussian noise is added. 
+                                This flag decides whether the noise is added independently to each element of the weight and 
+                                bias tensors (using add_gaussian_noise_independent) or in a proportional manner 
+                                (using add_gaussian_noise_proportional).
+
+The add_gaussian_noise_to_model_brevitas function takes a Brevitas model, a list of layer names to which noise should be added,
+a standard deviation sigma of the Gaussian noise, and an integer num_perturbations representing the number of times to apply 
+noise to the specified layers.
+
+For each perturbation, the function makes a deep copy of the original model and adds Gaussian noise to the specified layers
+weights and biases using the add_noise function. The noisy weights and biases are then used to update the corresponding layer's 
+weight and bias tensors.
+
+After each perturbation, the modified model is added to a list, which is then returned once all perturbations have been applied.
 """
 
-def add_gaussian_noise_to_model_pytorch( model, layers, sigma, num_perturbations ):
+def add_gaussian_noise_to_model_pytorch(model, layer_names, sigma, num_perturbations, analog_noise_type):
     
-    # keep all modified models accuracy so we can get a correct average
     modified_models = []
-
-    for _ in range( num_perturbations ):    
-
-        # create individual modified model
-        modified_model = deepcopy( model )
-
-        for i in range( len( layers ) ): 
-            layer_name = f'layer{i + 1}'
-            layer = getattr( modified_model, layer_name )
     
-            # get weight and bias for layer
-            weight_temp = layer[ 0 ].weight.data.cpu().detach().numpy()
-            bias_temp = layer[ 0 ].bias.data.cpu().detach().numpy()
+    for _ in range(num_perturbations):
     
-            # add noise to the weight and bias
-            # need to work on this to add independent vs. proportional noise
-            noise_w = ( weight_temp, sigma )
-            noise_b = ( bias_temp, sigma )
+        modified_model = deepcopy(model)
+        
+        # add noise to the modified model
+        for layer_name in layer_names:
+        
+            layer = getattr(modified_model, layer_name)
+            
+            with torch.no_grad():
+            
+                
+                if layer_name.lower().startswith("c"):
+                    weight = layer.conv.weight.cpu().clone().detach().numpy()
+                    bias = layer.conv.bias.cpu().detach().numpy() if layer.conv.bias is not None else None
+                else:
+                    weight = layer.weight.cpu().clone().detach().numpy()
+                    bias = layer.bias.cpu().detach().numpy() if layer.bias is not None else None
 
-            # place values back into the modified model for analysis
-            layer[ 0 ].weight.data = torch.from_numpy( noise_w ).float()
-            layer[ 0 ].bias.data = torch.from_numpy( noise_b ).float()
+                # Add noise to the weight and bias tensors
+                if (analog_noise_type):
+                    noised_weight = add_gaussian_noise_independent(weight, sigma)
+                
+                    if bias is not None:
+                        noised_bias = add_gaussian_noise_independent(bias, sigma)
+                else:
+                    noised_weight = add_gaussian_noise_proportional(weight, sigma)
 
-        # append this modified model to the list
-        modified_models.append( modified_model )
+                    if bias is not None:
+                        noised_bias = add_gaussian_noise_proportional(bias, sigma)
+
+
+                # Update layer weights and bias tensors with noised values
+                if layer_name.lower().startswith("c"):
+                    layer.conv.weight = torch.nn.Parameter(torch.tensor(noised_weight, dtype = torch.float))
+
+                    if bias is not None:
+                        layer.conv.bias = torch.nn.Parameter(torch.tensor(noised_bias, dtype = torch.float))
+
+                else:
+                    layer.weight = torch.nn.Parameter(torch.tensor(noised_weight, dtype = torch.float))
+
+                    if bias is not None:
+                        layer.bias = torch.nn.Parameter(torch.tensor(noised_bias, dtype = torch.float))
+
+        modified_models.append(modified_model)
 
     return modified_models
 
