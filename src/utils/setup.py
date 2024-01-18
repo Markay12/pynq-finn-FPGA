@@ -47,6 +47,7 @@ import numpy as np
 from pathlib import Path
 import random
 import sys
+import time
 import torch
 import torch.nn as nn
 import torchvision
@@ -432,6 +433,8 @@ Return:
 """
 
 def gen_rand_seed():
+
+    time.sleep(0.5)
 
     # print for debug
     print_header( "Generating Random Seed" )
