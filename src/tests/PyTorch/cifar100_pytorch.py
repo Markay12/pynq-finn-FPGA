@@ -1,12 +1,20 @@
 """
-Cifar100 Brevitas Noise Analysis Testing
--------------------------
+CIFAR100 PyTorch Noise Analysis Testing
+----------------------------------------
 
 Description:
-    - 
+    This script is designed for conducting noise analysis testing on CIFAR100 neural network models 
+    implemented with PyTorch. It focuses on evaluating the robustness of the models under 
+    different noise conditions, specifically Bit Error Rate (BER) and Gaussian noise. The script 
+    orchestrates the entire testing process, from initializing the model and loading the dataset, 
+    to applying noise perturbations and evaluating the impact on model performance. The noise 
+    analysis aims to assess the susceptibility of neural networks to hardware-induced errors, 
+    simulating scenarios that might be encountered in real-world deployments.
 
 Notes:
-    - 
+    - The script covers both individual layer noise injection and multiple layers for a comprehensive analysis.
+    - It employs a range of BER and Gaussian noise levels to thoroughly test the model's robustness.
+    - The testing framework is built for flexibility, allowing easy adaptation to different models or datasets.
     
 Author(s):
     Mark Ashinhust
@@ -17,7 +25,14 @@ Created on:
 Last Modified:
     18 January 2024
 
+Usage:
+    To use this script, ensure that the CIFAR100 dataset and the required PyTorch models are 
+    accessible. Modify the layer names and noise parameters as needed for specific testing 
+    requirements. Run the script in an environment where PyTorch is installed. The results of 
+    the noise tests will be printed out, providing insights into the model's performance under 
+    various noise conditions.
 """
+
 
 print("-----------------------------------------------------")
 print("---------- Importing Modules and Functions ----------")
