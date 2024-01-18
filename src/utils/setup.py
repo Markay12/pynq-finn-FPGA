@@ -30,6 +30,7 @@ Last Modified:
 
 """
 
+# Alphabetize and clean
 import torch
 import torchvision
 from torchvision import transforms
@@ -37,6 +38,8 @@ from pathlib import Path
 import sys
 import torch.nn as nn
 import os
+import datetime
+import random
 
 # Current script path
 current_path = Path( __file__ ).parent
@@ -191,4 +194,19 @@ def setup_test( crop_size, padding_size, mean_vector_train, std_vector_train, me
     load_dictionary( model, state_dict )
 
     return device, model, val_quantized_loader, model_name
+
+def gen_rand_seed():
+
+    # print for debug
+    print("\n-----------------------------------------------------")
+    print("--------------- Generating Random Seed --------------")
+    print("-----------------------------------------------------")
+
+    ## Testing Models
+    # Generate a seed based on the current date and time
+    current_time = datetime.datetime.now()
+    seed = int( current_time.timestamp() )
+
+    # Set the seed for the random module
+    random.seed( seed )
 
