@@ -12,10 +12,10 @@ Author(s):
     Mark Ashinhust
 
 Created on:
-    08 December 2024
+    08 December 2023
 
 Last Modified:
-    08 December 2024
+    17 January 2024
 
 """
 
@@ -51,42 +51,15 @@ sys.path.append( str( parent_directory ) )
 # Now, you can import from the parent directory
 from utils import noise_injection_pytorch_funcs as noise_funcs     # import pytorch functions
 from utils import models
+from utils import setup
 
-print("-----------------------------------------------------")
-print("-------------- Locating Targeted Device -------------")
-print("-----------------------------------------------------")
+setup.locate_hw_target()
 
-# Locate the device that can be used for noise analysis and testing
-# Target this device 
-device = torch.device( "cuda" if torch.cuda.is_available() else "cpu" )
-print( "Target device: " + str (device ) )
+# TODO: Clean up the magic numbers here and add explanations
+setup.augment_data( 32, 4, [0.5070751592371323, 0.48654887331495095, 0.4409178433670343], [.2673342858792401, 0.2564384629170883, 0.27615047132568404],
+                    [0.5088964127604166, 0.48739301317401956, 0.44194221124387256], [0.2682515741720801, 0.2573637364478126, 0.2770957707973042] )
 
-print("-----------------------------------------------------")
-print("------- Defining Data Augmentation Transforms -------")
-print("-----------------------------------------------------")
 
-# Define data augmentation transforms
-train_transform = transforms.Compose([
-    transforms.RandomCrop(32, padding=4),
-    transforms.RandomHorizontalFlip(),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.5070751592371323, 0.48654887331495095, 0.4409178433670343], std=[.2673342858792401, 0.2564384629170883, 0.27615047132568404])
-])
-
-val_transform = transforms.Compose([
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.5088964127604166, 0.48739301317401956, 0.44194221124387256], std=[0.2682515741720801, 0.2573637364478126, 0.2770957707973042])
-])
-
-print("-----------------------------------------------------")
-print("------------ Applying Data Augmentation -------------")
-print("-----------------------------------------------------")
-
-# Apply data augmentation to the training dataset
-train_set = torchvision.datasets.CIFAR100(root='../data', train=True, download=True, transform=train_transform)
-
-# Use the validation transform for the validation dataset
-val_set = torchvision.datasets.CIFAR100(root='../data', train=False, download=True, transform=val_transform)
 
 print("-----------------------------------------------------")
 print("--------------- Creating Data Loaders ---------------")
@@ -175,9 +148,6 @@ perturbations = 15 # Value does not change between tests
 # set the layer names, combinations, probability, gamma and sigma values for BER testing
 layer_names = [ 'conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'conv6', 'conv7', 'conv8', 'fc1', 'fc2' ]
 layer_combinations = [ [ 'conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'conv6', 'conv7', 'conv8', 'fc1', 'fc2' ] ]
-p_values = [ 1, 0.5, 0.25 ]
-gamma_values = np.linspace( 0.001, 0.1, 2 )
-sigma = np.linspace( 0.0, 0.2, 2 )
 
 print("-----------------------------------------------------")
 print("---------- Beginning Bit Error Rate Testing ---------")
@@ -196,7 +166,7 @@ print( "\n\n-----------------------------------------------------")
 print( "------- Beginning Brevitas BER Noise Injection ------")
 print( "------------------ Multiple Layers ------------------")
 print( "-----------------------------------------------------")
-#noise_funcs.ber_noise_plot_multiple_layers_pytorch( perturbations, layer_names, ber_vals, model, device, val_quantized_loader, model_name )
+noise_funcs.ber_noise_plot_multiple_layers_pytorch( perturbations, layer_names, ber_vals, model, device, val_quantized_loader, model_name )
 
 print("\n\n-----------------------------------------------------")
 print("---------- Beginning Gaussian Noise Testing ---------")
@@ -212,25 +182,25 @@ print( "---- Beginning Brevitas Gaussian Noise Injection ----" )
 print( "----------------- Individual Layers -----------------" )
 print( "-------------------- Proportional -------------------" )
 print( "-----------------------------------------------------" )
-#noise_funcs.gaussian_noise_plots_pytorch( perturbations, layer_names, sigma_vector_prop, model, device, val_quantized_loader, 0, model_name )
+noise_funcs.gaussian_noise_plot_pytorch( perturbations, layer_names, sigma_vector_prop, model, device, val_quantized_loader, 0, model_name )
 
 print( "\n\n-----------------------------------------------------" )
 print( "---- Beginning Brevitas Gaussian Noise Injection ----" )
 print( "----------------- Individual Layers -----------------" )
 print( "-------------------- Independent --------------------" )
 print( "-----------------------------------------------------" )
-#noise_funcs.gaussian_noise_plots_pytorch( perturbations, layer_names, sigma_vector_ind, model, device, val_quantized_loader, 1, model_name )
+noise_funcs.gaussian_noise_plot_pytorch( perturbations, layer_names, sigma_vector_ind, model, device, val_quantized_loader, 1, model_name )
 
 print( "\n\n-----------------------------------------------------" )
 print( "---- Beginning Brevitas Gaussian Noise Injection ----" )
 print( "------------------- Multiple Layers -----------------" )
 print( "-------------------- Proportional -------------------" )
 print( "-----------------------------------------------------" )
-#noise_funcs.gaussian_noise_plots_pytorch_all( perturbations, layer_names, sigma_vector_prop, model, device, val_quantized_loader, 0, model_name )
+noise_funcs.gaussian_noise_plot_multiple_layers_pytorch( perturbations, layer_names, sigma_vector_prop, model, device, val_quantized_loader, 0, model_name )
 
 print( "\n\n-----------------------------------------------------" )
 print( "---- Beginning Brevitas Gaussian Noise Injection ----" )
 print( "------------------- Multiple Layers -----------------" )
 print( "-------------------- Independent --------------------" )
 print( "-----------------------------------------------------" )
-#noise_funcs.gaussian_noise_plots_pytorch_all( perturbations, layer_names, sigma_vector_ind, model, device, val_quantized_loader, 1, model_name )
+noise_funcs.gaussian_noise_plot_multiple_layers_pytorch( perturbations, layer_names, sigma_vector_ind, model, device, val_quantized_loader, 1, model_name )
