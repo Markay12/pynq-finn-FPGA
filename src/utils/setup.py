@@ -435,13 +435,11 @@ def gen_rand_seed():
     # print for debug
     print_header( "Generating Random Seed" )
 
-    ## Testing Models
-    # Generate a seed based on the current date and time
     current_time = datetime.datetime.now()
     seed = int( current_time.timestamp() )
 
-    # Set the seed for the random module
-    random.seed( seed )
+    # Set the seed 
+    torch.manual_seed( seed )
 
 """
 Function Name: print_header()
@@ -482,7 +480,7 @@ def print_header(title, subtitle=None, multiple_layers=False):
         lines.append(subtitle)
 
     if multiple_layers:
-        lines.append("------------------- Multiple Layers -----------------")
+        lines.append("Multiple Layers")
 
     lines.append("-----------------------------------------------------")
 

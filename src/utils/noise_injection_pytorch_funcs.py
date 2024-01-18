@@ -59,6 +59,7 @@ print( parent_directory )
 sys.path.append( str( parent_directory ) )
 
 from test_noise import test
+import setup
 
 """
 Function Name: add_digital_noise()
@@ -103,12 +104,8 @@ def add_digital_noise( matrix, ber ):
 
     # Generate a new seed each time to add noise to the model.
     # This creates more accurate randomess and noise generation.
-    current_time = datetime.datetime.now()
-    seed = int( current_time.timestamp() )
-
-    # Set the seed 
-    torch.manual_seed( seed )
-
+    setup.gen_rand_seed()
+    
     # Generate a boolean mask with the same shape as the matrix where each element is True with probability `ber`
     mask = torch.rand( matrix.size(), device = matrix.device ) < ber
     
@@ -245,7 +242,6 @@ def add_gaussian_noise_to_model_pytorch(model, layer_names, sigma, num_perturbat
             layer = getattr(modified_model, layer_name)
             
             with torch.no_grad():
-            
                 
                 if layer_name.lower().startswith("c"):
                     weight = layer.conv.weight.cpu().clone().detach().numpy()
@@ -309,11 +305,7 @@ def add_gaussian_noise_independent( matrix, sigma ):
 
     # Generate a new seed each time to add noise to the model.
     # This creates more accurate randomess and noise generation.
-    current_time = datetime.datetime.now()
-    seed = int( current_time.timestamp() )
-
-    # Set the seed 
-    random.seed( seed )
+    setup.gen_rand_seed()
 
     noised_matrix = matrix + np.random.normal( 0, scale=sigma )
 
@@ -340,11 +332,7 @@ def add_gaussian_noise_proportional( matrix, sigma ):
 
     # Generate a new seed each time to add noise to the model.
     # This creates more accurate randomess and noise generation.
-    current_time = datetime.datetime.now()
-    seed = int( current_time.timestamp() )
-
-    # Set the seed 
-    random.seed( seed )
+    setup.gen_rand_seed()
 
     noised_matrix = matrix * np.random.normal( 1, scale=sigma )
 
