@@ -1,5 +1,5 @@
 """
-Noise Injection Utilities
+Noise Injection Utilities PyTorch
 -------------------------
 
 Description:
@@ -7,9 +7,14 @@ Description:
 
 Functions:
     add_digital_noise()
+    add_digital_noise_to_model_pytorch()
     add_gaussian_noise_to_model_pytorch()
     add_gaussian_noise_independent()
     add_gaussian_noise_proportional()
+    ber_noise_plot_pytorch()
+    ber_noise_plot_multiple_layers_pytorch()
+    gaussian_noise_plot_pytorch()
+    gaussian_noise_plot_multiple_layers_pytorch()
 
 Usage:
     These utilities are intended to be imported and used in data processing or
@@ -27,10 +32,10 @@ Author(s):
     Christopher Bennett
 
 Created on:
-    05 December 2024
+    05 December 2023
 
 Last Modified:
-    30 December 2024
+    17 January 2024
 
 """
 
@@ -553,7 +558,7 @@ def ber_noise_plot_multiple_layers_pytorch( num_perturbations, layer_names, ber_
     plt.clf()
 
 """
-Function Name: gaussian_noise_plots_pytorch()
+Function Name: gaussian_noise_plot_pytorch()
 
 Parameters:
 
@@ -597,7 +602,7 @@ Parameters:
             Type:               String.
             Details:            Used to create directories and name files where the results (plots and data) will be saved.
 
-This function gaussian_noise_plots_pytorch adds Gaussian noise to a given model for each layer and creates plots to visualize the effect of noise on test accuracy.
+This function gaussian_noise_plot_pytorch adds Gaussian noise to a given model for each layer and creates plots to visualize the effect of noise on test accuracy.
 
 The function first creates a folder to store the noise plots, if it does not already exist. Then, for each layer in layer_names, 
 it loops over each value of standard deviation in sigma_vector and adds Gaussian noise to the model for the current layer only. 
@@ -610,7 +615,7 @@ standard deviation value and plots the averaged test accuracies as a function of
 Finally, the function saves the average test accuracy plot to a file and displays it.
 """
 
-def gaussian_noise_plots_pytorch(num_perturbations, layer_names, sigma_vector, model, device, test_quantized_loader, analog_noise_type, model_name):
+def gaussian_noise_plot_pytorch(num_perturbations, layer_names, sigma_vector, model, device, test_quantized_loader, analog_noise_type, model_name):
 
     if not os.path.exists(f"noise_plots_pytorch/gaussian_noise_pytorch/{model_name}"):
         os.makedirs(f"noise_plots_pytorch/gaussian_noise_pytorch/{model_name}")
@@ -691,7 +696,7 @@ def gaussian_noise_plots_pytorch(num_perturbations, layer_names, sigma_vector, m
         plt.clf()
 
 """
-Function Name: gaussian_noise_plots_pytorch_all()
+Function Name: gaussian_noise_plot_multiple_layers_pytorch()
 
 Paramters:
 
@@ -739,7 +744,7 @@ Paramters:
             Details:            Used to create directories and name files where the results (plots and data) will be saved.
 """
 
-def gaussian_noise_plots_pytorch_all(num_perturbations, layer_names, sigma_vector, model, device, test_quantized_loader, analog_noise_type, model_name):
+def gaussian_noise_plot_pytorch_all(num_perturbations, layer_names, sigma_vector, model, device, test_quantized_loader, analog_noise_type, model_name):
 
     if not os.path.exists(f"noise_plots_pytorch/gaussian_noise_pytorch/{model_name}"):
         os.makedirs(f"noise_plots_pytorch/gaussian_noise_pytorch/{model_name}")

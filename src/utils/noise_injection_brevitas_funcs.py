@@ -1,5 +1,5 @@
 """
-Noise Injection Utilities
+Noise Injection Utilities for Brevitas
 -------------------------
 
 Description:
@@ -36,10 +36,10 @@ Author(s):
     Christopher Bennett
 
 Created on:
-    05 December 2024
+    05 December 2023
 
 Last Modified:
-    30 December 2024
+    17 January 2024
 
 """
 

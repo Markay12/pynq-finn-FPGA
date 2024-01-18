@@ -1,3 +1,41 @@
+"""
+Models Setup 
+-------------------------
+
+Description:
+    Description here.
+
+Classes:
+    CommonUintActQuant()
+    CommonIntWeightPerTensorQuant()
+    ConvBlock()
+    CIFAR10CNN()
+    CIFAR100CNN_4BLOCKS()
+    CIFAR100CNN_5BLOCKS()
+
+Usage:
+    These utilities are intended to be imported and used in data processing or
+    simulation scripts. Example of use:
+    
+        from noise_injection import function1_name
+
+        modified_data = function1_name(data)
+
+Notes:
+    - These functions are optimized for performance and accuracy.
+    
+Author(s):
+    Mark Ashinhust
+    Christopher Bennett
+
+Created on:
+    05 December 2023
+
+Last Modified:
+    17 January 2024
+
+"""
+
 # Brevitas imports
 import brevitas.nn as qnn
 from brevitas.quant import Int32Bias, Int8WeightPerTensorFloat, Uint8ActPerTensorFloatMaxInit
