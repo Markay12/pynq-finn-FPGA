@@ -33,6 +33,23 @@ Last Modified:
 import torch
 import torchvision
 from torchvision import transforms
+from pathlib import Path
+import sys
+import torch.nn as nn
+import os
+
+# Current script path
+current_path = Path( __file__ ).parent
+
+# Get parent directory
+parent_directory = current_path
+
+print( parent_directory )
+
+# Add parent to the Python path
+sys.path.append( str( parent_directory ) )
+
+import models
 
 def locate_hw_target():
 
@@ -150,8 +167,6 @@ def model_criteria( device ):
 
 def load_dictionary( model, state_dict ):
 
-    model, state_dict = model_criteria()
-
     # Load the state dictionary into the model
     model.load_state_dict( state_dict )
 
@@ -170,7 +185,7 @@ def setup_test( crop_size, padding_size, mean_vector_train, std_vector_train, me
     device = locate_hw_target()
     
     train_set, val_set, train_transform, val_transform = augment_data(crop_size, padding_size, mean_vector_train, std_vector_train, mean_vector_transform, std_vector_transform)
-    train_quantized_loader, val_quantized_loader = create_data_loaders(train_set, val_set, train_transform, val_transform)
+    train_quantized_loader, val_quantized_loader = create_data_loaders( train_set, val_set, train_transform, val_transform, 256 )
     model, state_dict, optimizer, scheduler, criterion, model_name = model_criteria(device)
     
     load_dictionary( model, state_dict )
