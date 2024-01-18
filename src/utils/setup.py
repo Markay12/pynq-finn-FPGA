@@ -3,10 +3,20 @@ Setup for Testing
 -------------------------
 
 Description:
-    Description here.
+    This module provides a comprehensive setup for testing neural networks, particularly focusing on 
+    noise injection and performance analysis in PyTorch models. It includes functions for data augmentation, 
+    data loader creation, model setup, and various utilities to facilitate neural network testing in a 
+    quantized environment. The emphasis is on ease of use and integration into existing testing workflows.
 
 Functions:
-    Functions_go_here()
+    locate_hw_target()
+    augment_data()
+    create_data_loaders()
+    model_criteria()
+    load_dictionary()
+    setup_test()
+    gen_rand_seed()
+    print_header()
 
 Usage:
     These utilities are intended to be imported and used in data processing or
@@ -17,7 +27,8 @@ Usage:
         modified_data = function1_name(data)
 
 Notes:
-    - These functions are optimized for performance and accuracy.
+    - These functions are optimized for performance and accuracy. Most of these functions are tailored specifically to CIFAR100.
+      However, this should be able to be changed and future functionality can be introduced to make this a parameter.
     
 Author(s):
     Mark Ashinhust
@@ -26,7 +37,7 @@ Created on:
     17 January 2024
 
 Last Modified:
-    17 January 2024
+    18 January 2024
 
 """
 
@@ -53,6 +64,27 @@ sys.path.append( str( parent_directory ) )
 
 import models
 
+"""
+Function Name: locate_hw_target()
+
+Parameters:
+    None
+
+Function Process:
+    - The function identifies the most suitable hardware target for running neural network models.
+    - It checks if a CUDA-capable GPU is available. If so, it selects the GPU as the target device.
+    - If a GPU is not available, it falls back to using the CPU.
+    - The chosen device (either GPU or CPU) is then printed to the console for confirmation.
+    - The function is useful for ensuring that models are run on the most efficient hardware 
+      available, particularly important for performance-intensive tasks like training or 
+      evaluating neural networks.
+
+Return:
+    - torch.device: The selected hardware device (CUDA GPU or CPU) for running the models. 
+                    This device object can be used in PyTorch to allocate tensors directly 
+                    on the chosen device.
+"""
+
 def locate_hw_target():
 
     # print statement for debug
@@ -65,6 +97,66 @@ def locate_hw_target():
 
     # return whether using CUDA or CPU
     return device
+
+"""
+Function Name: augment_data()
+
+Parameters:
+    1. crop_size
+        Description:    Size of the cropped image.
+        Type:           Integer
+        Details:        This value specifies the dimensions to which images will be cropped 
+                        during the augmentation process.
+
+    2. padding_size
+        Description:    Size of padding around the image before cropping.
+        Type:           Integer
+        Details:        Padding is added to the images before the cropping step. This helps in 
+                        creating variations in the dataset by altering the area of the image 
+                        that is cropped.
+
+    3. mean_vector_train
+        Description:    Mean values for normalization in training data.
+        Type:           List of Floats
+        Details:        These values are used for normalizing the pixel values of the training 
+                        images, aiding in model convergence during training.
+
+    4. std_vector_train
+        Description:    Standard deviation values for normalization in training data.
+        Type:           List of Floats
+        Details:        Standard deviation values used alongside the mean for normalization of 
+                        training images.
+
+    5. mean_vector_transform
+        Description:    Mean values for normalization in validation data.
+        Type:           List of Floats
+        Details:        Similar to mean_vector_train but applied to validation dataset for 
+                        consistent data preprocessing.
+
+    6. std_vector_transform
+        Description:    Standard deviation values for normalization in validation data.
+        Type:           List of Floats
+        Details:        Similar to std_vector_train but applied to validation dataset for 
+                        consistent data preprocessing.
+
+Function Process:
+    - The function defines a series of data augmentation and transformation steps, including
+      random cropping, horizontal flipping, and normalization.
+    - These transformations are applied to both training and validation datasets but with 
+      different normalization parameters for each.
+    - The augmented and transformed datasets are then loaded using the CIFAR100 dataset from 
+      torchvision.
+
+Return:
+    - train_set: The augmented and transformed training dataset.
+    - val_set: The transformed validation dataset.
+    - train_transform: The transformation applied to the training dataset.
+    - val_transform: The transformation applied to the validation dataset.
+
+Note:
+    This function is specifically designed for the CIFAR100 dataset but can be adapted for 
+    other datasets by modifying the dataset loading step.
+"""
 
 def augment_data( crop_size, padding_size, mean_vector_train, std_vector_train, mean_vector_transform, std_vector_transform ):
 
@@ -93,6 +185,54 @@ def augment_data( crop_size, padding_size, mean_vector_train, std_vector_train, 
     val_set = torchvision.datasets.CIFAR100(root='../data', train=False, download=True, transform=val_transform)
 
     return train_set, val_set, train_transform, val_transform
+
+"""
+Function Name: create_data_loaders()
+
+Parameters:
+    1. train_set
+        Description:    The training dataset after applying augmentation and transformations.
+        Type:           torchvision.datasets
+        Details:        This dataset is used to create the training data loader.
+
+    2. val_set
+        Description:    The validation dataset after applying transformations.
+        Type:           torchvision.datasets
+        Details:        This dataset is used to create the validation data loader.
+
+    3. train_transform
+        Description:    Transformations applied to the training dataset.
+        Type:           torchvision.transforms
+        Details:        Not directly used in this function, but provided for consistency 
+                        and potential future use.
+
+    4. val_transform
+        Description:    Transformations applied to the validation dataset.
+        Type:           torchvision.transforms
+        Details:        Not directly used in this function, but provided for consistency 
+                        and potential future use.
+
+    5. batch_size
+        Description:    The size of each batch of data.
+        Type:           Integer
+        Details:        Determines how many samples are processed together in one iteration 
+                        of the data loader.
+
+Function Process:
+    - The function initializes data loaders for both the training and validation datasets.
+    - It sets up the batch size, shuffling, and number of worker threads for efficient 
+      data loading and processing.
+    - The function also includes debug prints to provide information about the shape and 
+      size of the datasets and the batches.
+
+Return:
+    - train_quantized_loader: Data loader for the training dataset.
+    - val_quantized_loader: Data loader for the validation dataset.
+
+Note:
+    The function is tailored for the CIFAR100 dataset but can be adapted for other datasets 
+    by modifying the dataset-specific parameters.
+"""
 
 def create_data_loaders( train_set, val_set, train_transform, val_transform, batch_size ):
 
@@ -134,6 +274,39 @@ def create_data_loaders( train_set, val_set, train_transform, val_transform, bat
 
     return train_quantized_loader, val_quantized_loader
 
+"""
+Function Name: model_criteria()
+
+Parameters:
+    1. device
+        Description:    The target device for model computation (CPU or GPU).
+        Type:           torch.device
+        Details:        Determines where the model and computations will be allocated, 
+                        impacting performance and efficiency.
+
+Function Process:
+    - The function initializes a neural network model, along with its optimizer, learning 
+      rate scheduler, and loss criterion.
+    - It sets the model to the specified device (GPU or CPU) for optimized computation.
+    - The function prompts the user to input the name of the model for testing, and loads 
+      the corresponding pre-trained state dictionary.
+    - Several training parameters such as number of epochs, patience for early stopping, and 
+      initial best test accuracy are defined within the function.
+    - It is designed to provide a comprehensive setup for model training and evaluation, 
+      making it easier to experiment with different configurations.
+
+Return:
+    - model: The neural network model, set to the specified device.
+    - state_dict: The state dictionary loaded from the saved model file.
+    - optimizer: The optimizer configured for the model.
+    - scheduler: Learning rate scheduler for adjusting the learning rate during training.
+    - criterion: Loss function used for model training.
+    - model_name: Name of the model as input by the user.
+
+Note:
+    This function is tailored for the CIFAR100CNN_5Blocks model but can be adapted for other 
+    models by modifying the model initialization and parameter settings.
+"""
 
 def model_criteria( device ):
 
@@ -157,6 +330,40 @@ def model_criteria( device ):
 
     return model, state_dict, optimizer, scheduler, criterion, model_name
 
+"""
+Function Name: load_dictionary()
+
+Parameters:
+    1. model
+        Description:    The neural network model into which the state dictionary will be loaded.
+        Type:           torch.nn.Module
+        Details:        This is the pre-initialized model whose parameters are to be set 
+                        according to the provided state dictionary.
+
+    2. state_dict
+        Description:    The state dictionary containing model weights and biases.
+        Type:           Dict
+        Details:        This dictionary holds the trained parameters of the model, typically 
+                        obtained from a previously saved model state.
+
+Function Process:
+    - The function loads the provided state dictionary into the given model.
+    - This operation updates the model's parameters (weights and biases) to match those 
+      stored in the state dictionary.
+    - After loading the state dictionary, the function prints out the shapes of the weights 
+      and biases of certain layers for verification and debugging purposes. 
+    - This can help in ensuring that the model parameters are loaded correctly and the 
+      model architecture matches the state dictionary.
+
+Return:
+    None
+
+Note:
+    This function is a utility for loading a pre-trained model state. It is particularly 
+    useful in scenarios where a model trained in one session needs to be reloaded for 
+    further use or evaluation in another session.
+"""
+
 def load_dictionary( model, state_dict ):
 
     # Load the state dictionary into the model
@@ -169,6 +376,30 @@ def load_dictionary( model, state_dict ):
     print( "Convolutional Layer 1 Bias: ",           model.conv1.conv.bias )
     print( "Fully Connected Layer 1 Weight Shape: ", model.fc1.weight.shape )
 
+"""
+Function Name: setup_test()
+
+Parameters:
+    1. crop_size, padding_size, mean_vector_train, std_vector_train, mean_vector_transform, std_vector_transform
+        Description:    Parameters required for data augmentation and transformation.
+        Type:           Various (Integer and Lists of Floats)
+        Details:        These parameters are used to define how the input data for the model 
+                        should be augmented and transformed.
+
+Function Process:
+    - This function serves as the main setup procedure for neural network testing.
+    - It begins by locating the hardware target (CPU or GPU) for model computation.
+    - It then augments and transforms the training and validation datasets.
+    - Following this, it creates data loaders for both datasets.
+    - The function initializes the neural network model and loads the pretrained model weights.
+    - Finally, it returns the device, model, validation data loader, and model name for further use.
+
+Return:
+    - device: The computation device (CPU or GPU).
+    - model: The initialized neural network model.
+    - val_quantized_loader: DataLoader for the validation dataset.
+    - model_name: Name of the model for testing.
+"""
 
 def setup_test( crop_size, padding_size, mean_vector_train, std_vector_train, mean_vector_transform, std_vector_transform ):
 
@@ -181,6 +412,23 @@ def setup_test( crop_size, padding_size, mean_vector_train, std_vector_train, me
     load_dictionary( model, state_dict )
 
     return device, model, val_quantized_loader, model_name
+
+"""
+Function Name: gen_rand_seed()
+
+Parameters:
+    None
+
+Function Process:
+    - Generates a random seed based on the current date and time.
+    - This seed is used to initialize the random module, ensuring that any random operation 
+      within the testing models is reproducible.
+    - Especially useful in scenarios where consistent behavior is required across different 
+      runs for comparison or debugging purposes.
+
+Return:
+    None
+"""
 
 def gen_rand_seed():
 
@@ -195,13 +443,48 @@ def gen_rand_seed():
     # Set the seed for the random module
     random.seed( seed )
 
+"""
+Function Name: print_header()
+
+Parameters:
+    1. title
+        Description:    The main title for the header.
+        Type:           String
+        Details:        This title is printed as a part of the header for better readability 
+                        and organization of console output.
+
+    2. subtitle (Optional)
+        Description:    An additional subtitle for more detailed headers.
+        Type:           String
+        Details:        Provides additional context or categorization within the header.
+
+    3. multiple_layers (Optional)
+        Description:    Flag to indicate if the header is for multiple layers.
+        Type:           Boolean
+        Details:        When set to True, an additional line indicating 'Multiple Layers' 
+                        is included in the header.
+
+Function Process:
+    - Constructs and prints a formatted header in the console.
+    - The header is designed to visually segment different sections or stages of output, 
+      making the console output easier to read and follow.
+
+Return:
+    None
+"""
+
 def print_header(title, subtitle=None, multiple_layers=False):
+
     lines = ["-----------------------------------------------------"]
     lines.append(title)
+
     if subtitle:
         lines.append(subtitle)
+
     if multiple_layers:
         lines.append("------------------- Multiple Layers -----------------")
+
     lines.append("-----------------------------------------------------")
+
     for line in lines:
         print(line)
