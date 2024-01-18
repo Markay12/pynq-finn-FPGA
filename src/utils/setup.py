@@ -43,6 +43,7 @@ Last Modified:
 
 import datetime
 import os
+import numpy as np
 from pathlib import Path
 import random
 import sys
@@ -436,10 +437,16 @@ def gen_rand_seed():
     print_header( "Generating Random Seed" )
 
     current_time = datetime.datetime.now()
-    seed = int( current_time.timestamp() )
+    seed = int(current_time.timestamp())
+    print(f"Random seed: {seed}")
 
-    # Set the seed 
-    torch.manual_seed( seed )
+    # Set the seed for PyTorch
+    torch.manual_seed(seed)
+
+    # If you are using other libraries that depend on randomness, set their seeds as well.
+    np.random.seed(seed)
+    random.seed(seed)
+    torch.cuda.manual_seed_all(seed)
 
 """
 Function Name: print_header()
