@@ -69,7 +69,7 @@ std_vector_transform = [0.2682515741720801, 0.2573637364478126, 0.27709577079730
 
 ## Begin Test Setup
 device, model, val_quantized_loader, model_name = setup.setup_test( crop_size, padding, mean_vector_training, std_vector_training, mean_vector_transform,
-                                                                    std_vector_transform,  )
+                                                                    std_vector_transform )
 
 
 setup.gen_rand_seed()
