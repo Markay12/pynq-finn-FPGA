@@ -30,16 +30,15 @@ Last Modified:
 
 """
 
-# Alphabetize and clean
+import datetime
+import os
+from pathlib import Path
+import random
+import sys
 import torch
+import torch.nn as nn
 import torchvision
 from torchvision import transforms
-from pathlib import Path
-import sys
-import torch.nn as nn
-import os
-import datetime
-import random
 
 # Current script path
 current_path = Path( __file__ ).parent
@@ -57,9 +56,7 @@ import models
 def locate_hw_target():
 
     # print statement for debug
-    print("-----------------------------------------------------")
-    print("-------------- Locating Targeted Device -------------")
-    print("-----------------------------------------------------")
+    print_header( "Locating Targeted Device" )
 
     # Locate the device that can be used for noise analysis and testing
     # Target this device 
@@ -72,9 +69,7 @@ def locate_hw_target():
 def augment_data( crop_size, padding_size, mean_vector_train, std_vector_train, mean_vector_transform, std_vector_transform ):
 
     # print statement for debug
-    print("-----------------------------------------------------")
-    print("------- Defining Data Augmentation Transforms -------")
-    print("-----------------------------------------------------")
+    print_header( "Defining Data Augmentation Transforms" )
 
     # Define data augmentation transforms
     train_transform = transforms.Compose([
@@ -89,9 +84,7 @@ def augment_data( crop_size, padding_size, mean_vector_train, std_vector_train, 
         transforms.Normalize( mean = mean_vector_transform, std = std_vector_transform )
     ])
 
-    print("-----------------------------------------------------")
-    print("------------ Applying Data Augmentation -------------")
-    print("-----------------------------------------------------")
+    print_header( "Applying Data Augmentation" )
 
     # Apply data augmentation to the training dataset
     train_set = torchvision.datasets.CIFAR100(root='../data', train=True, download=True, transform=train_transform)
@@ -104,9 +97,7 @@ def augment_data( crop_size, padding_size, mean_vector_train, std_vector_train, 
 def create_data_loaders( train_set, val_set, train_transform, val_transform, batch_size ):
 
     # print statement for debug
-    print("-----------------------------------------------------")
-    print("--------------- Creating Data Loaders ---------------")
-    print("-----------------------------------------------------")
+    print_header( "Creating Data Loaders" )
 
     # Create the data loaders
     train_loader = torch.utils.data.DataLoader( train_set, batch_size=128, shuffle=True, num_workers=4 )
@@ -147,9 +138,7 @@ def create_data_loaders( train_set, val_set, train_transform, val_transform, bat
 def model_criteria( device ):
 
     # print for debug
-    print("-----------------------------------------------------")
-    print("---- Model, Optimizer and Criteria Initialized ------")
-    print("-----------------------------------------------------")
+    print_header( "Model, Optimizer, and Criteria Initialized" )
 
     # Initialize the model, optimizer, and criterion
     model     = models.CIFAR100CNN_5Blocks().to( device )
@@ -173,9 +162,7 @@ def load_dictionary( model, state_dict ):
     # Load the state dictionary into the model
     model.load_state_dict( state_dict )
 
-    print("-----------------------------------------------------")
-    print("------------- Printing Layer Shape Sizes ------------")
-    print("-----------------------------------------------------")
+    print_header( "Printing Layer Shape Sizes" )
 
     # Test shapes
     print( "Convolutional Layer 1 Weight Shape: ",   model.conv1.conv.weight.shape )
@@ -189,7 +176,7 @@ def setup_test( crop_size, padding_size, mean_vector_train, std_vector_train, me
     
     train_set, val_set, train_transform, val_transform = augment_data(crop_size, padding_size, mean_vector_train, std_vector_train, mean_vector_transform, std_vector_transform)
     train_quantized_loader, val_quantized_loader = create_data_loaders( train_set, val_set, train_transform, val_transform, 256 )
-    model, state_dict, optimizer, scheduler, criterion, model_name = model_criteria(device)
+    model, state_dict, optimizer, scheduler, criterion, model_name = model_criteria( device )
     
     load_dictionary( model, state_dict )
 
@@ -198,9 +185,7 @@ def setup_test( crop_size, padding_size, mean_vector_train, std_vector_train, me
 def gen_rand_seed():
 
     # print for debug
-    print("\n-----------------------------------------------------")
-    print("--------------- Generating Random Seed --------------")
-    print("-----------------------------------------------------")
+    print_header( "Generating Random Seed" )
 
     ## Testing Models
     # Generate a seed based on the current date and time
@@ -210,3 +195,13 @@ def gen_rand_seed():
     # Set the seed for the random module
     random.seed( seed )
 
+def print_header(title, subtitle=None, multiple_layers=False):
+    lines = ["-----------------------------------------------------"]
+    lines.append(title)
+    if subtitle:
+        lines.append(subtitle)
+    if multiple_layers:
+        lines.append("------------------- Multiple Layers -----------------")
+    lines.append("-----------------------------------------------------")
+    for line in lines:
+        print(line)
