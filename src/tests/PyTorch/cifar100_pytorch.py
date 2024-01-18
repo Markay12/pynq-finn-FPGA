@@ -53,82 +53,19 @@ from utils import noise_injection_pytorch_funcs as noise_funcs     # import pyto
 from utils import models
 from utils import setup
 
-setup.locate_hw_target()
+## Initialize Variables
 
-# TODO: Clean up the magic numbers here and add explanations
-setup.augment_data( 32, 4, [0.5070751592371323, 0.48654887331495095, 0.4409178433670343], [.2673342858792401, 0.2564384629170883, 0.27615047132568404],
-                    [0.5088964127604166, 0.48739301317401956, 0.44194221124387256], [0.2682515741720801, 0.2573637364478126, 0.2770957707973042] )
+# Data Augmentation
+crop_size = 32
+padding = 4
+mean_vector_training = [0.5070751592371323, 0.48654887331495095, 0.4409178433670343]
+std_vector_training = [.2673342858792401, 0.2564384629170883, 0.27615047132568404]
+mean_vector_transform = [0.5088964127604166, 0.48739301317401956, 0.44194221124387256]
+std_vector_transform = [0.2682515741720801, 0.2573637364478126, 0.2770957707973042]
 
-
-
-print("-----------------------------------------------------")
-print("--------------- Creating Data Loaders ---------------")
-print("-----------------------------------------------------")
-
-# Create the data loaders
-train_loader = torch.utils.data.DataLoader( train_set, batch_size=128, shuffle=True, num_workers=4 )
-val_loader = torch.utils.data.DataLoader( val_set, batch_size=128, shuffle=False, num_workers=4 )
-
-## Data Loader
-# Using PyTorch dataloader we can create a convenient iterator over the dataset that returns batches of data, 
-# rather than requiring manual batch creation.
-
-# set batch size
-batch_size = 256
-
-train_set = torchvision.datasets.CIFAR100(root='./data/', train=True, download=True, transform=train_transform)
-val_set = torchvision.datasets.CIFAR100(root='./data/', train=False, download=True, transform=val_transform)
-
-train_quantized_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=4)
-val_quantized_loader = torch.utils.data.DataLoader(val_set, batch_size=batch_size, shuffle=False, num_workers=4)
-
-a = next(iter(train_loader))
-print(a[0].size())
-print(len(train_set))
-print("Samples in each set: train = %d, test = %s" % (len(train_set), len(train_loader)))
-print("Shape of one input sample: " + str(train_set[0][0].shape))
-
-count = 0
-
-print("\nDataset Shape:\n-------------------------")
-for x, y in train_loader:
-    print("Input shape for 1 batch: " + str(x.shape))
-    print("Label shape for 1 batch: " + str(y.shape))
-    count += 1
-    if count == 1:
-        break
-
-print("-----------------------------------------------------")
-print("---- Model, Optimizer and Criteria Initialized ------")
-print("-----------------------------------------------------")
-    
-# Initialize the model, optimizer, and criterion
-model     = models.CIFAR100CNN_5Blocks().to( device )
-
-optimizer = torch.optim.AdamW(model.parameters(), lr=0.0009)
-scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=11, factor=0.1, verbose=True)
-criterion = nn.CrossEntropyLoss()
-
-num_epochs = 80             # Total number of training epochs (full passes over the dataset).
-best_test_accuracy = 0      # Keep track of the highest test accuracy achieved.
-patience = 8                # Number of epochs to wait for improvement in accuracy before early stopping.
-no_improvement_counter = 0  # Counter to track epochs without improvement in accuracy.
-
-model_name = input( "Name of the Model to Test: " )
-state_dict = torch.load( f'{os.getcwd()}/trained_models/{model_name}.pth', map_location=device )
-
-
-# Load the state dictionary into the model
-model.load_state_dict( state_dict )
-
-print("-----------------------------------------------------")
-print("------------- Printing Layer Shape Sizes ------------")
-print("-----------------------------------------------------")
-
-# Test shapes
-print( "Convolutional Layer 1 Weight Shape: ",   model.conv1.conv.weight.shape )
-print( "Convolutional Layer 1 Bias: ",           model.conv1.conv.bias )
-print( "Fully Connected Layer 1 Weight Shape: ", model.fc1.weight.shape )
+setup.setup_test( crop_size, padding, mean_vector_training,
+                  std_vector_training, mean_vector_transform,
+                  std_vector_transform )
 
 
 print("\n-----------------------------------------------------")
