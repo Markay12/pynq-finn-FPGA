@@ -732,7 +732,7 @@ Paramters:
             Details:            Used to create directories and name files where the results (plots and data) will be saved.
 """
 
-def gaussian_noise_plot_pytorch_all(num_perturbations, layer_names, sigma_vector, model, device, test_quantized_loader, analog_noise_type, model_name):
+def gaussian_noise_plot_multiple_layers_pytorch(num_perturbations, layer_names, sigma_vector, model, device, test_quantized_loader, analog_noise_type, model_name):
 
     if not os.path.exists(f"noise_plots_pytorch/gaussian_noise_pytorch/{model_name}"):
         os.makedirs(f"noise_plots_pytorch/gaussian_noise_pytorch/{model_name}")
@@ -788,3 +788,38 @@ def gaussian_noise_plot_pytorch_all(num_perturbations, layer_names, sigma_vector
 
         plt.show()
         plt.clf()
+
+
+def select_test( perturbations, layer_names, ber_vals, model, device, val_quantized_loader, model_name, sigma_vector_prop, sigma_vector_ind ):
+    print("Please select the tests you would like to run:")
+    print("1. PyTorch BER Noise Injection (Individual Layers)")
+    print("2. PyTorch BER Noise Injection (Multiple Layers)")
+    print("3. PyTorch Gaussian Noise Injection (Individual Layers, Proportional)")
+    print("4. PyTorch Gaussian Noise Injection (Individual Layers, Independent)")
+    print("5. PyTorch Gaussian Noise Injection (Multiple Layers, Proportional)")
+    print("6. PyTorch Gaussian Noise Injection (Multiple Layers, Independent)")
+    
+    selected_tests = input("Enter the numbers of the tests to run, separated by commas (e.g., 1,3,5): ")
+    selected_tests = [int(test.strip()) for test in selected_tests.split(',')]
+
+    for test_number in selected_tests:
+        if test_number == 1:
+            setup.print_header( "Beginning PyTorch BER Noise Injection", subtitle="Individual Layers" )
+            ber_noise_plot_pytorch( perturbations, layer_names, ber_vals, model, device, val_quantized_loader, model_name )
+        elif test_number == 2:
+            setup.print_header( "Beginning PyTorch BER Noise Injection", None, multiple_layers=True )
+            ber_noise_plot_multiple_layers_pytorch( perturbations, layer_names, ber_vals, model, device, val_quantized_loader, model_name )
+        elif test_number == 3:
+            setup.print_header( "Beginning PyTorch Gaussian Noise Injection", subtitle="Individual Layers, Proportional" )
+            gaussian_noise_plot_pytorch( perturbations, layer_names, sigma_vector_prop, model, device, val_quantized_loader, 0, model_name )
+        elif test_number == 4:
+            setup.print_header( "Beginning PyTorch Gaussian Noise Injection", subtitle="Individual Layers, Independent" )
+            gaussian_noise_plot_pytorch( perturbations, layer_names, sigma_vector_ind, model, device, val_quantized_loader, 1, model_name )
+        elif test_number == 5:
+            setup.print_header( "Beginning PyTorch Gaussian Noise Injection", subtitle="Proportional", multiple_layers=True )
+            gaussian_noise_plot_multiple_layers_pytorch( perturbations, layer_names, sigma_vector_prop, model, device, val_quantized_loader, 0, model_name )
+        elif test_number == 6:
+            setup.print_header( "Beginning PyTorch Gaussian Noise Injection", subtitle="Independent", multiple_layers=True )
+            gaussian_noise_plot_multiple_layers_pytorch( perturbations, layer_names, sigma_vector_ind, model, device, val_quantized_loader, 1, model_name )
+        else:
+            print(f"Invalid selection: {test_number}")

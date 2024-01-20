@@ -88,24 +88,5 @@ ber_vals = np.linspace( 1e-5, 0.01, 15 )
 sigma_vector_prop = np.linspace( 0, 0.10, 15 )
 sigma_vector_ind = np.linspace( 0, 0.005, 15 )
 
-## BER Noise Testing
-setup.print_header( "Beginning Bit Error Rate Testing" )
-setup.print_header( "Beginning PyTorch BER Noise Injection", subtitle="Individual Layers" )
-test_start.ber_noise_plot_pytorch( perturbations, layer_names, ber_vals, model, device, val_quantized_loader, model_name )
-
-setup.print_header( "Beginning PyTorch BER Noise Injection", None, multiple_layers=True )
-test_start.ber_noise_plot_multiple_layers_pytorch( perturbations, layer_names, ber_vals, model, device, val_quantized_loader, model_name )
-
-## Gaussian Noise Testing
-setup.print_header( "Beginning Gaussian Noise Testing" )
-setup.print_header( "Beginning PyTorch Gaussian Noise Injection", subtitle="Individual Layers, Proportional" )
-test_start.gaussian_noise_plot_pytorch( perturbations, layer_names, sigma_vector_prop, model, device, val_quantized_loader, 0, model_name )
-
-setup.print_header( "Beginning PyTorch Gaussian Noise Injection", subtitle="Individual Layers, Independent" )
-test_start.gaussian_noise_plot_pytorch( perturbations, layer_names, sigma_vector_ind, model, device, val_quantized_loader, 1, model_name )
-
-setup.print_header( "Beginning PyTorch Gaussian Noise Injection", subtitle="Proportional", multiple_layers=True )
-test_start.gaussian_noise_plot_multiple_layers_pytorch( perturbations, layer_names, sigma_vector_prop, model, device, val_quantized_loader, 0, model_name )
-
-setup.print_header( "Beginning PyTorch Gaussian Noise Injection", subtitle="Independent", multiple_layers=True )
-test_start.gaussian_noise_plot_multiple_layers_pytorch( perturbations, layer_names, sigma_vector_ind, model, device, val_quantized_loader, 1, model_name )
+test_start.select_test( perturbations, layer_names, ber_vals, model, device, 
+                        val_quantized_loader, model_name, sigma_vector_prop, sigma_vector_ind )
