@@ -301,13 +301,12 @@ the standard deviation of the noise distribution. The function returns the origi
 matrix with added noise.
 """
 
-def add_gaussian_noise_independent( matrix, sigma ):
-
-    # Generate a new seed each time to add noise to the model.
-    # This creates more accurate randomess and noise generation.
+def add_gaussian_noise_independent(matrix, sigma):
     setup.gen_rand_seed()
 
-    noised_matrix = matrix + np.random.normal( 0, scale=sigma )
+    # Generate noise matrix of the same shape as input matrix
+    noise = np.random.normal(0, scale=sigma, size=matrix.shape)
+    noised_matrix = matrix + noise
 
     return noised_matrix
 
@@ -328,15 +327,15 @@ Parameters:
                         Unlike the independent noise addition, this affects the matrix elements in a multiplicative manner.
 """
 
-def add_gaussian_noise_proportional( matrix, sigma ):
-
-    # Generate a new seed each time to add noise to the model.
-    # This creates more accurate randomess and noise generation.
+def add_gaussian_noise_proportional(matrix, sigma):
     setup.gen_rand_seed()
 
-    noised_matrix = matrix * np.random.normal( 1, scale=sigma )
+    # Generate noise matrix of the same shape as input matrix
+    noise = np.random.normal(1, scale=sigma, size=matrix.shape)
+    noised_matrix = matrix * noise
 
     return noised_matrix
+
 
 """
 Function Name: ber_noise_plot_pytorch()
