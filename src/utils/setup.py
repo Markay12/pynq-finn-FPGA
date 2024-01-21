@@ -434,7 +434,7 @@ Return:
 
 def gen_rand_seed():
 
-    time.sleep(0.5)
+    time.sleep(1)
 
     # print for debug
     print_header( "Generating Random Seed" )
