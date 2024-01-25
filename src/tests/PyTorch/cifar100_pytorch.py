@@ -75,7 +75,7 @@ device, model, val_quantized_loader, model_name = setup.setup_test( crop_size, p
 setup.gen_rand_seed()
 
 ## Intialize Test Structure
-perturbations = 15 
+perturbations = 15
 # set the layer names, combinations, probability, gamma and sigma values for testing
 layer_names = [ 'conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'conv6', 'conv7', 'conv8', 'fc1', 'fc2' ]
 layer_combinations = [ [ 'conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'conv6', 'conv7', 'conv8', 'fc1', 'fc2' ] ]
@@ -86,7 +86,7 @@ ber_vals = np.linspace( 1e-5, 0.01, 15 )
 # Gaussian Vector
 # Gaussian sigma vector. Retains most values from BER but changes the sigma_vector.
 sigma_vector_prop = np.linspace( 0, 0.10, 15 )
-sigma_vector_ind = np.linspace( 0, 0.005, 15 )
+sigma_vector_ind = np.linspace( 0, 0.05, 15 )
 
 test_start.select_test( perturbations, layer_names, ber_vals, model, device, 
                         val_quantized_loader, model_name, sigma_vector_prop, sigma_vector_ind )
