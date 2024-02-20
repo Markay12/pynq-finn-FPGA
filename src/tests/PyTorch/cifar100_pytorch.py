@@ -42,6 +42,7 @@ print("-----------------------------------------------------")
 import numpy as np
 from pathlib import Path
 import sys
+import torch.nn as nn
 
 ## Import utility functions for noise testing
 # Get the directory of the current script
@@ -77,8 +78,20 @@ setup.gen_rand_seed()
 ## Intialize Test Structure
 perturbations = 15
 # set the layer names, combinations, probability, gamma and sigma values for testing
-layer_names = [ 'conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'conv6', 'conv7', 'conv8', 'fc1', 'fc2' ]
-layer_combinations = [ [ 'conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'conv6', 'conv7', 'conv8', 'fc1', 'fc2' ] ]
+#layer_names = [ 'conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'conv6', 'conv7', 'conv8', 'fc1', 'fc2' ]
+#layer_combinations = [ [ 'conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'conv6', 'conv7', 'conv8', 'fc1', 'fc2' ] ]
+
+def extract_layer_names( model ):
+	layer_names = []
+	for name, module in model.named_modules():
+		if isinstance( module, (nn.Conv2d, nn.Linear )):
+			layer_names.append( name )
+
+	return layer_names
+
+layer_names = extract_layer_names( model )
+print( layer_names ) 
+
 
 # BER Vector
 ber_vals = np.linspace( 1e-5, 0.01, 15 )
