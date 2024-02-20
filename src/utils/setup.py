@@ -12,6 +12,7 @@ Functions:
     locate_hw_target()
     augment_data()
     create_data_loaders()
+    extract_layer_names()
     model_criteria()
     load_dictionary()
     setup_test()
@@ -275,6 +276,32 @@ def create_data_loaders( train_set, val_set, train_transform, val_transform, bat
             break
 
     return train_quantized_loader, val_quantized_loader
+
+"""
+Function Name: extract_layer_names()
+
+Parameters:
+    1. model
+
+Function Process:
+    - 
+
+Return:
+    - 
+
+Note:
+    
+"""
+
+def extract_layer_names( model ):
+	layer_names = []
+     
+	for name, module in model.named_modules():
+          
+		if isinstance( module, (nn.Conv2d, nn.Linear )):
+			layer_names.append( name )
+
+	return layer_names
 
 """
 Function Name: model_criteria()
