@@ -299,7 +299,9 @@ def extract_layer_names( model ):
 	for name, module in model.named_modules():
           
 		if isinstance( module, (nn.Conv2d, nn.Linear )):
-			layer_names.append( name )
+			
+			cleaned_name = name.replace( '.conv', '' )
+			layer_names.append( cleaned_name )
 
 	return layer_names
 
