@@ -9,15 +9,15 @@ Description:
     quantized environment. The emphasis is on ease of use and integration into existing testing workflows.
 
 Functions:
-    locate_hw_target()
     augment_data()
     create_data_loaders()
     extract_layer_names()
-    model_criteria()
+    gen_random_seed()
+    locate_hw_target()
     load_dictionary()
-    setup_test()
-    gen_rand_seed()
+    model_criteria()
     print_header()
+    setup_test()
 
 Usage:
     These utilities are intended to be imported and used in data processing or
@@ -38,7 +38,7 @@ Created on:
     17 January 2024
 
 Last Modified:
-    18 January 2024
+    30 March 2024
 
 """
 
@@ -66,40 +66,6 @@ print( parent_directory )
 sys.path.append( str( parent_directory ) )
 
 import models
-
-"""
-Function Name: locate_hw_target()
-
-Parameters:
-    None
-
-Function Process:
-    - The function identifies the most suitable hardware target for running neural network models.
-    - It checks if a CUDA-capable GPU is available. If so, it selects the GPU as the target device.
-    - If a GPU is not available, it falls back to using the CPU.
-    - The chosen device (either GPU or CPU) is then printed to the console for confirmation.
-    - The function is useful for ensuring that models are run on the most efficient hardware 
-      available, particularly important for performance-intensive tasks like training or 
-      evaluating neural networks.
-
-Return:
-    - torch.device: The selected hardware device (CUDA GPU or CPU) for running the models. 
-                    This device object can be used in PyTorch to allocate tensors directly 
-                    on the chosen device.
-"""
-
-def locate_hw_target():
-
-    # print statement for debug
-    print_header( "Locating Targeted Device" )
-
-    # Locate the device that can be used for noise analysis and testing
-    # Target this device 
-    device = torch.device( "cuda" if torch.cuda.is_available() else "cpu" )
-    print( "Target device: " + str (device ) )
-
-    # return whether using CUDA or CPU
-    return device
 
 """
 Function Name: augment_data()
@@ -282,12 +248,19 @@ Function Name: extract_layer_names()
 
 Parameters:
     1. model
+        Description:    The neural network model into which the state dictionary will be loaded.
+        Type:           torch.nn.Module
+        Details:        This is the pre-initialized model whose parameters are to be set 
+                        according to the provided state dictionary.
 
 Function Process:
-    - 
+    - This function intiailizes an array meant to hold the names of the individual layer
+      names of the model. 
+    - The function then loops through the model and locates the names of the individual
+      layers, adding them to the previously initialized array. 
 
 Return:
-    - 
+    - Array with the names of each individual layer of a neural network model.
 
 Note:
     
@@ -304,6 +277,123 @@ def extract_layer_names( model ):
 			layer_names.append( cleaned_name )
 
 	return layer_names
+
+"""
+Function Name: gen_rand_seed()
+
+Parameters:
+    None
+
+Function Process:
+    - Generates a random seed based on the current date and time.
+    - This seed is used to initialize the random module, ensuring that any random operation 
+      within the testing models is reproducible.
+    - Especially useful in scenarios where consistent behavior is required across different 
+      runs for comparison or debugging purposes.
+
+Return:
+    None
+"""
+
+def gen_rand_seed():
+
+    time.sleep(1)
+
+    # print for debug
+    print_header( "Generating Random Seed" )
+
+    current_time = datetime.datetime.now()
+    seed = int(current_time.timestamp())
+    print(f"Random seed: {seed}")
+
+    # Set the seed for PyTorch
+    torch.manual_seed(seed)
+
+    # If you are using other libraries that depend on randomness, set their seeds as well.
+    np.random.seed(seed)
+    random.seed(seed)
+    torch.cuda.manual_seed_all(seed)
+
+"""
+Function Name: locate_hw_target()
+
+Parameters:
+    None
+
+Function Process:
+    - The function identifies the most suitable hardware target for running neural network models.
+    - It checks if a CUDA-capable GPU is available. If so, it selects the GPU as the target device.
+    - If a GPU is not available, it falls back to using the CPU.
+    - The chosen device (either GPU or CPU) is then printed to the console for confirmation.
+    - The function is useful for ensuring that models are run on the most efficient hardware 
+      available, particularly important for performance-intensive tasks like training or 
+      evaluating neural networks.
+
+Return:
+    - torch.device: The selected hardware device (CUDA GPU or CPU) for running the models. 
+                    This device object can be used in PyTorch to allocate tensors directly 
+                    on the chosen device.
+"""
+
+def locate_hw_target():
+
+    # print statement for debug
+    print_header( "Locating Targeted Device" )
+
+    # Locate the device that can be used for noise analysis and testing
+    # Target this device 
+    device = torch.device( "cuda" if torch.cuda.is_available() else "cpu" )
+    print( "Target device: " + str (device ) )
+
+    # return whether using CUDA or CPU
+    return device
+
+"""
+Function Name: load_dictionary()
+
+Parameters:
+    1. model
+        Description:    The neural network model into which the state dictionary will be loaded.
+        Type:           torch.nn.Module
+        Details:        This is the pre-initialized model whose parameters are to be set 
+                        according to the provided state dictionary.
+
+    2. state_dict
+        Description:    The state dictionary containing model weights and biases.
+        Type:           Dict
+        Details:        This dictionary holds the trained parameters of the model, typically 
+                        obtained from a previously saved model state.
+
+Function Process:
+    - The function loads the provided state dictionary into the given model.
+    - This operation updates the model's parameters (weights and biases) to match those 
+      stored in the state dictionary.
+    - After loading the state dictionary, the function prints out the shapes of the weights 
+      and biases of certain layers for verification and debugging purposes. 
+    - This can help in ensuring that the model parameters are loaded correctly and the 
+      model architecture matches the state dictionary.
+
+Return:
+    None
+
+Note:
+    This function is a utility for loading a pre-trained model state. It is particularly 
+    useful in scenarios where a model trained in one session needs to be reloaded for 
+    further use or evaluation in another session.
+"""
+
+def load_dictionary( model, state_dict ):
+
+    # Load the state dictionary into the model
+    model.load_state_dict( state_dict )
+
+    print_header( "Printing Layer Shape Sizes" )
+
+    # Test shapes
+    print( "Convolutional Layer 1 Weight Shape: ",   model.conv1.conv.weight.shape )
+    print( "Convolutional Layer 1 Bias: ",           model.conv1.conv.bias )
+    print( "Fully Connected Layer 1 Weight Shape: ", model.fc1.weight.shape )
+
 
 """
 Function Name: model_criteria()
@@ -362,125 +452,6 @@ def model_criteria( device ):
     return model, state_dict, optimizer, scheduler, criterion, model_name
 
 """
-Function Name: load_dictionary()
-
-Parameters:
-    1. model
-        Description:    The neural network model into which the state dictionary will be loaded.
-        Type:           torch.nn.Module
-        Details:        This is the pre-initialized model whose parameters are to be set 
-                        according to the provided state dictionary.
-
-    2. state_dict
-        Description:    The state dictionary containing model weights and biases.
-        Type:           Dict
-        Details:        This dictionary holds the trained parameters of the model, typically 
-                        obtained from a previously saved model state.
-
-Function Process:
-    - The function loads the provided state dictionary into the given model.
-    - This operation updates the model's parameters (weights and biases) to match those 
-      stored in the state dictionary.
-    - After loading the state dictionary, the function prints out the shapes of the weights 
-      and biases of certain layers for verification and debugging purposes. 
-    - This can help in ensuring that the model parameters are loaded correctly and the 
-      model architecture matches the state dictionary.
-
-Return:
-    None
-
-Note:
-    This function is a utility for loading a pre-trained model state. It is particularly 
-    useful in scenarios where a model trained in one session needs to be reloaded for 
-    further use or evaluation in another session.
-"""
-
-def load_dictionary( model, state_dict ):
-
-    # Load the state dictionary into the model
-    model.load_state_dict( state_dict )
-
-    print_header( "Printing Layer Shape Sizes" )
-
-    # Test shapes
-    print( "Convolutional Layer 1 Weight Shape: ",   model.conv1.conv.weight.shape )
-    print( "Convolutional Layer 1 Bias: ",           model.conv1.conv.bias )
-    print( "Fully Connected Layer 1 Weight Shape: ", model.fc1.weight.shape )
-
-"""
-Function Name: setup_test()
-
-Parameters:
-    1. crop_size, padding_size, mean_vector_train, std_vector_train, mean_vector_transform, std_vector_transform
-        Description:    Parameters required for data augmentation and transformation.
-        Type:           Various (Integer and Lists of Floats)
-        Details:        These parameters are used to define how the input data for the model 
-                        should be augmented and transformed.
-
-Function Process:
-    - This function serves as the main setup procedure for neural network testing.
-    - It begins by locating the hardware target (CPU or GPU) for model computation.
-    - It then augments and transforms the training and validation datasets.
-    - Following this, it creates data loaders for both datasets.
-    - The function initializes the neural network model and loads the pretrained model weights.
-    - Finally, it returns the device, model, validation data loader, and model name for further use.
-
-Return:
-    - device: The computation device (CPU or GPU).
-    - model: The initialized neural network model.
-    - val_quantized_loader: DataLoader for the validation dataset.
-    - model_name: Name of the model for testing.
-"""
-
-def setup_test( crop_size, padding_size, mean_vector_train, std_vector_train, mean_vector_transform, std_vector_transform ):
-
-    device = locate_hw_target()
-    
-    train_set, val_set, train_transform, val_transform = augment_data(crop_size, padding_size, mean_vector_train, std_vector_train, mean_vector_transform, std_vector_transform)
-    train_quantized_loader, val_quantized_loader = create_data_loaders( train_set, val_set, train_transform, val_transform, 256 )
-    model, state_dict, optimizer, scheduler, criterion, model_name = model_criteria( device )
-    
-    load_dictionary( model, state_dict )
-
-    return device, model, val_quantized_loader, model_name
-
-"""
-Function Name: gen_rand_seed()
-
-Parameters:
-    None
-
-Function Process:
-    - Generates a random seed based on the current date and time.
-    - This seed is used to initialize the random module, ensuring that any random operation 
-      within the testing models is reproducible.
-    - Especially useful in scenarios where consistent behavior is required across different 
-      runs for comparison or debugging purposes.
-
-Return:
-    None
-"""
-
-def gen_rand_seed():
-
-    time.sleep(1)
-
-    # print for debug
-    print_header( "Generating Random Seed" )
-
-    current_time = datetime.datetime.now()
-    seed = int(current_time.timestamp())
-    print(f"Random seed: {seed}")
-
-    # Set the seed for PyTorch
-    torch.manual_seed(seed)
-
-    # If you are using other libraries that depend on randomness, set their seeds as well.
-    np.random.seed(seed)
-    random.seed(seed)
-    torch.cuda.manual_seed_all(seed)
-
-"""
 Function Name: print_header()
 
 Parameters:
@@ -525,3 +496,40 @@ def print_header(title, subtitle=None, multiple_layers=False):
 
     for line in lines:
         print(line)
+
+"""
+Function Name: setup_test()
+
+Parameters:
+    1. crop_size, padding_size, mean_vector_train, std_vector_train, mean_vector_transform, std_vector_transform
+        Description:    Parameters required for data augmentation and transformation.
+        Type:           Various (Integer and Lists of Floats)
+        Details:        These parameters are used to define how the input data for the model 
+                        should be augmented and transformed.
+
+Function Process:
+    - This function serves as the main setup procedure for neural network testing.
+    - It begins by locating the hardware target (CPU or GPU) for model computation.
+    - It then augments and transforms the training and validation datasets.
+    - Following this, it creates data loaders for both datasets.
+    - The function initializes the neural network model and loads the pretrained model weights.
+    - Finally, it returns the device, model, validation data loader, and model name for further use.
+
+Return:
+    - device: The computation device (CPU or GPU).
+    - model: The initialized neural network model.
+    - val_quantized_loader: DataLoader for the validation dataset.
+    - model_name: Name of the model for testing.
+"""
+
+def setup_test( crop_size, padding_size, mean_vector_train, std_vector_train, mean_vector_transform, std_vector_transform ):
+
+    device = locate_hw_target()
+    
+    train_set, val_set, train_transform, val_transform = augment_data(crop_size, padding_size, mean_vector_train, std_vector_train, mean_vector_transform, std_vector_transform)
+    train_quantized_loader, val_quantized_loader = create_data_loaders( train_set, val_set, train_transform, val_transform, 256 )
+    model, state_dict, optimizer, scheduler, criterion, model_name = model_criteria( device )
+    
+    load_dictionary( model, state_dict )
+
+    return device, model, val_quantized_loader, model_name
